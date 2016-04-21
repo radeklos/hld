@@ -1,0 +1,16 @@
+#spring:
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop
+#    database: POSTGRESQL
+#    show-sql: false
+#  datasource:
+#    driverClassName: org.postgresql.Driver
+#    platform: postgres
+#    url: jdbc:${DATABASE_URI}
+#    username: ${DATABASE_USERNAME}
+#    password: ${POSTGRES_PASSWORD}
+#  social:
+#    github:
+#      appId: app
+#      appSecret: secret
