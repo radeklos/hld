@@ -43,6 +43,7 @@ dependencies {
     // data
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("postgresql:postgresql:9.0-801.jdbc4")
+    compile("org.codehaus.jackson:jackson-mapper-asl:1.9.13")
 
     // rx
     compile("io.jmnarloch:rxjava-spring-boot-starter:1.0.0")

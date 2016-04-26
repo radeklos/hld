@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 
@@ -15,7 +16,8 @@ import javax.validation.Valid;
 public class UserRestController {
 
     @RequestMapping(method = RequestMethod.PUT)
-    public UserAccount create(@Valid @RequestBody UserAccount newUser) {
+    public UserAccount create(@Valid @RequestBody UserAccount newUser, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_CREATED);
         return newUser;
     }
 
