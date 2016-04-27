@@ -8,7 +8,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
-public class UserAccount {
+public class UserAccountDto {
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long uid;
 
     @NotEmpty
     @Size(max = 255)
@@ -31,10 +34,10 @@ public class UserAccount {
     @JsonProperty
     private String email;
 
-    public UserAccount() {
+    public UserAccountDto() {
     }
 
-    private UserAccount(Builder builder) {
+    private UserAccountDto(Builder builder) {
         firstName = builder.firstName;
         lastName = builder.lastName;
         password = builder.password;
@@ -43,6 +46,26 @@ public class UserAccount {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public Long getUid() {
+        return uid;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public static final class Builder {
@@ -75,8 +98,8 @@ public class UserAccount {
             return this;
         }
 
-        public UserAccount build() {
-            return new UserAccount(this);
+        public UserAccountDto build() {
+            return new UserAccountDto(this);
         }
     }
 

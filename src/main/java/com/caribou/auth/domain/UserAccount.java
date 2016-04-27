@@ -12,10 +12,13 @@ public class UserAccount extends AbstractEntity {
 
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     private String password;
+
     @Column
     private String firstName;
+
     @Column
     private String lastName;
 
@@ -26,14 +29,20 @@ public class UserAccount extends AbstractEntity {
         this.email = email;
         this.password = password;
     }
-//
-//    @Column
-//    private Date started;
-//
-//    @ManyToOne(cascade = CascadeType.ALL, optional = false)
-//    private Company company;
-//
-//    @ManyToOne(cascade = CascadeType.ALL, optional = false)
-//    private Department department;
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 }

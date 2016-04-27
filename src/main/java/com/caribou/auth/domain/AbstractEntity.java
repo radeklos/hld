@@ -1,7 +1,5 @@
 package com.caribou.auth.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -19,7 +17,6 @@ abstract class AbstractEntity implements Serializable {
 
     private Date updatedAt;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public Long getUid() {
         return uid;
     }

@@ -2,12 +2,14 @@ package com.caribou.auth.rest;
 
 import com.caribou.Json;
 import com.caribou.WebApplication;
+import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
-import com.caribou.auth.rest.dto.UserAccount;
+import com.caribou.auth.rest.dto.UserAccountDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
@@ -21,6 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -51,7 +54,7 @@ public class UserRestControllerTest {
 
     @Test
     public void requestWithEmptyJsonRequestReturnsUnprocessableEntity() throws Exception {
-        UserAccount userAccount = UserAccount.newBuilder().build();
+        UserAccountDto userAccount = UserAccountDto.newBuilder().build();
 
         mockMvc.perform(
                 put(String.format("/v1/users"))
@@ -62,7 +65,7 @@ public class UserRestControllerTest {
 
     @Test
     public void createNewUser() throws Exception {
-        UserAccount userAccount = UserAccount.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.newBuilder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
@@ -75,6 +78,33 @@ public class UserRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CREATED, result.getResponse().getStatus());
+
+        UserAccount user = userRepository.findByEmail("john.doe@email.com");
+        assertNotNull("User wasn't saved", user);
     }
+
+    @Test
+    public void cannotCreateUserWithSameEmailAddress() throws Exception {
+        UserAccountDto userAccount = UserAccountDto.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+
+        ModelMapper modelMapper = new ModelMapper();
+        userRepository.save(modelMapper.map(userAccount, UserAccount.class));
+
+        MvcResult result = mockMvc.perform(
+                put(String.format("/v1/users"))
+                        .content(Json.dumps(userAccount))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CONFLICT, result.getResponse().getStatus());
+
+        UserAccount user = userRepository.findByEmail("john.doe@email.com");
+        assertNotNull("User wasn't saved", user);
+    }
+
 
 }
