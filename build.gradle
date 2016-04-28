@@ -20,7 +20,7 @@ apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'docker'
 
-group = 'radeklos'
+group = 'holiday'
 
 jar {
     baseName = 'api'
@@ -55,6 +55,7 @@ dependencies {
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("junit:junit")
     testCompile("com.jayway.jsonpath:json-path-assert:0.8.1")
+    testCompile group: 'com.github.javafaker', name: 'javafaker', version: '0.10'
 }
 
 task wrapper(type: Wrapper) {

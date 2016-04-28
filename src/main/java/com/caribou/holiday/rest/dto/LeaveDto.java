@@ -11,22 +11,27 @@ import java.util.Date;
 
 public class LeaveDto {
 
-    @JsonProperty(required = true)
+    @JsonProperty
     LeaveType leaveType;
+
     @JsonProperty(required = true)
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date from;
+
     @JsonProperty
     When leaveAt = When.Morning;
+
     @JsonProperty(required = true)
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date to;
+
     @JsonProperty
     When returnAt = When.Evening;
+
     @Size(max = 255)
     @JsonProperty
     String reason;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+
     private Long uid;
 
     public LeaveDto() {
@@ -45,6 +50,7 @@ public class LeaveDto {
         return new Builder();
     }
 
+    @JsonProperty
     public Long getUid() {
         return uid;
     }

@@ -1,5 +1,6 @@
 package com.caribou.holiday.rest;
 
+import com.caribou.Factory;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
@@ -11,6 +12,7 @@ import com.caribou.holiday.domain.When;
 import com.caribou.holiday.repository.LeaveRepository;
 import com.caribou.holiday.repository.LeaveTypeRepository;
 import com.caribou.holiday.rest.dto.LeaveDto;
+import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +27,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -37,34 +38,36 @@ import static junit.framework.TestCase.assertEquals;
 @SpringApplicationConfiguration(classes = {WebApplication.class})
 @WebAppConfiguration
 @IntegrationTest({"server.port=0"})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LeaveControllerTest {
 
-    private static TestRestTemplate restAuthenticated = new TestRestTemplate("john.doe@email.com", "abcabc");
-
     private static TestRestTemplate restGuest = new TestRestTemplate();
+
+    Faker faker = new Faker();
+
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     LeaveRepository leaveRepository;
-    Company company = Company.newBuilder().name("company").build();
+
+    Company company = Company.newBuilder().name(faker.company().name()).build();
+
     LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
+
     @Value("${local.server.port}")
     private int port = 0;
+
     @Autowired
     private CompanyRepository companyRepository;
+
     @Autowired
     private LeaveTypeRepository leaveTypeRepository;
+
     private UserAccount userAccount;
 
     @Before
     public void before() throws Exception {
-        userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
         companyRepository.save(company);
@@ -86,17 +89,16 @@ public class LeaveControllerTest {
                 .build();
 
         String url = String.format("/v1/users/%s/leaves", userAccount.getUid());
-        ResponseEntity<LeaveDto> response = restAuthenticated.exchange(
+        ResponseEntity<LeaveDto> response = new TestRestTemplate(userAccount.getEmail(), userAccount.getPassword()).exchange(
                 path(url),
                 HttpMethod.PUT,
                 new HttpEntity<>(leaveDto, new HttpHeaders()),
                 LeaveDto.class
         );
-
         assertEquals(url, HttpStatus.CREATED, response.getStatusCode());
 
-        Leave department = leaveRepository.findAll().iterator().next();
-        assertEquals("Department isn't saved into company", userAccount, department.getUserAccount());
+        Leave leave = leaveRepository.findOne(response.getBody().getUid());
+        assertEquals("Department isn't saved into company", userAccount.getUid(), leave.getUserAccount().getUid());
     }
 
     private String path(String context) {

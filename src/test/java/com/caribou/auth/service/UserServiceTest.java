@@ -1,9 +1,9 @@
 package com.caribou.auth.service;
 
+import com.caribou.Factory;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,16 +25,11 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @After
-    public void tearDown() throws Exception {
-        userRepository.deleteAll();
-    }
-
     @Test
     public void testCreate() throws Exception {
         TestSubscriber<UserAccount> testSubscriber = new TestSubscriber<>();
 
-        userService.create(new UserAccount("email@emial.com", "1234")).subscribe(testSubscriber);
+        userService.create(Factory.userAccount()).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
         UserAccount us = testSubscriber.getOnNextEvents().get(0);

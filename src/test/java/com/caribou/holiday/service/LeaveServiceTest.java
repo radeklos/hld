@@ -4,20 +4,18 @@ import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
-import com.caribou.company.domain.Department;
 import com.caribou.company.repository.CompanyRepository;
-import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.service.CompanyService;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
 import com.caribou.holiday.repository.LeaveTypeRepository;
+import com.github.javafaker.Faker;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
@@ -27,30 +25,26 @@ import java.util.Date;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LeaveServiceTest {
 
-    Company company = Company.newBuilder().name("company").build();
+    Faker faker = new Faker();
+
+    Company company = Company.newBuilder().name(faker.company().name()).build();
 
     UserAccount userAccount = UserAccount.newBuilder()
-            .email("john.doe@email.com")
-            .firstName("John")
-            .lastName("Doe")
-            .password("abcab")
+            .email(faker.internet().emailAddress())
+            .firstName(faker.name().firstName())
+            .lastName(faker.name().lastName())
+            .password(faker.internet().password())
             .build();
 
     LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
-
-    Department department = Department.newBuilder().company(company).daysOff(10).name("HR").build();
 
     @Autowired
     private CompanyService companyService;
 
     @Autowired
     private CompanyRepository companyRepository;
-
-    @Autowired
-    private DepartmentRepository departmentRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -64,7 +58,6 @@ public class LeaveServiceTest {
     @Before
     public void setUp() throws Exception {
         companyRepository.save(company);
-        departmentRepository.save(department);
         userRepository.save(userAccount);
         leaveTypeRepository.save(leaveType);
     }
@@ -74,7 +67,6 @@ public class LeaveServiceTest {
         Leave leave = Leave.newBuilder()
                 .userAccount(userAccount)
                 .leaveType(leaveType)
-                .department(department)
                 .from(new Date())
                 .to(new Date())
                 .build();

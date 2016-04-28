@@ -16,6 +16,9 @@ public class LeaveType extends AbstractEntity {
     @ManyToOne(optional = false)
     Company company;
 
+    public LeaveType() {
+    }
+
     private LeaveType(Builder builder) {
         name = builder.name;
         company = builder.company;

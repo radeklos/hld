@@ -1,12 +1,13 @@
 package com.caribou.auth.rest;
 
+import com.caribou.Factory;
 import com.caribou.Header;
 import com.caribou.Json;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.rest.dto.UserAccountDto;
-import org.junit.After;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +29,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 
@@ -46,9 +51,8 @@ public class UserRestControllerTest {
 
     @Autowired
     UserRepository userRepository;
-
+    ObjectMapper mapper = new ObjectMapper();
     private MockMvc mockMvc;
-
     private StatusResultMatchers status;
 
     @Before
@@ -58,67 +62,59 @@ public class UserRestControllerTest {
         status = status();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        userRepository.deleteAll();
-    }
-
     @Test
     public void requestWithEmptyJsonRequestReturnsUnprocessableEntity() throws Exception {
         UserAccountDto userAccount = UserAccountDto.newBuilder().build();
 
-        mockMvc.perform(
-                put("/v1/users")
+        mockMvc.perform(put("/v1/users")
                         .content(Json.dumps(userAccount))
-                        .contentType(MediaType.APPLICATION_JSON)
-        )
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status.isUnprocessableEntity());
     }
 
     @Test
     public void createNewUser() throws Exception {
+        UserAccountDto userAccount = Factory.userAccountDto();
+        String json = "{" +
+                "\"firstName\":\"%s\"," +
+                "\"lastName\":\"%s\"," +
+                "\"email\":\"%s\"," +
+                "\"password\":\"%s\"" +
+                "}";
+        json = String.format(json, userAccount.getFirstName(), userAccount.getLastName(), userAccount.getEmail(), userAccount.getPassword());
+
         MvcResult result = mockMvc.perform(
                 put("/v1/users")
-                        .content("{\"email\":\"john.doe@email.com\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}")
+                        .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CREATED, result.getResponse().getStatus());
 
-        UserAccount user = userRepository.findByEmail("john.doe@email.com");
+        UserAccount user = userRepository.findByEmail(userAccount.getEmail());
         assertNotNull("User wasn't saved", user);
     }
 
     @Test
     public void cannotCreateUserWithSameEmailAddress() throws Exception {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccountDto userAccount = Factory.userAccountDto();
 
         ModelMapper modelMapper = new ModelMapper();
         userRepository.save(modelMapper.map(userAccount, UserAccount.class));
 
         MvcResult result = mockMvc.perform(
                 put("/v1/users")
-                        .content("{\"email\":\"john.doe@email.com\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}")
+                        .content(String.format("{\"email\":\"%s\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}", userAccount.getEmail()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CONFLICT, result.getResponse().getStatus());
 
-        UserAccount user = userRepository.findByEmail("john.doe@email.com");
+        UserAccount user = userRepository.findByEmail(userAccount.getEmail());
         assertNotNull("User wasn't saved", user);
     }
 
     @Test
     public void userDetailIsUnauthorized() throws Exception {
-        UserAccount userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
         mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))).andExpect(status.isUnauthorized());
@@ -126,25 +122,21 @@ public class UserRestControllerTest {
 
     @Test
     public void loginWithIncorrectCredentials() throws Exception {
+        UserAccount userAccount = Factory.userAccount();
         mockMvc.perform(post("/v1/users")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("username", "john.doe@email.com")
-                        .param("password", "abcabc")
+                .param("username", userAccount.getEmail())
+                .param("password", userAccount.getPassword())
         ).andExpect(status().isUnauthorized());
     }
 
     @Test
     public void loginWithCorrectCredentials() throws Exception {
-        UserAccount userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
         MvcResult result = mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))
-                .headers(Header.basic("john.doe@email.com", "abcabc")))
+                .headers(Header.basic(userAccount.getEmail(), userAccount.getPassword())))
                 .andReturn();
         assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
         // assertNotNull(result.getResponse().getHeader("x-auth-token"));
@@ -152,21 +144,18 @@ public class UserRestControllerTest {
 
     @Test
     public void getUserDetail() throws Exception {
-        UserAccount userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
         mockMvc.perform(
-                get(String.format("/v1/users/%s", userAccount.getUid())).headers(Header.basic("john.doe@email.com", "abcabc"))
+                get(String.format("/v1/users/%s", userAccount.getUid()))
+                        .headers(Header.basic(userAccount.getEmail(), userAccount.getPassword())
+                        )
         ).andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$.firstName").value("John"))
-                .andExpect(jsonPath("$.lastName").value("Doe"))
-                .andExpect(jsonPath("$.email").value("john.doe@email.com"))
+                .andExpect(jsonPath("$.firstName").value(userAccount.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(userAccount.getLastName()))
+                .andExpect(jsonPath("$.email").value(userAccount.getEmail()))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
 

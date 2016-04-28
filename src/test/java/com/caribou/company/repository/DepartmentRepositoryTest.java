@@ -1,5 +1,6 @@
 package com.caribou.company.repository;
 
+import com.caribou.Factory;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DepartmentRepositoryTest {
 
     @Autowired
@@ -41,15 +40,10 @@ public class DepartmentRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        company = Company.newBuilder().name("company").defaultDaysOff(10).build();
+        company = Factory.company();
         companyRepository.save(company);
 
-        userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
         company.addEmployee(userAccount, Role.Viewer);
@@ -57,7 +51,7 @@ public class DepartmentRepositoryTest {
 
         company = companyRepository.findOne(company.getUid());
 
-        department = Department.newBuilder().name("department").company(company).daysOff(10).build();
+        department = Factory.department(company);
         departmentRepository.save(department);
 
         department = departmentRepository.findOne(department.getUid());

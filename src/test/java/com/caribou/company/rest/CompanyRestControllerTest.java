@@ -1,5 +1,6 @@
 package com.caribou.company.rest;
 
+import com.caribou.Factory;
 import com.caribou.Header;
 import com.caribou.Json;
 import com.caribou.WebApplication;
@@ -9,7 +10,6 @@ import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.rest.dto.CompanyDto;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -18,7 +18,6 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.FilterChainProxy;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,7 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.core.Is.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -39,7 +40,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {WebApplication.class})
 @WebAppConfiguration
-@DirtiesContext
 public class CompanyRestControllerTest {
 
     private static UserAccount userAccount;
@@ -62,26 +62,16 @@ public class CompanyRestControllerTest {
 
     private StatusResultMatchers status;
 
-    @BeforeClass
-    public static void before() {
-        userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
-        authHeader = Header.basic("john.doe@email.com", "abcabc");
-    }
-
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         this.mockMvc = webAppContextSetup(webApplicationContext).addFilters(filterChainProxy).build();
         status = status();
 
-        if (userAccount.getUid() == null) {
-            userRepository.save(userAccount);
-        }
+        userAccount = Factory.userAccount();
+        userRepository.save(userAccount);
+
+        authHeader = Header.basic(userAccount.getEmail(), userAccount.getPassword());
     }
 
     @Test
@@ -98,10 +88,7 @@ public class CompanyRestControllerTest {
 
     @Test
     public void createNewCompany() throws Exception {
-        CompanyDto company = CompanyDto.newBuilder()
-                .name("company name")
-                .defaultDaysOf(10)
-                .build();
+        CompanyDto company = Factory.companyDto();
 
         MvcResult result = mockMvc.perform(
                 put("/v1/companies")
@@ -114,7 +101,7 @@ public class CompanyRestControllerTest {
 
     @Test
     public void updateCompany() throws Exception {
-        Company company = new Company("company name", 15);
+        Company company = Factory.company();
         companyRepository.save(company);
 
         CompanyDto companyDto = CompanyDto.newBuilder()
@@ -133,10 +120,7 @@ public class CompanyRestControllerTest {
 
     @Test
     public void updateNonExistingCompany() throws Exception {
-        CompanyDto companyDto = CompanyDto.newBuilder()
-                .name("company name")
-                .defaultDaysOf(10)
-                .build();
+        CompanyDto companyDto = Factory.companyDto();
 
         mockMvc.perform(
                 post("/v1/companies/0")
@@ -148,7 +132,7 @@ public class CompanyRestControllerTest {
 
     @Test
     public void getCompany() throws Exception {
-        Company company = new Company("company name", 15);
+        Company company = Factory.company();
         companyRepository.save(company);
 
         mockMvc.perform(

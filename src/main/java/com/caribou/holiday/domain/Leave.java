@@ -1,7 +1,6 @@
 package com.caribou.holiday.domain;
 
 import com.caribou.auth.domain.UserAccount;
-import com.caribou.company.domain.Department;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -111,7 +110,6 @@ public class Leave extends AbstractEntity {
 
     public static final class Builder {
         private LeaveType leaveType;
-        private Department department;
         private UserAccount userAccount;
         private Date from;
         private Date to;
@@ -122,11 +120,6 @@ public class Leave extends AbstractEntity {
 
         public Builder leaveType(LeaveType val) {
             leaveType = val;
-            return this;
-        }
-
-        public Builder department(Department val) {
-            department = val;
             return this;
         }
 
