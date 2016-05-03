@@ -1,4 +1,4 @@
-package com.caribou.controller.domain;
+package com.caribou.company.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
