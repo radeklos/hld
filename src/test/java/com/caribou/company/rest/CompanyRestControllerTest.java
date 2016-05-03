@@ -2,6 +2,7 @@ package com.caribou.company.rest;
 
 import com.caribou.Json;
 import com.caribou.WebApplication;
+import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.rest.dto.CompanyDto;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -73,6 +75,24 @@ public class CompanyRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CREATED, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void updateCompany() throws Exception {
+        Company company = new Company("company name", 15);
+        companyRepository.save(company);
+
+        CompanyDto companyDto = CompanyDto.newBuilder()
+                .name("company name")
+                .defaultDaysOf(10)
+                .build();
+
+        MvcResult result = mockMvc.perform(
+                post(String.format("/v1/companies/%s", company.getUid()))
+                        .content(Json.dumps(companyDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_OK, result.getResponse().getStatus());
     }
 
 }

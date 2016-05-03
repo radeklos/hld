@@ -24,4 +24,22 @@ public class CompanyService {
             }
         });
     }
+
+    public Observable<Company> update(Long uid, Company company) {
+        return Observable.create(subscriber -> {
+            try {
+                Company entity = companyRepository.findOne(uid);
+                if (entity == null) {
+                    throw new NotFound();
+                }
+                company.setUid(entity.getUid());
+                companyRepository.save(company);
+                subscriber.onNext(company);
+                subscriber.onCompleted();
+            } catch (Exception | NotFound e) {
+                subscriber.onError(e);
+            }
+        });
+    }
+
 }

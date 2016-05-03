@@ -31,7 +31,7 @@ public class CompanyServiceTest {
     }
 
     @Test
-    public void testCreate() throws Exception {
+    public void create() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
 
         companyService.create(new Company("name", 10)).subscribe(testSubscriber);
@@ -39,6 +39,29 @@ public class CompanyServiceTest {
 
         Company company = testSubscriber.getOnNextEvents().get(0);
         Assert.assertNotNull(company.getUid());
+    }
+
+    @Test
+    public void update() throws Exception {
+        Company company = new Company("name", 10);
+        companyRepository.save(company);
+
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+
+        companyService.update(company.getUid(), new Company("new name", 20)).subscribe(testSubscriber);
+        testSubscriber.assertNoErrors();
+
+        Company updated = testSubscriber.getOnNextEvents().get(0);
+        Assert.assertEquals(company.getUid(), updated.getUid());
+        Assert.assertEquals("new name", updated.getName());
+        Assert.assertEquals(new Integer(20), updated.getDefaultDaysOf());
+    }
+
+    @Test
+    public void updateNonExistingObject() throws Exception {
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        companyService.update(0l, new Company("new name", 20)).subscribe(testSubscriber);
+        testSubscriber.assertError(NotFound.class);
     }
 
 }

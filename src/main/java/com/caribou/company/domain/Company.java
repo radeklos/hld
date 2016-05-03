@@ -20,12 +20,19 @@ public class Company extends AbstractEntity {
         this.defaultDaysOf = defaultDaysOf;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getDefaultDaysOf() {
+        return defaultDaysOf;
     }
 
     public void setDefaultDaysOf(Integer defaultDaysOf) {
         this.defaultDaysOf = defaultDaysOf;
     }
-
 }
