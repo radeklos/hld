@@ -10,6 +10,9 @@ import javax.validation.constraints.Size;
 
 public class CompanyDto {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long uid;
+
     @NotEmpty
     @Size(max = 255)
     @JsonProperty
@@ -20,6 +23,9 @@ public class CompanyDto {
     @JsonProperty
     private Integer defaultDaysOf;
 
+    public CompanyDto() {
+    }
+
     private CompanyDto(Builder builder) {
         name = builder.name;
         defaultDaysOf = builder.defaultDaysOf;
@@ -27,6 +33,22 @@ public class CompanyDto {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getDefaultDaysOf() {
+        return defaultDaysOf;
+    }
+
+    public void setDefaultDaysOf(Integer defaultDaysOf) {
+        this.defaultDaysOf = defaultDaysOf;
     }
 
     public static final class Builder {

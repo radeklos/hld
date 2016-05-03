@@ -1,4 +1,4 @@
-package com.caribou.auth.rest;
+package com.caribou;
 
 import com.caribou.auth.rest.dto.Error;
 import com.caribou.auth.rest.mapper.ErrorMapper;
