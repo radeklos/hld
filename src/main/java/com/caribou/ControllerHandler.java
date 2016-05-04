@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @ControllerAdvice(annotations = RestController.class)
-public class ControllerValidationHandler {
+public class ControllerHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -16,6 +16,15 @@ public class ControllerValidationHandler {
     public Error processValidationError(MethodArgumentNotValidException ex) {
         Error err = ErrorMapper.map(ex);
         err.setStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+        return err;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public Error entityNotFound(Exception ex) {
+        Error err = new Error();
+        err.setStatus(HttpStatus.NOT_FOUND);
         return err;
     }
 

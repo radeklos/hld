@@ -55,6 +55,8 @@ public class CompanyServiceTest {
         Assert.assertEquals(company.getUid(), updated.getUid());
         Assert.assertEquals("new name", updated.getName());
         Assert.assertEquals(new Integer(20), updated.getDefaultDaysOf());
+        Assert.assertNotNull(updated.getCreatedAt());
+        Assert.assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
@@ -62,6 +64,25 @@ public class CompanyServiceTest {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
         companyService.update(0l, new Company("new name", 20)).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
+    }
+
+    @Test
+    public void getNonExistingObject() throws Exception {
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        companyService.get(0l).subscribe(testSubscriber);
+        testSubscriber.assertError(NotFound.class);
+    }
+
+    @Test
+    public void get() throws Exception {
+        Company company = new Company("name", 10);
+        companyRepository.save(company);
+
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        companyService.get(company.getUid()).subscribe(testSubscriber);
+
+        Company got = testSubscriber.getOnNextEvents().get(0);
+        Assert.assertEquals(company.getUid(), got.getUid());
     }
 
 }

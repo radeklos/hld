@@ -2,6 +2,7 @@ package com.caribou.company.service;
 
 import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
@@ -9,6 +10,8 @@ import rx.Observable;
 
 @Service
 public class CompanyService {
+
+    private ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
     private CompanyRepository companyRepository;
@@ -32,11 +35,26 @@ public class CompanyService {
                 if (entity == null) {
                     throw new NotFound();
                 }
-                company.setUid(entity.getUid());
-                companyRepository.save(company);
-                subscriber.onNext(company);
+                modelMapper.map(company, entity);
+                companyRepository.save(entity);
+                subscriber.onNext(entity);
                 subscriber.onCompleted();
-            } catch (Exception | NotFound e) {
+            } catch (Exception e) {
+                subscriber.onError(e);
+            }
+        });
+    }
+
+    public Observable<Company> get(Long uid) {
+        return Observable.create(subscriber -> {
+            try {
+                Company entity = companyRepository.findOne(uid);
+                if (entity == null) {
+                    throw new NotFound();
+                }
+                subscriber.onNext(entity);
+                subscriber.onCompleted();
+            } catch (Exception e) {
                 subscriber.onError(e);
             }
         });

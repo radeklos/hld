@@ -22,8 +22,9 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.hamcrest.core.Is.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -93,6 +94,38 @@ public class CompanyRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_OK, result.getResponse().getStatus());
+    }
+
+    @Test
+    public void updateNonExistingCompany() throws Exception {
+        CompanyDto companyDto = CompanyDto.newBuilder()
+                .name("company name")
+                .defaultDaysOf(10)
+                .build();
+
+        mockMvc.perform(
+                post("/v1/companies/0")
+                        .content(Json.dumps(companyDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status.isNotFound());
+    }
+
+    @Test
+    public void getCompany() throws Exception {
+        Company company = new Company("company name", 15);
+        companyRepository.save(company);
+
+        mockMvc.perform(
+                get(String.format("/v1/companies/%s", company.getUid())))
+                .andExpect(jsonPath("$.uid", is(new Integer(String.valueOf(company.getUid())))))
+                .andExpect(jsonPath("$.name", is(company.getName())))
+                .andExpect(jsonPath("$.defaultDaysOf", is(company.getDefaultDaysOf())));
+    }
+
+    @Test
+    public void nonExisting() throws Exception {
+        MvcResult result = mockMvc.perform(get("/v1/companies/0")).andReturn();
+        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_NOT_FOUND, result.getResponse().getStatus());
     }
 
 }
