@@ -1,9 +1,7 @@
 package com.caribou.company.service;
 
-import com.caribou.auth.domain.UserAccount;
-import com.caribou.company.domain.Company;
-import com.caribou.company.domain.Role;
-import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.domain.Department;
+import com.caribou.company.repository.DepartmentRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,19 +9,19 @@ import rx.Observable;
 
 
 @Service
-public class CompanyService implements RxService<Company, Long> {
+public class DeparmentService implements RxService<Department, Long> {
 
     private ModelMapper modelMapper = new ModelMapper();
 
     @Autowired
-    private CompanyRepository companyRepository;
+    private DepartmentRepository repository;
 
-    public Observable<Company> create(Company company, UserAccount creator) {
+    @Override
+    public Observable<Department> create(Department department) {
         return Observable.create(subscriber -> {
             try {
-                company.addEmployee(creator, Role.Admin);
-                companyRepository.save(company);
-                subscriber.onNext(company);
+                repository.save(department);
+                subscriber.onNext(department);
                 subscriber.onCompleted();
             } catch (Exception e) {
                 subscriber.onError(e);
@@ -32,20 +30,15 @@ public class CompanyService implements RxService<Company, Long> {
     }
 
     @Override
-    public Observable<Company> create(Company company) {
-        return null;
-    }
-
-    @Override
-    public Observable<Company> update(Long uid, Company company) {
+    public Observable<Department> update(Long uid, Department department) {
         return Observable.create(subscriber -> {
             try {
-                Company entity = companyRepository.findOne(uid);
+                Department entity = repository.findOne(uid);
                 if (entity == null) {
                     throw new NotFound();
                 }
-                modelMapper.map(company, entity);
-                companyRepository.save(entity);
+                modelMapper.map(department, entity);
+                repository.save(entity);
                 subscriber.onNext(entity);
                 subscriber.onCompleted();
             } catch (Exception e) {
@@ -55,10 +48,10 @@ public class CompanyService implements RxService<Company, Long> {
     }
 
     @Override
-    public Observable<Company> get(Long uid) {
+    public Observable<Department> get(Long uid) {
         return Observable.create(subscriber -> {
             try {
-                Company entity = companyRepository.findOne(uid);
+                Department entity = repository.findOne(uid);
                 if (entity == null) {
                     throw new NotFound();
                 }
