@@ -9,7 +9,7 @@ import rx.Observable;
 
 
 @Service
-public class DeparmentService implements RxService<Department, Long> {
+public class DepartmentService implements RxService<Department, Long> {
 
     private ModelMapper modelMapper = new ModelMapper();
 
