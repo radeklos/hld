@@ -4,6 +4,6 @@ public enum Role {
 
     Admin,
     Editor,
-    Viewer,
+    Viewer, Owner,
 
 }

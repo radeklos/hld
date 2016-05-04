@@ -4,6 +4,7 @@ import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import org.junit.After;
 import org.junit.Assert;
@@ -56,8 +57,9 @@ public class CompanyServiceTest {
                 .lastName("Doe")
                 .password("abcab")
                 .build();
+        company.addEmployee(userAccount, Role.Owner);
 
-        companyService.create(company, userAccount).subscribe(testSubscriber);
+        companyService.create(company).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
         Company created = testSubscriber.getOnNextEvents().get(0);

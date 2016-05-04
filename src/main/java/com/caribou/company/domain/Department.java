@@ -35,8 +35,16 @@ public class Department extends AbstractEntity {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Integer getDaysOf() {
         return daysOf;
+    }
+
+    public void setDaysOf(Integer daysOf) {
+        this.daysOf = daysOf;
     }
 
     public Company getCompany() {

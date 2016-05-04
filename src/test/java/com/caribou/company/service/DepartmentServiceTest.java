@@ -51,48 +51,63 @@ public class DepartmentServiceTest {
         Assert.assertEquals("company", departmentResult.getCompany().getName());
     }
 
-//    @Test
-//    public void update() throws Exception {
-//        Company company = new Company("name", 10);
-//        departmentRepository.save(company);
-//
-//        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-//
-//        departmentService.update(company.getUid(), new Company("new name", 20)).subscribe(testSubscriber);
-//        testSubscriber.assertNoErrors();
-//
-//        Company updated = testSubscriber.getOnNextEvents().get(0);
-//        Assert.assertEquals(company.getUid(), updated.getUid());
-//        Assert.assertEquals("new name", updated.getName());
-//        Assert.assertEquals(new Integer(20), updated.getDefaultDaysOf());
-//        Assert.assertNotNull(updated.getCreatedAt());
-//        Assert.assertNotNull(updated.getUpdatedAt());
-//    }
-//
-//    @Test
-//    public void updateNonExistingObject() throws Exception {
-//        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-//        departmentService.update(0l, new Company("new name", 20)).subscribe(testSubscriber);
-//        testSubscriber.assertError(NotFound.class);
-//    }
-//
-//    @Test
-//    public void getNonExistingObject() throws Exception {
-//        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-//        departmentService.get(0l).subscribe(testSubscriber);
-//        testSubscriber.assertError(NotFound.class);
-//    }
-//
-//    @Test
-//    public void get() throws Exception {
-//        Company company = new Company("name", 10);
-//        departmentRepository.save(company);
-//
-//        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-//        departmentService.get(company.getUid()).subscribe(testSubscriber);
-//
-//        Company got = testSubscriber.getOnNextEvents().get(0);
-//        Assert.assertEquals(company.getUid(), got.getUid());
-//    }
+    @Test
+    public void update() throws Exception {
+        Department department = Department.newBuilder()
+                .company(Company.newBuilder().name("company").defaultDaysOf(10).build())
+                .name("department")
+                .daysOf(10)
+                .build();
+        departmentRepository.save(department);
+
+        TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
+
+        Department update = Department.newBuilder().name("new name").daysOf(20).build();
+        departmentService.update(department.getUid(), update).subscribe(testSubscriber);
+        testSubscriber.assertNoErrors();
+
+        Department updated = testSubscriber.getOnNextEvents().get(0);
+        Assert.assertNotNull(updated.getUid());
+        Assert.assertEquals("new name", updated.getName());
+        Assert.assertEquals(20, (int) updated.getDaysOf());
+        Assert.assertEquals("company", updated.getCompany().getName());
+        Assert.assertNotNull(updated.getCreatedAt());
+        Assert.assertNotNull(updated.getUpdatedAt());
+    }
+
+    @Test
+    public void updateNonExistingObject() throws Exception {
+        Department department = Department.newBuilder()
+                .name("department")
+                .daysOf(10)
+                .build();
+
+        TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
+        departmentService.update(0l, department).subscribe(testSubscriber);
+        testSubscriber.assertError(NotFound.class);
+    }
+
+    @Test
+    public void getNonExistingObject() throws Exception {
+        TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
+        departmentService.get(0l).subscribe(testSubscriber);
+        testSubscriber.assertError(NotFound.class);
+    }
+
+    @Test
+    public void get() throws Exception {
+        Department department = Department.newBuilder()
+                .company(Company.newBuilder().name("company").defaultDaysOf(10).build())
+                .name("department")
+                .daysOf(10)
+                .build();
+        departmentRepository.save(department);
+
+        TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
+        departmentService.get(department.getUid()).subscribe(testSubscriber);
+
+        Department got = testSubscriber.getOnNextEvents().get(0);
+        Assert.assertEquals(department.getUid(), got.getUid());
+    }
 
 }

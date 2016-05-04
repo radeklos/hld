@@ -1,8 +1,6 @@
 package com.caribou.company.service;
 
-import com.caribou.auth.domain.UserAccount;
 import com.caribou.company.domain.Company;
-import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +16,10 @@ public class CompanyService implements RxService<Company, Long> {
     @Autowired
     private CompanyRepository companyRepository;
 
-    public Observable<Company> create(Company company, UserAccount creator) {
+    @Override
+    public Observable<Company> create(Company company) {
         return Observable.create(subscriber -> {
             try {
-                company.addEmployee(creator, Role.Admin);
                 companyRepository.save(company);
                 subscriber.onNext(company);
                 subscriber.onCompleted();
@@ -29,11 +27,6 @@ public class CompanyService implements RxService<Company, Long> {
                 subscriber.onError(e);
             }
         });
-    }
-
-    @Override
-    public Observable<Company> create(Company company) {
-        return null;
     }
 
     @Override
