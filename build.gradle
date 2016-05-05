@@ -45,6 +45,12 @@ dependencies {
     compile("org.codehaus.jackson:jackson-mapper-asl:1.9.13")
     compile("org.modelmapper.extensions:modelmapper-spring:0.7.5")
 
+    // auth
+    compile("org.springframework.session:spring-session-data-redis:1.0.1.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-security")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("com.github.kstyrc:embedded-redis:0.6")
+
     // rx
     compile("io.jmnarloch:rxjava-spring-boot-starter:1.0.0")
 

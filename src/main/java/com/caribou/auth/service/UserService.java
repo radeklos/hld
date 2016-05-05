@@ -3,12 +3,17 @@ package com.caribou.auth.service;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     UserRepository userRepository;
@@ -25,4 +30,12 @@ public class UserService {
         });
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserAccount userAccount = userRepository.findByEmail(username);
+        if (userAccount == null) {
+            return null;
+        }
+        return new User(username, userAccount.getPassword(), AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+    }
 }
