@@ -1,5 +1,6 @@
 package com.caribou.auth.rest;
 
+import com.caribou.Header;
 import com.caribou.Json;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
@@ -12,7 +13,9 @@ import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,8 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 
@@ -33,6 +36,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringApplicationConfiguration(classes = {WebApplication.class})
 @WebAppConfiguration
 public class UserRestControllerTest {
+
+    @Autowired
+    protected FilterChainProxy[] filterChainProxy;
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
@@ -46,7 +52,7 @@ public class UserRestControllerTest {
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        this.mockMvc = webAppContextSetup(webApplicationContext).addFilters(filterChainProxy).build();
         status = status();
 
         userRepository.deleteAll();
@@ -107,4 +113,58 @@ public class UserRestControllerTest {
         assertNotNull("User wasn't saved", user);
     }
 
+    @Test
+    public void userDetailIsUnauthorized() throws Exception {
+        UserAccount userAccount = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(userAccount);
+
+        mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))).andExpect(status.isUnauthorized());
+    }
+
+    @Test
+    public void loginWithIncorrectCredentials() throws Exception {
+        mockMvc.perform(post("/v1/users")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("username", "john.doe@email.com")
+                .param("password", "abcabc")
+        ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void loginWithCorrectCredentials() throws Exception {
+        UserAccount userAccount = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(userAccount);
+
+        MvcResult result = mockMvc.perform(get("/v1/users").headers(Header.basic("john.doe@email.com", "abcabc"))).andReturn();
+        assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+        // assertNotNull(result.getResponse().getHeader("x-auth-token"));
+    }
+
+    @Test
+    public void getUserDetail() throws Exception {
+        UserAccount userAccount = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(userAccount);
+
+        mockMvc.perform(
+                get("/v1/users").headers(Header.basic("john.doe@email.com", "abcabc"))
+        ).andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.firstName").value("John"));
+    }
+    
 }

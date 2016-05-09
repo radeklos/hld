@@ -30,6 +30,10 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    public Observable<UserAccount> findByEmail(String email) {
+        return Observable.create(subscriber -> userRepository.findByEmail(email));
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserAccount userAccount = userRepository.findByEmail(username);

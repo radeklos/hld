@@ -1,7 +1,7 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: auto
+      ddl-auto: create-drop
     database: POSTGRESQL
     show-sql: false
   datasource:
