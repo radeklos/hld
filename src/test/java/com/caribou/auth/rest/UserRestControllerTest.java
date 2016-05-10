@@ -72,7 +72,6 @@ public class UserRestControllerTest {
 
     @Test
     public void createNewUser() throws Exception {
-
         MvcResult result = mockMvc.perform(
                 put("/v1/users")
                         .content("{\"email\":\"john.doe@email.com\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}")
@@ -165,5 +164,5 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.email").value("john.doe@email.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
-    
+
 }
