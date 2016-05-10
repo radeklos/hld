@@ -9,17 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Func1;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.websocket.server.PathParam;
 
 
 @RestController
@@ -31,20 +26,15 @@ public class UserRestController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
-    public Observable<UserAccountDto> get(@PathParam("uid") String uid) {
+    @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
+    public UserAccountDto get(@PathVariable("uid") Long uid) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Observable<UserAccountDto> bbb = userService.findByEmail(userDetails.getUsername()).map(new Func1<UserAccount, UserAccountDto>() {
-            @Override
-            public UserAccountDto call(UserAccount userAccount) {
-                return modelMapper.map(userAccount, UserAccountDto.class);
-            }
-        });
-
-        return bbb;
+        Observable<UserAccountDto> bla = userService.findByEmail(userDetails.getUsername())
+                .map(u -> modelMapper.map(u, UserAccountDto.class));
+        return bla.toBlocking().first();
     }
 
-    @RequestMapping(method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(method = RequestMethod.PUT)
     public UserAccountDto create(@Valid @RequestBody UserAccountDto newUser, HttpServletResponse response) {
         UserAccount user = convertToEntity(newUser);
 
@@ -56,7 +46,7 @@ public class UserRestController {
 
             @Override
             public void onError(Throwable e) {
-                if (e instanceof DataIntegrityViolationException) {
+                if (e instanceof DataIntegrityViolationException) {  // TODO can also be nulls
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
                 } else {
                     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

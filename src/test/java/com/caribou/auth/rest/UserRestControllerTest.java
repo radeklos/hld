@@ -72,16 +72,10 @@ public class UserRestControllerTest {
 
     @Test
     public void createNewUser() throws Exception {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
 
         MvcResult result = mockMvc.perform(
                 put("/v1/users")
-                        .content(Json.dumps(userAccount))
+                        .content("{\"email\":\"john.doe@email.com\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CREATED, result.getResponse().getStatus());
@@ -104,7 +98,7 @@ public class UserRestControllerTest {
 
         MvcResult result = mockMvc.perform(
                 put("/v1/users")
-                        .content(Json.dumps(userAccount))
+                        .content("{\"email\":\"john.doe@email.com\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CONFLICT, result.getResponse().getStatus());
@@ -145,7 +139,9 @@ public class UserRestControllerTest {
                 .build();
         userRepository.save(userAccount);
 
-        MvcResult result = mockMvc.perform(get("/v1/users").headers(Header.basic("john.doe@email.com", "abcabc"))).andReturn();
+        MvcResult result = mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))
+                .headers(Header.basic("john.doe@email.com", "abcabc")))
+                .andReturn();
         assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
         // assertNotNull(result.getResponse().getHeader("x-auth-token"));
     }
@@ -161,10 +157,13 @@ public class UserRestControllerTest {
         userRepository.save(userAccount);
 
         mockMvc.perform(
-                get("/v1/users").headers(Header.basic("john.doe@email.com", "abcabc"))
+                get(String.format("/v1/users/%s", userAccount.getUid())).headers(Header.basic("john.doe@email.com", "abcabc"))
         ).andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.firstName").value("John"));
+                .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"))
+                .andExpect(jsonPath("$.email").value("john.doe@email.com"))
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
     
 }

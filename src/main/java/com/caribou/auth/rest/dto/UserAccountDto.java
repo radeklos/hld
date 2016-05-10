@@ -25,13 +25,12 @@ public class UserAccountDto {
 
     @NotNull
     @Size(min = 6, max = 255)
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @NotEmpty
     @Email
     @Size(max = 255)
-    @JsonProperty
     private String email;
 
     public UserAccountDto() {
@@ -56,16 +55,32 @@ public class UserAccountDto {
         return firstName;
     }
 
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
     public String getLastName() {
         return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPassword() {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public static final class Builder {
