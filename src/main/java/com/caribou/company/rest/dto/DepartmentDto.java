@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
-public class CompanyDto {
+public class DepartmentDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long uid;
@@ -21,44 +21,33 @@ public class CompanyDto {
     @NotNull
     @Min(value = 0)
     @JsonProperty
-    private Integer defaultDaysOf;
+    private Integer daysOff;
 
-    public CompanyDto() {
-    }
-
-    private CompanyDto(Builder builder) {
+    private DepartmentDto(Builder builder) {
         name = builder.name;
-        defaultDaysOf = builder.defaultDaysOf;
+        daysOff = builder.daysOff;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public void setUid(Long uid) {
-        this.uid = uid;
+    public Integer getDaysOff() {
+        return daysOff;
     }
 
     public String getName() {
         return name.trim();
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getDefaultDaysOf() {
-        return defaultDaysOf;
-    }
-
-    public void setDefaultDaysOf(Integer defaultDaysOf) {
-        this.defaultDaysOf = defaultDaysOf;
+    public Long getUid() {
+        return uid;
     }
 
     public static final class Builder {
 
         private String name;
-        private Integer defaultDaysOf;
+        private Integer daysOff;
 
         private Builder() {
         }
@@ -68,13 +57,13 @@ public class CompanyDto {
             return this;
         }
 
-        public Builder defaultDaysOf(Integer val) {
-            defaultDaysOf = val;
+        public Builder daysOff(Integer val) {
+            daysOff = val;
             return this;
         }
 
-        public CompanyDto build() {
-            return new CompanyDto(this);
+        public DepartmentDto build() {
+            return new DepartmentDto(this);
         }
     }
 }

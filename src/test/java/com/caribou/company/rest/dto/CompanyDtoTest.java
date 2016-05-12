@@ -39,7 +39,7 @@ public class CompanyDtoTest {
     @Test
     public void nameShouldntBeLongerThan255() {
         CompanyDto company = CompanyDto.newBuilder()
-                .name(new String(new char[256]))
+                .name(new String(new char[256]).replace('\0', 'A'))
                 .defaultDaysOf(10)
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -99,6 +99,16 @@ public class CompanyDtoTest {
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
 
         assertEquals(constraintViolations.toString(), 0, constraintViolations.size());
+    }
+
+    @Test
+    public void nameTrimsWhiteSpaces() {
+        CompanyDto company = CompanyDto.newBuilder()
+                .name(" name ")
+                .defaultDaysOf(10)
+                .build();
+
+        assertEquals("name", company.getName());
     }
 
 }
