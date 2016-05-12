@@ -6,6 +6,7 @@ import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.rest.dto.UserAccountDto;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +55,10 @@ public class UserRestControllerTest {
         MockitoAnnotations.initMocks(this);
         this.mockMvc = webAppContextSetup(webApplicationContext).addFilters(filterChainProxy).build();
         status = status();
+    }
 
+    @After
+    public void tearDown() throws Exception {
         userRepository.deleteAll();
     }
 

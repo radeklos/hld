@@ -1,10 +1,13 @@
 package com.caribou.company.service;
 
 import com.caribou.WebApplication;
+import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,20 +28,41 @@ public class CompanyServiceTest {
     @Autowired
     private CompanyService companyService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Before
+    public void setUp() throws Exception {
+        userRepository.deleteAll();
+    }
+
     @After
     public void tearDown() throws Exception {
         companyRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
     public void create() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        Company company = Company.newBuilder()
+                .name("name")
+                .defaultDaysOf(10)
+                .build();
 
-        companyService.create(new Company("name", 10)).subscribe(testSubscriber);
+        UserAccount userAccount = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcab")
+                .build();
+
+        companyService.create(company, userAccount).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
-        Company company = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertNotNull(company.getUid());
+        Company created = testSubscriber.getOnNextEvents().get(0);
+        Assert.assertNotNull(created.getUid());
+        Assert.assertEquals(1, created.getEmployees().size());
     }
 
     @Test

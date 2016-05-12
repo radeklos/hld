@@ -1,12 +1,16 @@
 package com.caribou.company.rest;
 
 
+import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.NotFound;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import rx.Observable;
 import rx.Subscriber;
@@ -24,6 +28,9 @@ public class CompanyRestController {
     @Autowired
     private CompanyService companyService;
 
+    @Autowired
+    private UserService userService;
+
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
     public CompanyDto get(@PathVariable("uid") Long uid) {
         Observable<CompanyDto> bla = companyService.get(uid).map(u -> modelMapper.map(u, CompanyDto.class));
@@ -32,9 +39,11 @@ public class CompanyRestController {
 
     @RequestMapping(method = RequestMethod.PUT)
     public CompanyDto create(@Valid @RequestBody CompanyDto newCompany, HttpServletResponse response) {
-        Company company = convert(newCompany);
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserAccount loggedUser = userService.findByEmail(userDetails.getUsername()).toBlocking().first();
 
-        companyService.create(company).subscribe(new Subscriber<Company>() {
+        Company company = convert(newCompany);
+        companyService.create(company, loggedUser).subscribe(new Subscriber<Company>() {
             @Override
             public void onCompleted() {
                 response.setStatus(HttpServletResponse.SC_CREATED);
