@@ -47,7 +47,7 @@ public class DepartmentServiceTest {
         Department departmentResult = testSubscriber.getOnNextEvents().get(0);
         Assert.assertNotNull(departmentResult.getUid());
         Assert.assertEquals("department", departmentResult.getName());
-        Assert.assertEquals(10, (int) departmentResult.getDaysOf());
+        Assert.assertEquals(10, (int) departmentResult.getDaysOff());
         Assert.assertEquals("company", departmentResult.getCompany().getName());
     }
 
@@ -69,7 +69,7 @@ public class DepartmentServiceTest {
         Department updated = testSubscriber.getOnNextEvents().get(0);
         Assert.assertNotNull(updated.getUid());
         Assert.assertEquals("new name", updated.getName());
-        Assert.assertEquals(20, (int) updated.getDaysOf());
+        Assert.assertEquals(20, (int) updated.getDaysOff());
         Assert.assertEquals("company", updated.getCompany().getName());
         Assert.assertNotNull(updated.getCreatedAt());
         Assert.assertNotNull(updated.getUpdatedAt());
@@ -83,14 +83,14 @@ public class DepartmentServiceTest {
                 .build();
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.update(0l, department).subscribe(testSubscriber);
+        departmentService.update(0L, department).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
     @Test
     public void getNonExistingObject() throws Exception {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.get(0l).subscribe(testSubscriber);
+        departmentService.get(0L).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 

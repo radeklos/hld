@@ -21,6 +21,9 @@ public class Company extends AbstractEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
     private Set<CompanyEmployee> employees;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
+    private Set<Department> departments;
+
     public Company() {
     }
 
@@ -37,6 +40,10 @@ public class Company extends AbstractEntity {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public Set<Department> getDepartments() {
+        return departments;
     }
 
     public String getName() {
@@ -60,6 +67,13 @@ public class Company extends AbstractEntity {
             employees = new HashSet<>();
         }
         employees.add(new CompanyEmployee(this, userAccount, role));
+    }
+
+    public void addDepartment(Department department) {
+        if (departments == null) {
+            departments = new HashSet<>();
+        }
+        departments.add(department);
     }
 
     public Set<CompanyEmployee> getEmployees() {

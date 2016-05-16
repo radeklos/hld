@@ -28,6 +28,9 @@ public class DepartmentDto {
         daysOff = builder.daysOff;
     }
 
+    public DepartmentDto() {
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -36,12 +39,24 @@ public class DepartmentDto {
         return daysOff;
     }
 
+    public void setDaysOff(Integer daysOff) {
+        this.daysOff = daysOff;
+    }
+
     public String getName() {
         return name.trim();
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Long getUid() {
         return uid;
+    }
+
+    public void setUid(Long uid) {
+        this.uid = uid;
     }
 
     public static final class Builder {

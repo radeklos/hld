@@ -146,8 +146,7 @@ public class CompanyRestControllerTest {
 
         mockMvc.perform(
                 get(String.format("/v1/companies/%s", company.getUid()))
-                        .headers(authHeader)
-        )
+                        .headers(authHeader))
                 .andExpect(jsonPath("$.uid", is(new Integer(String.valueOf(company.getUid())))))
                 .andExpect(jsonPath("$.name", is(company.getName())))
                 .andExpect(jsonPath("$.defaultDaysOf", is(company.getDefaultDaysOf())));
@@ -155,8 +154,7 @@ public class CompanyRestControllerTest {
 
     @Test
     public void nonExisting() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v1/companies/0").headers(authHeader)).andReturn();
-        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_NOT_FOUND, result.getResponse().getStatus());
+        mockMvc.perform(get("/v1/companies/0").headers(authHeader)).andExpect(status.isNotFound());
     }
 
 }

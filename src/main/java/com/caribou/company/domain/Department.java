@@ -13,9 +13,9 @@ public class Department extends AbstractEntity {
     private String name;
 
     @Column(nullable = false)
-    private Integer daysOf;
+    private Integer daysOff;
 
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     private Company company;
 
     public Department() {
@@ -23,8 +23,8 @@ public class Department extends AbstractEntity {
 
     private Department(Builder builder) {
         name = builder.name;
-        daysOf = builder.daysOf;
-        company = builder.company;
+        daysOff = builder.daysOff;
+        this.setCompany(builder.company);
     }
 
     public static Builder newBuilder() {
@@ -39,22 +39,27 @@ public class Department extends AbstractEntity {
         this.name = name;
     }
 
-    public Integer getDaysOf() {
-        return daysOf;
+    public Integer getDaysOff() {
+        return daysOff;
     }
 
-    public void setDaysOf(Integer daysOf) {
-        this.daysOf = daysOf;
+    public void setDaysOff(Integer daysOff) {
+        this.daysOff = daysOff;
     }
 
     public Company getCompany() {
         return company;
     }
 
+    public void setCompany(Company company) {
+        this.company = company;
+        this.company.addDepartment(this);
+    }
+
     public static final class Builder {
 
         private String name;
-        private Integer daysOf;
+        private Integer daysOff;
         private Company company;
 
         private Builder() {
@@ -66,7 +71,7 @@ public class Department extends AbstractEntity {
         }
 
         public Builder daysOf(Integer val) {
-            daysOf = val;
+            daysOff = val;
             return this;
         }
 

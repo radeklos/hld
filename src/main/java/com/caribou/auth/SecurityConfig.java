@@ -32,7 +32,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 //        sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //        requestCache().requestCache(new NullRequestCache())
-
         http
                 .csrf().disable()
                 .httpBasic()
