@@ -41,17 +41,23 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class CompanyRestControllerTest {
 
     private static UserAccount userAccount;
+
     private static HttpHeaders authHeader;
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
+
     @Autowired
     protected FilterChainProxy[] filterChainProxy;
+
     @Autowired
     CompanyRepository companyRepository;
+
     @Autowired
     UserRepository userRepository;
+
     private MockMvc mockMvc;
+
     private StatusResultMatchers status;
 
     @BeforeClass

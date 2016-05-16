@@ -18,11 +18,11 @@ import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -31,13 +31,19 @@ import static junit.framework.TestCase.assertNotNull;
 @IntegrationTest({"server.port=0"})
 public class DepartmentRestControllerTest {
 
-    private static TestRestTemplate restTemplate = new TestRestTemplate("john.doe@email.com", "abcabc");
+    private static TestRestTemplate restAuthenticated = new TestRestTemplate("john.doe@email.com", "abcabc");
+
+    private static TestRestTemplate restGuest = new TestRestTemplate();
+
     @Autowired
     CompanyRepository companyRepository;
+
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     DepartmentRepository departmentRepository;
+
     @Value("${local.server.port}")
     private int port = 0;
     private UserAccount userAccount;
@@ -61,6 +67,11 @@ public class DepartmentRestControllerTest {
 
         userRepository.save(userAccount);
         companyRepository.save(company);
+
+
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setOutputStreaming(false);
+        restGuest.setRequestFactory(requestFactory);
     }
 
     @After
@@ -80,7 +91,7 @@ public class DepartmentRestControllerTest {
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/0/departments/%s", department.getUid());
-        ResponseEntity<DepartmentDto> response = restTemplate.getForEntity(path(url), DepartmentDto.class);
+        ResponseEntity<DepartmentDto> response = restAuthenticated.getForEntity(path(url), DepartmentDto.class);
 
         assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -90,7 +101,7 @@ public class DepartmentRestControllerTest {
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto> response = restTemplate.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
         assertEquals(url, HttpStatus.OK, response.getStatusCode());
 
@@ -108,9 +119,8 @@ public class DepartmentRestControllerTest {
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = restTemplate.getForEntity(path(url), DepartmentDto.class);
+        ResponseEntity<DepartmentDto> response = restAuthenticated.getForEntity(path(url), DepartmentDto.class);
 
-        assertNotNull(response);
         assertEquals(url, HttpStatus.OK, response.getStatusCode());
 
         DepartmentDto body = response.getBody();
@@ -129,7 +139,7 @@ public class DepartmentRestControllerTest {
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("new name").daysOff(12).build();
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = restTemplate.exchange(path(url), HttpMethod.POST, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.POST, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
         assertEquals(url, HttpStatus.OK, response.getStatusCode());
 
@@ -147,9 +157,50 @@ public class DepartmentRestControllerTest {
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("new name").daysOff(12).build();
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), 0);
-        ResponseEntity<DepartmentDto> response = restTemplate.exchange(path(url), HttpMethod.POST, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.POST, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
         assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void getDepartmentAsGuestReturnUnauthorized() {
+        Department department = Department.newBuilder()
+                .name("department")
+                .company(company)
+                .daysOf(10)
+                .build();
+        departmentRepository.save(department);
+
+        String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
+        ResponseEntity<DepartmentDto> response = restGuest.getForEntity(path(url), DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    public void createDepartmentAsGuestReturnUnauthorized() {
+        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+
+        String url = String.format("/v1/companies/%s/departments", company.getUid());
+        ResponseEntity<DepartmentDto> response = restGuest.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    public void updateDepartmentAsGuestReturnUnauthorized() {
+        Department department = Department.newBuilder()
+                .name("department")
+                .company(company)
+                .daysOf(10)
+                .build();
+        departmentRepository.save(department);
+        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("new name").daysOff(12).build();
+
+        String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
+        ResponseEntity<DepartmentDto> response = restGuest.postForEntity(path(url), departmentDto, DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     private String path(String context) {
