@@ -22,6 +22,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.Arrays;
+
 import static junit.framework.TestCase.assertEquals;
 
 
@@ -62,12 +64,11 @@ public class DepartmentRestControllerTest {
 
         company = Company.newBuilder()
                 .name("company")
-                .defaultDaysOf(10)
+                .defaultDaysOff(10)
                 .build();
 
         userRepository.save(userAccount);
         companyRepository.save(company);
-
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setOutputStreaming(false);
@@ -86,7 +87,7 @@ public class DepartmentRestControllerTest {
         Department department = Department.newBuilder()
                 .name("department")
                 .company(company)
-                .daysOf(10)
+                .daysOff(10)
                 .build();
         departmentRepository.save(department);
 
@@ -114,7 +115,7 @@ public class DepartmentRestControllerTest {
         Department department = Department.newBuilder()
                 .name("department")
                 .company(company)
-                .daysOf(10)
+                .daysOff(10)
                 .build();
         departmentRepository.save(department);
 
@@ -129,11 +130,60 @@ public class DepartmentRestControllerTest {
     }
 
     @Test
+    public void getList() throws Exception {
+        Department hr = Department.newBuilder()
+                .name("hr")
+                .company(company)
+                .daysOff(10)
+                .build();
+        Department account = Department.newBuilder()
+                .name("account")
+                .company(company)
+                .daysOff(10)
+                .build();
+        departmentRepository.save(Arrays.asList(new Department[]{hr, account}));
+
+        String url = String.format("/v1/companies/%s/departments", company.getUid());
+        ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
+
+        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+
+        DepartmentDto[] departments = response.getBody();
+        assertEquals(2, departments.length);
+    }
+
+    @Test
+    public void getListOfDepartmentsInCompanyOnly() {
+        Department hr = Department.newBuilder()
+                .name("hr")
+                .company(company)
+                .daysOff(10)
+                .build();
+        Company anotherCompany = Company.newBuilder().name("another company").defaultDaysOff(10).build();
+        companyRepository.save(anotherCompany);
+        Department account = Department.newBuilder()
+                .name("account")
+                .company(anotherCompany)
+                .daysOff(10)
+                .build();
+        departmentRepository.save(Arrays.asList(new Department[]{hr, account}));
+
+        String url = String.format("/v1/companies/%s/departments", company.getUid());
+        ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
+
+        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+
+        DepartmentDto[] departments = response.getBody();
+        assertEquals(1, departments.length);
+        assertEquals("hr", departments[0].getName());
+    }
+
+    @Test
     public void updateDepartment() throws Exception {
         Department department = Department.newBuilder()
                 .name("department")
                 .company(company)
-                .daysOf(10)
+                .daysOff(10)
                 .build();
         departmentRepository.save(department);
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("new name").daysOff(12).build();
@@ -167,7 +217,7 @@ public class DepartmentRestControllerTest {
         Department department = Department.newBuilder()
                 .name("department")
                 .company(company)
-                .daysOf(10)
+                .daysOff(10)
                 .build();
         departmentRepository.save(department);
 
@@ -192,7 +242,7 @@ public class DepartmentRestControllerTest {
         Department department = Department.newBuilder()
                 .name("department")
                 .company(company)
-                .daysOf(10)
+                .daysOff(10)
                 .build();
         departmentRepository.save(department);
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("new name").daysOff(12).build();
@@ -202,6 +252,21 @@ public class DepartmentRestControllerTest {
 
         assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
+
+
+//    @Test
+//    public void getDepartmentEmployee() {
+//        Department department = Department.newBuilder()
+//                .name("department")
+//                .company(company)
+//                .daysOff(10)
+//                .build();
+//        departmentRepository.save(department);
+//
+//        String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
+//        ResponseEntity<EmployeeDto[]> response = restAuthenticated.getForEntity(path(url), EmployeeDto[].class);
+//        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+//    }
 
     private String path(String context) {
         return String.format("http://localhost:%s%s", port, context);

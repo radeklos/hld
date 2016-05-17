@@ -3,11 +3,13 @@ package com.caribou.company.rest;
 
 import com.caribou.company.domain.Department;
 import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.DepartmentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
@@ -30,6 +32,15 @@ public class DepartmentRestController {
         return departmentService.get(uid)
                 .filter(d -> d.getCompany().getUid().equals(companyUid))
                 .map(this::convert).toSingle();
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public Observable<DepartmentDto> getList(@PathVariable("companyUid") Long companyUid) {
+        return companyService.get(companyUid)
+                .flatMap(d -> Observable.create(subscriber -> {
+                    d.getDepartments().forEach(subscriber::onNext);
+                    subscriber.onCompleted();
+                })).map(m -> this.convert((Department) m));
     }
 
     @RequestMapping(method = RequestMethod.PUT)
@@ -57,6 +68,12 @@ public class DepartmentRestController {
                 }).toSingle();
     }
 
+    @RequestMapping(value = "/{uid}/employee")
+    public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid) {
+        return departmentService.get(companyUid)
+                .filter(d -> d.getCompany().getUid().equals(companyUid))
+                .map(d -> new EmployeeDto());
+    }
 
     private Department convert(DepartmentDto dto) {
         return modelMapper.map(dto, Department.class);

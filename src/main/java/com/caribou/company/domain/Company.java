@@ -93,7 +93,7 @@ public class Company extends AbstractEntity {
             return this;
         }
 
-        public Builder defaultDaysOf(Integer val) {
+        public Builder defaultDaysOff(Integer val) {
             defaultDaysOf = val;
             return this;
         }

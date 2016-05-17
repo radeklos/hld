@@ -48,7 +48,7 @@ public class CompanyServiceTest {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
         Company company = Company.newBuilder()
                 .name("name")
-                .defaultDaysOf(10)
+                .defaultDaysOff(10)
                 .build();
 
         UserAccount userAccount = UserAccount.newBuilder()
@@ -88,14 +88,14 @@ public class CompanyServiceTest {
     @Test
     public void updateNonExistingObject() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.update(0l, new Company("new name", 20)).subscribe(testSubscriber);
+        companyService.update(0L, new Company("new name", 20)).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
     @Test
     public void getNonExistingObject() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.get(0l).subscribe(testSubscriber);
+        companyService.get(0L).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 

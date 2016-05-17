@@ -1,9 +1,10 @@
 package com.caribou.company.domain;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import com.caribou.auth.domain.UserAccount;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -18,6 +19,9 @@ public class Department extends AbstractEntity {
     @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     private Company company;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "department")
+    private Set<DepartmentEmployee> employees;
+
     public Department() {
     }
 
@@ -29,6 +33,10 @@ public class Department extends AbstractEntity {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public Set<DepartmentEmployee> getEmployees() {
+        return employees;
     }
 
     public String getName() {
@@ -56,6 +64,13 @@ public class Department extends AbstractEntity {
         this.company.addDepartment(this);
     }
 
+    public void addEmployee(UserAccount userAccount, Role role) {
+        if (employees == null) {
+            employees = new HashSet<>();
+        }
+        employees.add(new DepartmentEmployee(this, userAccount, role));
+    }
+
     public static final class Builder {
 
         private String name;
@@ -70,7 +85,7 @@ public class Department extends AbstractEntity {
             return this;
         }
 
-        public Builder daysOf(Integer val) {
+        public Builder daysOff(Integer val) {
             daysOff = val;
             return this;
         }

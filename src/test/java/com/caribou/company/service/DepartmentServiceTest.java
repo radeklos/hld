@@ -1,8 +1,10 @@
 package com.caribou.company.service;
 
 import com.caribou.WebApplication;
+import com.caribou.auth.domain.UserAccount;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
+import com.caribou.company.domain.Role;
 import com.caribou.company.repository.DepartmentRepository;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,9 +38,9 @@ public class DepartmentServiceTest {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
 
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOf(10).build())
+                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
                 .name("department")
-                .daysOf(10)
+                .daysOff(10)
                 .build();
 
         departmentService.create(department).subscribe(testSubscriber);
@@ -54,15 +56,15 @@ public class DepartmentServiceTest {
     @Test
     public void update() throws Exception {
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOf(10).build())
+                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
                 .name("department")
-                .daysOf(10)
+                .daysOff(10)
                 .build();
         departmentRepository.save(department);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
 
-        Department update = Department.newBuilder().name("new name").daysOf(20).build();
+        Department update = Department.newBuilder().name("new name").daysOff(20).build();
         departmentService.update(department.getUid(), update).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
@@ -79,7 +81,7 @@ public class DepartmentServiceTest {
     public void updateNonExistingObject() throws Exception {
         Department department = Department.newBuilder()
                 .name("department")
-                .daysOf(10)
+                .daysOff(10)
                 .build();
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
@@ -97,17 +99,41 @@ public class DepartmentServiceTest {
     @Test
     public void get() throws Exception {
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOf(10).build())
+                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
                 .name("department")
-                .daysOf(10)
+                .daysOff(10)
                 .build();
-        departmentRepository.save(department);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
         departmentService.get(department.getUid()).subscribe(testSubscriber);
 
         Department got = testSubscriber.getOnNextEvents().get(0);
         Assert.assertEquals(department.getUid(), got.getUid());
+    }
+
+    @Test
+    public void addEmployee() {
+        Department department = Department.newBuilder()
+                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
+                .name("department")
+                .daysOff(10)
+                .build();
+        departmentRepository.save(department);
+
+        department.addEmployee(UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build(), Role.Admin);
+
+        TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
+        departmentService.create(department).subscribe(testSubscriber);
+
+        Department departmentResult = testSubscriber.getOnNextEvents().get(0);
+        testSubscriber.assertNoErrors();
+
+        Assert.assertEquals(1, departmentResult.getEmployees().size());
     }
 
 }

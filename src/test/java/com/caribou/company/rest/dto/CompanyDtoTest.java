@@ -33,7 +33,7 @@ public class CompanyDtoTest {
 
         assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
         assertEquals("must be greater than or equal to 0", constraintViolation.getMessage());
-        assertEquals("defaultDaysOf", constraintViolation.getPropertyPath().toString());
+        assertEquals("defaultDaysOff", constraintViolation.getPropertyPath().toString());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class CompanyDtoTest {
 
         assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
         assertEquals("may not be null", constraintViolation.getMessage());
-        assertEquals("defaultDaysOf", constraintViolation.getPropertyPath().toString());
+        assertEquals("defaultDaysOff", constraintViolation.getPropertyPath().toString());
     }
 
     @Test

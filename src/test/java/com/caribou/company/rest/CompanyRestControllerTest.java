@@ -155,7 +155,7 @@ public class CompanyRestControllerTest {
                         .headers(authHeader))
                 .andExpect(jsonPath("$.uid", is(new Integer(String.valueOf(company.getUid())))))
                 .andExpect(jsonPath("$.name", is(company.getName())))
-                .andExpect(jsonPath("$.defaultDaysOf", is(company.getDefaultDaysOf())));
+                .andExpect(jsonPath("$.defaultDaysOff", is(company.getDefaultDaysOf())));
     }
 
     @Test
