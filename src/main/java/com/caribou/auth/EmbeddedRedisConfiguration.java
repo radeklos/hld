@@ -19,8 +19,10 @@ public class EmbeddedRedisConfiguration {
 
     @Bean
     public JedisConnectionFactory connectionFactory() throws IOException {
-        redisServer = new RedisServer(Protocol.DEFAULT_PORT);
-        redisServer.start();
+        if (redisServer == null) {
+            redisServer = new RedisServer(Protocol.DEFAULT_PORT);
+            redisServer.start();
+        }
         return new JedisConnectionFactory();
     }
 

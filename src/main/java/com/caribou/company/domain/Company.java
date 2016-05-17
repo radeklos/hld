@@ -79,11 +79,13 @@ public class Company extends AbstractEntity {
     public Set<CompanyEmployee> getEmployees() {
         return employees;
     }
+
     public static final class Builder {
 
         private String name;
 
         private Integer defaultDaysOff;
+
         private Set<CompanyEmployee> employees;
 
         private Builder() {

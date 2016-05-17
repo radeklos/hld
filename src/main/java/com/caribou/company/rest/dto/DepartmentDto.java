@@ -62,6 +62,7 @@ public class DepartmentDto {
     public static final class Builder {
 
         private String name;
+
         private Integer daysOff;
 
         private Builder() {

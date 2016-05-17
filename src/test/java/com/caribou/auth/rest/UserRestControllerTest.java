@@ -48,6 +48,7 @@ public class UserRestControllerTest {
     UserRepository userRepository;
 
     private MockMvc mockMvc;
+
     private StatusResultMatchers status;
 
     @Before

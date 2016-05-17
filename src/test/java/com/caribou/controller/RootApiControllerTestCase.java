@@ -28,6 +28,7 @@ public class RootApiControllerTestCase {
     protected WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
+
     private StatusResultMatchers status;
 
     @Before

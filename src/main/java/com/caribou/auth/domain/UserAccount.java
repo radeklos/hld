@@ -76,8 +76,11 @@ public class UserAccount extends AbstractEntity {
     public static final class Builder {
 
         private String email;
+
         private String password;
+
         private String firstName;
+
         private String lastName;
 
         private Builder() {

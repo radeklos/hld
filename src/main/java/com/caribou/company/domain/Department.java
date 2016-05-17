@@ -77,7 +77,9 @@ public class Department extends AbstractEntity {
     public static final class Builder {
 
         private String name;
+
         private Integer daysOff;
+
         private Company company;
 
         private Builder() {
