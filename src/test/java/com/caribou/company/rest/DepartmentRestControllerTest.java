@@ -52,7 +52,7 @@ public class DepartmentRestControllerTest {
     private Company company;
 
     @Before
-    public void setup() throws Exception {
+    public void before() throws Exception {
         userRepository.deleteAll();
 
         userAccount = UserAccount.newBuilder()

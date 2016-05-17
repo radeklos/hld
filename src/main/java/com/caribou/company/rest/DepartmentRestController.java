@@ -1,6 +1,7 @@
 package com.caribou.company.rest;
 
 
+import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Department;
 import com.caribou.company.rest.dto.DepartmentDto;
 import com.caribou.company.rest.dto.EmployeeDto;
@@ -8,6 +9,8 @@ import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.DepartmentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import rx.Observable;
 import rx.Single;
@@ -27,6 +30,9 @@ public class DepartmentRestController {
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private UserService userService;
+
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
     public Single<DepartmentDto> get(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid) {
         return departmentService.get(uid)
@@ -36,6 +42,8 @@ public class DepartmentRestController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Observable<DepartmentDto> getList(@PathVariable("companyUid") Long companyUid) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         return companyService.get(companyUid)
                 .flatMap(d -> Observable.create(subscriber -> {
                     d.getDepartments().forEach(subscriber::onNext);

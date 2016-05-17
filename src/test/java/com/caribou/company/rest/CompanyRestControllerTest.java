@@ -14,7 +14,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.FilterChainProxy;
@@ -27,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,11 +41,16 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {WebApplication.class})
 @WebAppConfiguration
+@IntegrationTest({"server.port=0"})
 public class CompanyRestControllerTest {
 
     private static UserAccount userAccount;
 
     private static HttpHeaders authHeader;
+
+    private static TestRestTemplate restAuthenticated = new TestRestTemplate("john.doe@email.com", "abcabc");
+
+    private static TestRestTemplate restGuest = new TestRestTemplate();
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
@@ -55,6 +63,9 @@ public class CompanyRestControllerTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @Value("${local.server.port}")
+    private int port = 0;
 
     private MockMvc mockMvc;
 
@@ -155,7 +166,7 @@ public class CompanyRestControllerTest {
                         .headers(authHeader))
                 .andExpect(jsonPath("$.uid", is(new Integer(String.valueOf(company.getUid())))))
                 .andExpect(jsonPath("$.name", is(company.getName())))
-                .andExpect(jsonPath("$.defaultDaysOff", is(company.getDefaultDaysOf())));
+                .andExpect(jsonPath("$.defaultDaysOff", is(company.getDefaultDaysOff())));
     }
 
     @Test

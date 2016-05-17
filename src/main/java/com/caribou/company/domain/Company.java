@@ -16,7 +16,7 @@ public class Company extends AbstractEntity {
     @Column(nullable = false)
     private String name;
 
-    private Integer defaultDaysOf;
+    private Integer defaultDaysOff;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
     private Set<CompanyEmployee> employees;
@@ -27,14 +27,14 @@ public class Company extends AbstractEntity {
     public Company() {
     }
 
-    public Company(String name, Integer defaultDaysOf) {
+    public Company(String name, Integer defaultDaysOff) {
         this.name = name;
-        this.defaultDaysOf = defaultDaysOf;
+        this.defaultDaysOff = defaultDaysOff;
     }
 
     private Company(Builder builder) {
         setName(builder.name);
-        setDefaultDaysOf(builder.defaultDaysOf);
+        setDefaultDaysOff(builder.defaultDaysOff);
         employees = builder.employees;
     }
 
@@ -54,12 +54,12 @@ public class Company extends AbstractEntity {
         this.name = name;
     }
 
-    public Integer getDefaultDaysOf() {
-        return defaultDaysOf;
+    public Integer getDefaultDaysOff() {
+        return defaultDaysOff;
     }
 
-    public void setDefaultDaysOf(Integer defaultDaysOf) {
-        this.defaultDaysOf = defaultDaysOf;
+    public void setDefaultDaysOff(Integer defaultDaysOff) {
+        this.defaultDaysOff = defaultDaysOff;
     }
 
     public void addEmployee(UserAccount userAccount, Role role) {
@@ -82,7 +82,8 @@ public class Company extends AbstractEntity {
     public static final class Builder {
 
         private String name;
-        private Integer defaultDaysOf;
+
+        private Integer defaultDaysOff;
         private Set<CompanyEmployee> employees;
 
         private Builder() {
@@ -94,7 +95,7 @@ public class Company extends AbstractEntity {
         }
 
         public Builder defaultDaysOff(Integer val) {
-            defaultDaysOf = val;
+            defaultDaysOff = val;
             return this;
         }
 

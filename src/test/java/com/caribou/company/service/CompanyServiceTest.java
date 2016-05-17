@@ -80,7 +80,7 @@ public class CompanyServiceTest {
         Company updated = testSubscriber.getOnNextEvents().get(0);
         Assert.assertEquals(company.getUid(), updated.getUid());
         Assert.assertEquals("new name", updated.getName());
-        Assert.assertEquals(new Integer(20), updated.getDefaultDaysOf());
+        Assert.assertEquals(new Integer(20), updated.getDefaultDaysOff());
         Assert.assertNotNull(updated.getCreatedAt());
         Assert.assertNotNull(updated.getUpdatedAt());
     }

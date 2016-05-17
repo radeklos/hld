@@ -21,14 +21,14 @@ public class CompanyDto {
     @NotNull
     @Min(value = 0)
     @JsonProperty
-    private Integer defaultDaysOf;
+    private Integer defaultDaysOff;
 
     public CompanyDto() {
     }
 
     private CompanyDto(Builder builder) {
         name = builder.name;
-        defaultDaysOf = builder.defaultDaysOf;
+        defaultDaysOff = builder.defaultDaysOff;
     }
 
     public static Builder newBuilder() {
@@ -47,18 +47,19 @@ public class CompanyDto {
         this.name = name;
     }
 
-    public Integer getDefaultDaysOf() {
-        return defaultDaysOf;
+    public Integer getDefaultDaysOff() {
+        return defaultDaysOff;
     }
 
-    public void setDefaultDaysOf(Integer defaultDaysOf) {
-        this.defaultDaysOf = defaultDaysOf;
+    public void setDefaultDaysOff(Integer defaultDaysOff) {
+        this.defaultDaysOff = defaultDaysOff;
     }
 
     public static final class Builder {
 
         private String name;
-        private Integer defaultDaysOf;
+
+        private Integer defaultDaysOff;
 
         private Builder() {
         }
@@ -69,7 +70,7 @@ public class CompanyDto {
         }
 
         public Builder defaultDaysOf(Integer val) {
-            defaultDaysOf = val;
+            defaultDaysOff = val;
             return this;
         }
 

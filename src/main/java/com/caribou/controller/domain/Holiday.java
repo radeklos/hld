@@ -13,21 +13,29 @@ import java.util.Date;
 public class Holiday extends AbstractEntity {
 
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
-    private TypeLeave leaveTypeUrn;
+    private TypeLeave leaveType;
+
     @Column(nullable = false)
     private String reason;
+
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     private UserAccount user;
+
     @Column(nullable = false)
     private Date startDate;
+
     @Column(nullable = false)
     private Date endDate;
+
     @Column(nullable = false)
     private boolean halfStartDate;
+
     @Column(nullable = false)
     private boolean halfEndData;
+
     @Column(nullable = false)
     private boolean confirmed;
+
     private String bossResponse;
 
     private Holiday() {

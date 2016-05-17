@@ -60,6 +60,9 @@ public class Department extends AbstractEntity {
     }
 
     public void setCompany(Company company) {
+        if (company == null) {
+            return;
+        }
         this.company = company;
         this.company.addDepartment(this);
     }

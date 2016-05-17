@@ -5,9 +5,11 @@ import com.caribou.auth.domain.UserAccount;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
+import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +30,21 @@ public class DepartmentServiceTest {
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    private Company company;
+
     @After
     public void tearDown() throws Exception {
         departmentRepository.deleteAll();
+        companyRepository.deleteAll();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        company = Company.newBuilder().name("company").defaultDaysOff(10).build();
+        companyRepository.save(company);
     }
 
     @Test
@@ -38,7 +52,7 @@ public class DepartmentServiceTest {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
 
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
+                .company(company)
                 .name("department")
                 .daysOff(10)
                 .build();
@@ -56,7 +70,7 @@ public class DepartmentServiceTest {
     @Test
     public void update() throws Exception {
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
+                .company(company)
                 .name("department")
                 .daysOff(10)
                 .build();
@@ -99,14 +113,16 @@ public class DepartmentServiceTest {
     @Test
     public void get() throws Exception {
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
+                .company(company)
                 .name("department")
                 .daysOff(10)
                 .build();
+        departmentRepository.save(department);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
         departmentService.get(department.getUid()).subscribe(testSubscriber);
 
+        testSubscriber.assertNoErrors();
         Department got = testSubscriber.getOnNextEvents().get(0);
         Assert.assertEquals(department.getUid(), got.getUid());
     }
@@ -114,7 +130,7 @@ public class DepartmentServiceTest {
     @Test
     public void addEmployee() {
         Department department = Department.newBuilder()
-                .company(Company.newBuilder().name("company").defaultDaysOff(10).build())
+                .company(company)
                 .name("department")
                 .daysOff(10)
                 .build();
