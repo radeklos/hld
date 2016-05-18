@@ -155,7 +155,7 @@ public class DepartmentRestControllerTest {
     }
 
     @Test
-    public void getListOfDepartmentsInCompanyOnly() {
+    public void getListOfDepartmentsInEmploeeysCompanyOnly() {
         Department hr = Department.newBuilder()
                 .name("hr")
                 .company(company)
