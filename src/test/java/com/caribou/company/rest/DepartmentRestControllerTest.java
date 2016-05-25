@@ -5,6 +5,7 @@ import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
+import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.DepartmentDto;
@@ -55,21 +56,21 @@ public class DepartmentRestControllerTest {
 
     @Before
     public void before() throws Exception {
-        userRepository.deleteAll();
-
         userAccount = UserAccount.newBuilder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
                 .password("abcabc")
                 .build();
+        userRepository.save(userAccount);
 
         company = Company.newBuilder()
                 .name("company")
                 .defaultDaysOff(10)
                 .build();
+        companyRepository.save(company);
 
-        userRepository.save(userAccount);
+        company.addEmployee(userAccount, Role.Admin);
         companyRepository.save(company);
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -97,19 +98,6 @@ public class DepartmentRestControllerTest {
         ResponseEntity<DepartmentDto> response = restAuthenticated.getForEntity(path(url), DepartmentDto.class);
 
         assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
-    public void createNewDepartment() throws Exception {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
-
-        String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
-
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-
-        Department department = departmentRepository.findAll().iterator().next();
-        assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
     }
 
     @Test
@@ -255,6 +243,74 @@ public class DepartmentRestControllerTest {
         assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
+    @Test
+    public void getListOfDepartmentsForUnemployedReturns404() {
+        Company anotherCompany = Company.newBuilder().name("another company").defaultDaysOff(10).build();
+        companyRepository.save(anotherCompany);
+
+        String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
+        ResponseEntity<Object> response = restAuthenticated.getForEntity(path(url), Object.class);
+
+        assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void createNewDepartmentAsUnemployedReturns404() {
+        Company anotherCompany = Company.newBuilder().name("another company").defaultDaysOff(10).build();
+        companyRepository.save(anotherCompany);
+
+        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+
+        String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void createNewDepartmentAsViewerReturns401() {
+        company.addEmployee(userAccount, Role.Viewer);
+        companyRepository.save(company);
+
+        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+
+        String url = String.format("/v1/companies/%s/departments", company.getUid());
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    public void createNewDepartmentAsAdmin() throws Exception {
+        company.addEmployee(userAccount, Role.Admin);
+        companyRepository.save(company);
+
+        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+
+        String url = String.format("/v1/companies/%s/departments", company.getUid());
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+
+        Department department = departmentRepository.findAll().iterator().next();
+        assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
+    }
+
+    @Test
+    public void createNewDepartmentAsEditor() throws Exception {
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+
+        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+
+        String url = String.format("/v1/companies/%s/departments", company.getUid());
+        ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
+
+        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+
+        Department department = departmentRepository.findAll().iterator().next();
+        assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
+    }
 
 //    @Test
 //    public void getDepartmentEmployee() {

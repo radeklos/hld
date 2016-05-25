@@ -63,4 +63,19 @@ public class CompanyService implements RxService<Company, Long> {
         });
     }
 
+    public Observable<Company> getForEmployeeEmail(Long uid, String email) {
+        return Observable.create(subscriber -> {
+            try {
+                Company entity = companyRepository.findEmployeeByEmailForUid(email, uid);
+                if (entity == null) {
+                    throw new NotFound();
+                }
+                subscriber.onNext(entity);
+                subscriber.onCompleted();
+            } catch (Exception e) {
+                subscriber.onError(e);
+            }
+        });
+    }
+
 }

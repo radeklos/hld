@@ -50,16 +50,17 @@ public class CompanyServiceTest {
                 .name("name")
                 .defaultDaysOff(10)
                 .build();
-
+        companyRepository.save(company);
         UserAccount userAccount = UserAccount.newBuilder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
                 .password("abcab")
                 .build();
+        userRepository.save(userAccount);
         company.addEmployee(userAccount, Role.Owner);
-
         companyService.create(company).subscribe(testSubscriber);
+
         testSubscriber.assertNoErrors();
 
         Company created = testSubscriber.getOnNextEvents().get(0);
@@ -109,6 +110,68 @@ public class CompanyServiceTest {
 
         Company got = testSubscriber.getOnNextEvents().get(0);
         Assert.assertEquals(company.getUid(), got.getUid());
+    }
+
+    @Test
+    public void getByEmployeeEmail() {
+        Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
+        companyRepository.save(company);
+        UserAccount user = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(user);
+        company.addEmployee(user, Role.Owner);
+        companyRepository.save(company);
+
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        companyService.getForEmployeeEmail(company.getUid(), user.getEmail()).subscribe(testSubscriber);
+
+        testSubscriber.assertNoErrors();
+        Company got = testSubscriber.getOnNextEvents().get(0);
+        Assert.assertEquals(company.getUid(), got.getUid());
+    }
+
+    @Test
+    public void getByEmployeeEmailNonExistingEmail() {
+        Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
+        companyRepository.save(company);
+        UserAccount user = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(user);
+        company.addEmployee(user, Role.Owner);
+        companyRepository.save(company);
+
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        companyService.getForEmployeeEmail(company.getUid(), "non.existing@email.com").subscribe(testSubscriber);
+
+        testSubscriber.assertError(NotFound.class);
+    }
+
+    @Test
+    public void getByEmployeeEmailNonCompanyUid() {
+        Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
+        companyRepository.save(company);
+        UserAccount user = UserAccount.newBuilder()
+                .email("john.doe@email.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(user);
+        company.addEmployee(user, Role.Owner);
+        companyRepository.save(company);
+
+        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        companyService.getForEmployeeEmail(0L, user.getEmail()).subscribe(testSubscriber);
+
+        testSubscriber.assertError(NotFound.class);
     }
 
 }

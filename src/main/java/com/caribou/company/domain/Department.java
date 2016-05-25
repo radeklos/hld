@@ -16,7 +16,7 @@ public class Department extends AbstractEntity {
     @Column(nullable = false)
     private Integer daysOff;
 
-    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
+    @ManyToOne(optional = false)
     private Company company;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "department")

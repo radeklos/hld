@@ -24,14 +24,4 @@ abstract class AbstractEntity implements Serializable {
         return uid;
     }
 
-    @PrePersist
-    void createdAt() {
-        this.createdAt = this.updatedAt = new Date();
-    }
-
-    @PreUpdate
-    void updatedAt() {
-        this.updatedAt = new Date();
-    }
-
 }

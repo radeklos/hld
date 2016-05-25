@@ -41,4 +41,5 @@ abstract class AbstractEntity implements Serializable {
     public Date getUpdatedAt() {
         return updatedAt;
     }
+
 }

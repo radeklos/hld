@@ -2,10 +2,7 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,7 +15,7 @@ public class Company extends AbstractEntity {
 
     private Integer defaultDaysOff;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<CompanyEmployee> employees;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
@@ -66,7 +63,9 @@ public class Company extends AbstractEntity {
         if (employees == null) {
             employees = new HashSet<>();
         }
-        employees.add(new CompanyEmployee(this, userAccount, role));
+        CompanyEmployee companyEmployee = new CompanyEmployee(this, userAccount, role);
+        employees.remove(companyEmployee);
+        employees.add(companyEmployee);
     }
 
     public void addDepartment(Department department) {
@@ -110,4 +109,5 @@ public class Company extends AbstractEntity {
             return new Company(this);
         }
     }
+
 }
