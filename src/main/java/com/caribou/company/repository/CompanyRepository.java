@@ -9,10 +9,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface CompanyRepository extends CrudRepository<Company, Long> {
 
-        @Query("from Company c " +
-                "join c.employees e " +
-                "join e.member u " +
-                "WHERE u.email = :email and c.uid = :uid")
-        Company findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") Long uid);
+    @Query("from Company c " +
+            "join c.employees e " +
+            "join e.member u " +
+            "WHERE u.email = :email and c.uid = :uid")
+    Company findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") Long uid);
 
 }

@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -58,14 +59,12 @@ public class DepartmentRestController {
     @RequestMapping(method = RequestMethod.PUT)
     public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") Long companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        final HttpStatus[] status = {HttpStatus.OK};
-
         return companyService.getForEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
                     for (Iterator<CompanyEmployee> iterator = company1.getEmployees().iterator(); iterator.hasNext(); ) {
                         CompanyEmployee f = iterator.next();
                         if (f.getMember().getEmail().equals(userDetails.getUsername()) && f.getRole() == Role.Viewer) {
-                            status[0] = HttpStatus.FORBIDDEN;
+                            throw new AccessDeniedException("omg");
                         }
                     }
                     return company1;
@@ -75,7 +74,8 @@ public class DepartmentRestController {
                     entity.setCompany(company);
                     return departmentService.create(entity);
                 })
-                .map(d -> new ResponseEntity<DepartmentDto>(status[0]))
+                .map(d -> new ResponseEntity<>(convert(d), HttpStatus.CREATED))
+                .onErrorReturn(ErrorHandler::h)
                 .toSingle();
     }
 

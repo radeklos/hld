@@ -6,24 +6,25 @@ import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Role;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.Iterator;
-
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
 @WebAppConfiguration
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CompanyRepositoryTest {
 
     @Autowired
@@ -51,12 +52,8 @@ public class CompanyRepositoryTest {
 
         company.addEmployee(userAccount, Role.Viewer);
         companyRepository.save(company);
-    }
 
-    @After
-    public void tearDown() throws Exception {
-        companyRepository.deleteAll();
-        userRepository.deleteAll();
+        company = companyRepository.findOne(company.getUid());
     }
 
     @Test
@@ -87,7 +84,7 @@ public class CompanyRepositoryTest {
     }
 
     @Test
-    public void onlyEmployeeCanBeInSameCompany() {
+    public void onlyOneEmployeeCanBeInSameCompany() {
         company.addEmployee(userAccount, Role.Viewer);
         companyRepository.save(company);
 
@@ -119,17 +116,21 @@ public class CompanyRepositoryTest {
 
         company.addEmployee(anotherUserAccount, Role.Viewer);
         companyRepository.save(company);
+        company = companyRepository.findOne(company.getUid());
 
         company.addEmployee(userAccount, Role.Admin);
         companyRepository.save(company);
+        company = companyRepository.findOne(company.getUid());
 
         Company refreshed = companyRepository.findOne(company.getUid());
 
         assertEquals(2, refreshed.getEmployees().size());
 
-        Iterator<CompanyEmployee> employees = refreshed.getEmployees().iterator();
-        assertEquals(Role.Viewer, employees.next().getRole());
-        assertEquals(Role.Admin, employees.next().getRole());
+        CompanyEmployee anotherUserCompany = userRepository.findOne(anotherUserAccount.getUid()).getCompanies().iterator().next();
+        assertEquals(Role.Viewer, anotherUserCompany.getRole());
+
+        CompanyEmployee defaultUserCompany = userRepository.findOne(userAccount.getUid()).getCompanies().iterator().next();
+        assertEquals(Role.Admin, defaultUserCompany.getRole());
     }
 
 }

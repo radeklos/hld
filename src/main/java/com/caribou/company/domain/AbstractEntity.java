@@ -1,7 +1,5 @@
 package com.caribou.company.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -19,7 +17,6 @@ abstract class AbstractEntity implements Serializable {
 
     private Date updatedAt;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public Long getUid() {
         return uid;
     }
@@ -42,4 +39,19 @@ abstract class AbstractEntity implements Serializable {
         return updatedAt;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractEntity that = (AbstractEntity) o;
+
+        return !(getUid() != null ? !getUid().equals(that.getUid()) : that.getUid() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getUid() != null ? getUid().hashCode() : 0;
+    }
 }

@@ -4,6 +4,7 @@ import com.caribou.auth.domain.UserAccount;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 
@@ -15,10 +16,10 @@ public class Company extends AbstractEntity {
 
     private Integer defaultDaysOff;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER)
     private Set<CompanyEmployee> employees;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "company", fetch = FetchType.EAGER)
     private Set<Department> departments;
 
     public Company() {
@@ -64,8 +65,17 @@ public class Company extends AbstractEntity {
             employees = new HashSet<>();
         }
         CompanyEmployee companyEmployee = new CompanyEmployee(this, userAccount, role);
-        employees.remove(companyEmployee);
-        employees.add(companyEmployee);
+        if (employees.contains(companyEmployee)) {
+            for (Iterator<CompanyEmployee> it = employees.iterator(); it.hasNext(); ) {
+                CompanyEmployee f = it.next();
+                if (f.equals(companyEmployee)) {
+                    f.setRole(role);
+                    break;
+                }
+            }
+        } else {
+            employees.add(companyEmployee);
+        }
     }
 
     public void addDepartment(Department department) {

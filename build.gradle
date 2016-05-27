@@ -49,7 +49,7 @@ dependencies {
     compile("org.springframework.session:spring-session-data-redis:1.0.1.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-security")
     compile("org.springframework.boot:spring-boot-starter-web")
-    compile("com.github.kstyrc:embedded-redis:0.6")
+    compile 'org.springframework.data:spring-data-redis:1.7.2.RELEASE'
 
     // rx
     compile("io.jmnarloch:rxjava-spring-boot-starter:1.0.0")

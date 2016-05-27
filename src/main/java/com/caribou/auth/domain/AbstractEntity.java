@@ -31,4 +31,27 @@ abstract class AbstractEntity implements Serializable {
         this.updatedAt = new Date();
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractEntity that = (AbstractEntity) o;
+
+        return !(getUid() != null ? !getUid().equals(that.getUid()) : that.getUid() != null);
+
+    }
+
+    @Override
+    public final int hashCode() {
+        return getUid() != null ? getUid().hashCode() : 0;
+    }
 }

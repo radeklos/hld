@@ -6,13 +6,12 @@ import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
@@ -21,6 +20,7 @@ import rx.observers.TestSubscriber;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
 @WebAppConfiguration
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CompanyServiceTest {
 
     @Autowired
@@ -31,17 +31,6 @@ public class CompanyServiceTest {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Before
-    public void setUp() throws Exception {
-        userRepository.deleteAll();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        companyRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @Test
     public void create() throws Exception {

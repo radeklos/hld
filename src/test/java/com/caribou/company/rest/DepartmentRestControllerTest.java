@@ -9,7 +9,6 @@ import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.DepartmentDto;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +19,11 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static junit.framework.TestCase.assertEquals;
@@ -32,6 +33,7 @@ import static junit.framework.TestCase.assertEquals;
 @SpringApplicationConfiguration(classes = {WebApplication.class})
 @WebAppConfiguration
 @IntegrationTest({"server.port=0"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DepartmentRestControllerTest {
 
     private static TestRestTemplate restAuthenticated = new TestRestTemplate("john.doe@email.com", "abcabc");
@@ -72,17 +74,11 @@ public class DepartmentRestControllerTest {
 
         company.addEmployee(userAccount, Role.Admin);
         companyRepository.save(company);
+        company = companyRepository.findOne(company.getUid());
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setOutputStreaming(false);
         restGuest.setRequestFactory(requestFactory);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        departmentRepository.deleteAll();
-        companyRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test
@@ -278,6 +274,10 @@ public class DepartmentRestControllerTest {
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
         assertEquals(url, HttpStatus.FORBIDDEN, response.getStatusCode());
+        ArrayList<Department> departments = new ArrayList<Department>();
+        departmentRepository.findAll().forEach(departments::add);
+
+        assertEquals(0, departments.size());
     }
 
     @Test
@@ -290,7 +290,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+        assertEquals(url, HttpStatus.CREATED, response.getStatusCode());
 
         Department department = departmentRepository.findAll().iterator().next();
         assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
@@ -306,7 +306,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+        assertEquals(url, HttpStatus.CREATED, response.getStatusCode());
 
         Department department = departmentRepository.findAll().iterator().next();
         assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());

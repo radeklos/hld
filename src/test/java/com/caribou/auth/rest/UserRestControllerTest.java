@@ -127,9 +127,9 @@ public class UserRestControllerTest {
     @Test
     public void loginWithIncorrectCredentials() throws Exception {
         mockMvc.perform(post("/v1/users")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .param("username", "john.doe@email.com")
-                .param("password", "abcabc")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("username", "john.doe@email.com")
+                        .param("password", "abcabc")
         ).andExpect(status().isUnauthorized());
     }
 

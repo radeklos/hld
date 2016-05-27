@@ -1,9 +1,9 @@
 package com.caribou.auth.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import com.caribou.company.domain.CompanyEmployee;
+
+import javax.persistence.*;
+import java.util.Set;
 
 
 @Entity
@@ -21,6 +21,9 @@ public class UserAccount extends AbstractEntity {
 
     @Column
     private String lastName;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<CompanyEmployee> companies;
 
     public UserAccount() {
     }
@@ -71,6 +74,14 @@ public class UserAccount extends AbstractEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<CompanyEmployee> getCompanies() {
+        return companies;
+    }
+
+    public void setCompanies(Set<CompanyEmployee> companies) {
+        this.companies = companies;
     }
 
     public static final class Builder {

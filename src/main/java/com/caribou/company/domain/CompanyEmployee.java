@@ -5,9 +5,9 @@ import com.caribou.auth.domain.UserAccount;
 import javax.persistence.*;
 
 
-//@Table(
-//        uniqueConstraints=@UniqueConstraint(columnNames={"company_uid", "member_uid"})
-//)
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"company_uid", "member_uid"})
+)
 @Entity
 public class CompanyEmployee extends AbstractEntity {
 
@@ -70,6 +70,5 @@ public class CompanyEmployee extends AbstractEntity {
 
         if (company != null ? !company.equals(that.company) : that.company != null) return false;
         return member != null ? member.equals(that.member) : that.member == null;
-
     }
 }
