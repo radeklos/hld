@@ -19,7 +19,7 @@ public class Company extends AbstractEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER)
     private Set<CompanyEmployee> employees;
 
-    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "company", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER)
     private Set<Department> departments;
 
     public Company() {

@@ -93,11 +93,14 @@ public class DepartmentRestController {
                 }).toSingle();
     }
 
-    @RequestMapping(value = "/{uid}/employee")
+    @RequestMapping(value = "/{uid}/employees")
     public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid) {
         return departmentService.get(companyUid)
-                .filter(d -> d.getCompany().getUid().equals(companyUid))
-                .map(d -> new EmployeeDto());
+                .flatMap(department -> Observable.create(subscriber -> {
+                    department.getEmployees().forEach(subscriber::onNext);
+                    subscriber.onCompleted();
+                }))
+                .map(entity -> modelMapper.map(entity, EmployeeDto.class));
     }
 
     private Department convert(DepartmentDto dto) {

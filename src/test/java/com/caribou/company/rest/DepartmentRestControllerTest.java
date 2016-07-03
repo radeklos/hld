@@ -127,7 +127,7 @@ public class DepartmentRestControllerTest {
                 .company(company)
                 .daysOff(10)
                 .build();
-        departmentRepository.save(Arrays.asList(new Department[]{hr, account}));
+        departmentRepository.save(Arrays.asList(hr, account));
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
@@ -152,7 +152,7 @@ public class DepartmentRestControllerTest {
                 .company(anotherCompany)
                 .daysOff(10)
                 .build();
-        departmentRepository.save(Arrays.asList(new Department[]{hr, account}));
+        departmentRepository.save(Arrays.asList(hr, account));
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
@@ -312,19 +312,38 @@ public class DepartmentRestControllerTest {
         assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
     }
 
-//    @Test
-//    public void getDepartmentEmployee() {
-//        Department department = Department.newBuilder()
-//                .name("department")
-//                .company(company)
-//                .daysOff(10)
-//                .build();
-//        departmentRepository.save(department);
-//
-//        String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
-//        ResponseEntity<EmployeeDto[]> response = restAuthenticated.getForEntity(path(url), EmployeeDto[].class);
-//        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-//    }
+    @Test
+    public void getDepartmentEmployees() {
+        UserAccount anotherUserAccount = UserAccount.newBuilder()
+                .email("another@user.com")
+                .firstName("John")
+                .lastName("Doe")
+                .password("abcabc")
+                .build();
+        userRepository.save(anotherUserAccount);
+        company.addEmployee(anotherUserAccount, Role.Viewer);
+        companyRepository.save(company);
+
+        Department department = Department.newBuilder()
+                .name("department")
+                .company(company)
+                .daysOff(10).build();
+        Department anotherDepartment = Department.newBuilder()
+                .name("another department")
+                .company(company)
+                .daysOff(12).build();
+        departmentRepository.save(Arrays.asList(department, anotherDepartment));
+
+        anotherDepartment.addEmployee(anotherUserAccount, Role.Editor);
+        department.addEmployee(userAccount, Role.Admin);
+        departmentRepository.save(Arrays.asList(department, anotherDepartment));
+
+        String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
+        ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
+        assertEquals(url, HttpStatus.OK, response.getStatusCode());
+
+        assertEquals(1, response.getBody().length);
+    }
 
     private String path(String context) {
         return String.format("http://localhost:%s%s", port, context);

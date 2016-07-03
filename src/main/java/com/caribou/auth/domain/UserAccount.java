@@ -1,6 +1,7 @@
 package com.caribou.auth.domain;
 
 import com.caribou.company.domain.CompanyEmployee;
+import com.caribou.company.domain.DepartmentEmployee;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -22,8 +23,11 @@ public class UserAccount extends AbstractEntity {
     @Column
     private String lastName;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER)
     private Set<CompanyEmployee> companies;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER)
+    private Set<DepartmentEmployee> department;
 
     public UserAccount() {
     }

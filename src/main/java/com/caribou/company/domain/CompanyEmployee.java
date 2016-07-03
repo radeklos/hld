@@ -55,20 +55,21 @@ public class CompanyEmployee extends AbstractEntity {
     }
 
     @Override
-    public int hashCode() {
-        int result = company != null ? company.hashCode() : 0;
-        result = 31 * result + (member != null ? member.hashCode() : 0);
-        return result;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         CompanyEmployee that = (CompanyEmployee) o;
 
-        if (company != null ? !company.equals(that.company) : that.company != null) return false;
-        return member != null ? member.equals(that.member) : that.member == null;
+        if (!getCompany().equals(that.getCompany())) return false;
+        return getMember().equals(that.getMember());
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getCompany().hashCode();
+        result = 31 * result + getMember().hashCode();
+        return result;
     }
 }
