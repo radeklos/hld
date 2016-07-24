@@ -2,6 +2,7 @@ package com.caribou.company.service;
 
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
@@ -33,6 +34,9 @@ public class DepartmentServiceTest {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private Company company;
 
@@ -131,18 +135,21 @@ public class DepartmentServiceTest {
                 .build();
         departmentRepository.save(department);
 
-        department.addEmployee(UserAccount.newBuilder()
+        UserAccount user = UserAccount.newBuilder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
                 .password("abcabc")
-                .build(), Role.Admin);
+                .build();
+        userRepository.save(user);
+
+        department.addEmployee(user, Role.Admin);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
         departmentService.create(department).subscribe(testSubscriber);
 
-        Department departmentResult = testSubscriber.getOnNextEvents().get(0);
         testSubscriber.assertNoErrors();
+        Department departmentResult = testSubscriber.getOnNextEvents().get(0);
 
         Assert.assertEquals(1, departmentResult.getEmployees().size());
     }
