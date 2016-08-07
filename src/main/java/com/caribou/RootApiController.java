@@ -1,4 +1,4 @@
-package com.caribou.controller;
+package com.caribou;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;
