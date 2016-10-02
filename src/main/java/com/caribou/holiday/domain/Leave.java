@@ -11,11 +11,8 @@ import java.util.Date;
 @Entity
 public class Leave extends AbstractEntity {
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     LeaveType leaveType;
-
-    @ManyToOne(optional = false)
-    Department department;
 
     @ManyToOne(optional = false)
     UserAccount userAccount;
@@ -24,24 +21,24 @@ public class Leave extends AbstractEntity {
     Date from;
 
     @Column(nullable = false)
-    Boolean fromWholeDay = true;
+    When leaveAt = When.Morning;
 
     @Column(nullable = false, name = "_to")
     Date to;
 
     @Column(nullable = false)
-    Boolean toWholeDay = true;
+    When returnAt = When.Evening;
 
     String reason;
 
+    public Leave() {
+    }
+
     private Leave(Builder builder) {
         leaveType = builder.leaveType;
-        department = builder.department;
         userAccount = builder.userAccount;
         from = builder.from;
-        fromWholeDay = builder.fromWholeDay;
         to = builder.to;
-        toWholeDay = builder.toWholeDay;
         reason = builder.reason;
     }
 
@@ -49,20 +46,67 @@ public class Leave extends AbstractEntity {
         return new Builder();
     }
 
+    public LeaveType getLeaveType() {
+        return leaveType;
+    }
+
+    public Leave setLeaveType(LeaveType leaveType) {
+        this.leaveType = leaveType;
+        return this;
+    }
+
+    public UserAccount getUserAccount() {
+        return userAccount;
+    }
+
+    public Leave setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
+        return this;
+    }
+
+    public When getLeaveAt() {
+        return leaveAt;
+    }
+
+    public Leave setLeaveAt(When leaveAt) {
+        this.leaveAt = leaveAt;
+        return this;
+    }
+
+    public When getReturnAt() {
+        return returnAt;
+    }
+
+    public Leave setReturnAt(When returnAt) {
+        this.returnAt = returnAt;
+        return this;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public Leave setReason(String reason) {
+        this.reason = reason;
+        return this;
+    }
+
     public Date getFrom() {
         return from;
+    }
+
+    public Leave setFrom(Date from) {
+        this.from = from;
+        return this;
     }
 
     public Date getTo() {
         return to;
     }
 
-    public Boolean getFromWholeDay() {
-        return fromWholeDay;
-    }
-
-    public Boolean getToWholeDay() {
-        return toWholeDay;
+    public Leave setTo(Date to) {
+        this.to = to;
+        return this;
     }
 
     public static final class Builder {
@@ -70,9 +114,7 @@ public class Leave extends AbstractEntity {
         private Department department;
         private UserAccount userAccount;
         private Date from;
-        private Boolean fromWholeDay = true;
         private Date to;
-        private Boolean toWholeDay = true;
         private String reason;
 
         private Builder() {
@@ -98,18 +140,8 @@ public class Leave extends AbstractEntity {
             return this;
         }
 
-        public Builder fromWholeDay(Boolean val) {
-            fromWholeDay = val;
-            return this;
-        }
-
         public Builder to(Date val) {
             to = val;
-            return this;
-        }
-
-        public Builder toWholeDay(Boolean val) {
-            toWholeDay = val;
             return this;
         }
 

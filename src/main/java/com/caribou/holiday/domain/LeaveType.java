@@ -25,7 +25,6 @@ public class LeaveType extends AbstractEntity {
         return new Builder();
     }
 
-
     public static final class Builder {
         private String name;
         private Company company;

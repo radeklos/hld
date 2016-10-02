@@ -22,9 +22,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -45,7 +42,6 @@ public class LeaveServiceTest {
     LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
 
     Department department = Department.newBuilder().company(company).daysOff(10).name("HR").build();
-
 
     @Autowired
     private CompanyService companyService;
@@ -89,53 +85,6 @@ public class LeaveServiceTest {
 
         Leave created = testSubscriber.getOnNextEvents().get(0);
         Assert.assertNotNull(created.getUid());
-    }
-
-    @Test
-    public void fromCannotBeAfterTo() throws Exception {
-        Leave leave = Leave.newBuilder()
-                .userAccount(userAccount)
-                .leaveType(leaveType)
-                .department(department)
-                .from(Date.from(LocalDate.of(2014, Month.DECEMBER, 12).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .to(Date.from(LocalDate.of(2014, Month.DECEMBER, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .build();
-        TestSubscriber<Leave> testSubscriber = new TestSubscriber<>();
-        leaveService.create(leave).subscribe(testSubscriber);
-
-        testSubscriber.assertError(ServiceValidationException.class);
-    }
-
-    @Test
-    public void fromAndToCanBeSameDay() throws Exception {
-        Leave leave = Leave.newBuilder()
-                .userAccount(userAccount)
-                .leaveType(leaveType)
-                .department(department)
-                .from(Date.from(LocalDate.of(2014, Month.DECEMBER, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .to(Date.from(LocalDate.of(2014, Month.DECEMBER, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .build();
-        TestSubscriber<Leave> testSubscriber = new TestSubscriber<>();
-        leaveService.create(leave).subscribe(testSubscriber);
-
-        testSubscriber.assertNoErrors();
-    }
-
-    @Test
-    public void cannotTakeTwoHalfDaysInOneDay() throws Exception {
-        Leave leave = Leave.newBuilder()
-                .userAccount(userAccount)
-                .leaveType(leaveType)
-                .department(department)
-                .fromWholeDay(false)
-                .toWholeDay(false)
-                .from(Date.from(LocalDate.of(2014, Month.DECEMBER, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .to(Date.from(LocalDate.of(2014, Month.DECEMBER, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-                .build();
-        TestSubscriber<Leave> testSubscriber = new TestSubscriber<>();
-        leaveService.create(leave).subscribe(testSubscriber);
-
-        testSubscriber.assertError(ServiceValidationException.class);
     }
 
 }
