@@ -1,0 +1,34 @@
+machine:
+  java:
+    version: oraclejdk8
+  services:
+    - redis
+    - postgresql
+    - docker
+  post:
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+  environment:
+      NAME: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+
+database:
+  override:
+    - createdb holiday
+
+test:
+  override:
+    - ./gradlew test
+
+deployment:
+  prod:
+    branch: master
+    commands:
+      - ./gradlew container -x test
+      - docker tag hld/api $NAME:prod
+      - docker push $NAME:prod
+
+  latest:
+    branch: develop
+    commands:
+      - ./gradlew container -x test
+      - docker tag hld/api $NAME:latest
+      - docker push $NAME:latest

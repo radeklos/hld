@@ -1,7 +1,9 @@
 package com.caribou.company.service;
 
+import com.caribou.Factory;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
@@ -13,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
@@ -22,7 +23,6 @@ import rx.observers.TestSubscriber;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DepartmentServiceTest {
 
     @Autowired
@@ -34,64 +34,56 @@ public class DepartmentServiceTest {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private Company company;
 
     @Before
     public void setUp() throws Exception {
-        company = Company.newBuilder().name("company").defaultDaysOff(10).build();
+        company = Factory.company();
         companyRepository.save(company);
     }
 
     @Test
     public void create() throws Exception {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-
-        Department department = Department.newBuilder()
-                .company(company)
-                .name("department")
-                .daysOff(10)
-                .build();
+        Department department = Factory.department(company);
 
         departmentService.create(department).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
         Department departmentResult = testSubscriber.getOnNextEvents().get(0);
         Assert.assertNotNull(departmentResult.getUid());
-        Assert.assertEquals("department", departmentResult.getName());
+        Assert.assertEquals(department.getName(), departmentResult.getName());
         Assert.assertEquals(10, (int) departmentResult.getDaysOff());
-        Assert.assertEquals("company", departmentResult.getCompany().getName());
+        Assert.assertEquals(department.getCompany().getName(), departmentResult.getCompany().getName());
     }
 
     @Test
     public void update() throws Exception {
-        Department department = Department.newBuilder()
-                .company(company)
-                .name("department")
-                .daysOff(10)
-                .build();
+        Department department = Factory.department(company);
         departmentRepository.save(department);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
 
-        Department update = Department.newBuilder().name("new name").daysOff(20).build();
+        String newName = Factory.faker.commerce().department();
+        Department update = Department.newBuilder().name(newName).daysOff(20).build();
         departmentService.update(department.getUid(), update).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
         Department updated = testSubscriber.getOnNextEvents().get(0);
         Assert.assertNotNull(updated.getUid());
-        Assert.assertEquals("new name", updated.getName());
+        Assert.assertEquals(newName, updated.getName());
         Assert.assertEquals(20, (int) updated.getDaysOff());
-        Assert.assertEquals("company", updated.getCompany().getName());
+        Assert.assertEquals(department.getCompany().getName(), updated.getCompany().getName());
         Assert.assertNotNull(updated.getCreatedAt());
         Assert.assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
     public void updateNonExistingObject() throws Exception {
-        Department department = Department.newBuilder()
-                .name("department")
-                .daysOff(10)
-                .build();
+        Department department = Factory.department(company);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
         departmentService.update(0L, department).subscribe(testSubscriber);
@@ -107,11 +99,7 @@ public class DepartmentServiceTest {
 
     @Test
     public void get() throws Exception {
-        Department department = Department.newBuilder()
-                .company(company)
-                .name("department")
-                .daysOff(10)
-                .build();
+        Department department = Factory.department(company);
         departmentRepository.save(department);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
@@ -124,25 +112,19 @@ public class DepartmentServiceTest {
 
     @Test
     public void addEmployee() {
-        Department department = Department.newBuilder()
-                .company(company)
-                .name("department")
-                .daysOff(10)
-                .build();
+        Department department = Factory.department(company);
         departmentRepository.save(department);
 
-        department.addEmployee(UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build(), Role.Admin);
+        UserAccount user = Factory.userAccount();
+        userRepository.save(user);
+
+        department.addEmployee(user, Role.Admin);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
         departmentService.create(department).subscribe(testSubscriber);
 
-        Department departmentResult = testSubscriber.getOnNextEvents().get(0);
         testSubscriber.assertNoErrors();
+        Department departmentResult = testSubscriber.getOnNextEvents().get(0);
 
         Assert.assertEquals(1, departmentResult.getEmployees().size());
     }

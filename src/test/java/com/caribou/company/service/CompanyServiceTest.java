@@ -1,5 +1,6 @@
 package com.caribou.company.service;
 
+import com.caribou.Factory;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
@@ -20,7 +20,6 @@ import rx.observers.TestSubscriber;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
 @WebAppConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CompanyServiceTest {
 
     @Autowired
@@ -35,17 +34,9 @@ public class CompanyServiceTest {
     @Test
     public void create() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        Company company = Company.newBuilder()
-                .name("name")
-                .defaultDaysOff(10)
-                .build();
+        Company company = Factory.company();
         companyRepository.save(company);
-        UserAccount userAccount = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcab")
-                .build();
+        UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
         company.addEmployee(userAccount, Role.Owner);
         companyService.create(company).subscribe(testSubscriber);
@@ -59,18 +50,19 @@ public class CompanyServiceTest {
 
     @Test
     public void update() throws Exception {
-        Company company = new Company("name", 10);
+        Company company = Factory.company();
         companyRepository.save(company);
 
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
 
-        companyService.update(company.getUid(), new Company("new name", 20)).subscribe(testSubscriber);
+        Company updateTo = Factory.company();
+        companyService.update(company.getUid(), updateTo).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 
         Company updated = testSubscriber.getOnNextEvents().get(0);
         Assert.assertEquals(company.getUid(), updated.getUid());
-        Assert.assertEquals("new name", updated.getName());
-        Assert.assertEquals(new Integer(20), updated.getDefaultDaysOff());
+        Assert.assertEquals(updateTo.getName(), updated.getName());
+        Assert.assertEquals(updateTo.getDefaultDaysOff(), updated.getDefaultDaysOff());
         Assert.assertNotNull(updated.getCreatedAt());
         Assert.assertNotNull(updated.getUpdatedAt());
     }
@@ -105,12 +97,7 @@ public class CompanyServiceTest {
     public void getByEmployeeEmail() {
         Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
         companyRepository.save(company);
-        UserAccount user = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccount user = Factory.userAccount();
         userRepository.save(user);
         company.addEmployee(user, Role.Owner);
         companyRepository.save(company);
@@ -125,14 +112,9 @@ public class CompanyServiceTest {
 
     @Test
     public void getByEmployeeEmailNonExistingEmail() {
-        Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
+        Company company = Factory.company();
         companyRepository.save(company);
-        UserAccount user = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccount user = Factory.userAccount();
         userRepository.save(user);
         company.addEmployee(user, Role.Owner);
         companyRepository.save(company);
@@ -145,14 +127,9 @@ public class CompanyServiceTest {
 
     @Test
     public void getByEmployeeEmailNonCompanyUid() {
-        Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
+        Company company = Factory.company();
         companyRepository.save(company);
-        UserAccount user = UserAccount.newBuilder()
-                .email("john.doe@email.com")
-                .firstName("John")
-                .lastName("Doe")
-                .password("abcabc")
-                .build();
+        UserAccount user = Factory.userAccount();
         userRepository.save(user);
         company.addEmployee(user, Role.Owner);
         companyRepository.save(company);

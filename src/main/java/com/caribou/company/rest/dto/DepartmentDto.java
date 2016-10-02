@@ -10,7 +10,6 @@ import javax.validation.constraints.Size;
 
 public class DepartmentDto {
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long uid;
 
     @NotBlank
@@ -51,6 +50,7 @@ public class DepartmentDto {
         this.name = name;
     }
 
+    @JsonProperty
     public Long getUid() {
         return uid;
     }

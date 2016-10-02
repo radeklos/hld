@@ -16,7 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import rx.Observable;
 import rx.Single;
 
@@ -93,9 +97,9 @@ public class DepartmentRestController {
                 }).toSingle();
     }
 
-    @RequestMapping(value = "/{uid}/employees")
-    public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid) {
-        return departmentService.get(companyUid)
+    @RequestMapping(value = "/{departmentUid}/employees")
+    public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
+        return departmentService.get(departmentUid)
                 .flatMap(department -> Observable.create(subscriber -> {
                     department.getEmployees().forEach(subscriber::onNext);
                     subscriber.onCompleted();
