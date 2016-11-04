@@ -10,7 +10,6 @@ public class ErrorMapper {
         Error err = new Error();
         err.setObject(ex.getBindingResult().getObjectName());
         err.setValidationErrors(ValidationErrorMapper.map(ex.getBindingResult().getFieldErrors()));
-
         return err;
     }
 

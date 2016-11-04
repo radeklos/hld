@@ -34,9 +34,6 @@ public class UserService implements UserDetailsService {
         return Observable.create(subscriber -> {
             try {
                 UserAccount entity = userRepository.findByEmail(email);
-//                if (entity == null) {
-//                    throw new NotFound();
-//                }
                 subscriber.onNext(entity);
                 subscriber.onCompleted();
             } catch (Exception e) {

@@ -6,6 +6,8 @@ import com.caribou.Json;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
+import com.caribou.auth.rest.dto.Error;
+import com.caribou.auth.rest.dto.ErrorField;
 import com.caribou.auth.rest.dto.UserAccountDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -14,9 +16,16 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -25,13 +34,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.http.HttpServletResponse;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,6 +48,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {WebApplication.class})
 @WebAppConfiguration
+@IntegrationTest({"server.port=0"})
 public class UserRestControllerTest {
 
     @Autowired
@@ -52,6 +60,8 @@ public class UserRestControllerTest {
     @Autowired
     UserRepository userRepository;
     ObjectMapper mapper = new ObjectMapper();
+    @Value("${local.server.port}")
+    private int port = 0;
     private MockMvc mockMvc;
     private StatusResultMatchers status;
 
@@ -66,10 +76,11 @@ public class UserRestControllerTest {
     public void requestWithEmptyJsonRequestReturnsUnprocessableEntity() throws Exception {
         UserAccountDto userAccount = UserAccountDto.newBuilder().build();
 
-        mockMvc.perform(put("/v1/users")
+        mockMvc.perform(post("/v1/users")
                         .content(Json.dumps(userAccount))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status.isUnprocessableEntity());
+                .andExpect(status.isUnprocessableEntity())
+                .andExpect(jsonPath("$.errors").exists());
     }
 
     @Test
@@ -83,12 +94,14 @@ public class UserRestControllerTest {
                 "}";
         json = String.format(json, userAccount.getFirstName(), userAccount.getLastName(), userAccount.getEmail(), userAccount.getPassword());
 
-        MvcResult result = mockMvc.perform(
-                put("/v1/users")
-                        .content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CREATED, result.getResponse().getStatus());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<String> response = new TestRestTemplate().exchange(
+                path("/v1/users"),
+                HttpMethod.POST,
+                new HttpEntity<>(json, headers),
+                String.class);
 
         UserAccount user = userRepository.findByEmail(userAccount.getEmail());
         assertNotNull("User wasn't saved", user);
@@ -101,12 +114,23 @@ public class UserRestControllerTest {
         ModelMapper modelMapper = new ModelMapper();
         userRepository.save(modelMapper.map(userAccount, UserAccount.class));
 
-        MvcResult result = mockMvc.perform(
-                put("/v1/users")
-                        .content(String.format("{\"email\":\"%s\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}", userAccount.getEmail()))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CONFLICT, result.getResponse().getStatus());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String payload = String.format("{\"email\":\"%s\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}", userAccount.getEmail());
+        ResponseEntity<Error> response = new TestRestTemplate().exchange(
+                path("/v1/users"),
+                HttpMethod.POST,
+                new HttpEntity<>(payload, headers),
+                Error.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+
+        ErrorField emailError = response.getBody().getValidationErrors().get("email");
+        assertThat(emailError.getCode()).isEqualTo("must be unique");
+        assertThat(emailError.getDefaultMessage()).isEqualTo("Email is already taken");
+        assertThat(emailError.getRejectedValue()).isEqualTo(userAccount.getEmail());
 
         UserAccount user = userRepository.findByEmail(userAccount.getEmail());
         assertNotNull("User wasn't saved", user);
@@ -123,7 +147,7 @@ public class UserRestControllerTest {
     @Test
     public void loginWithIncorrectCredentials() throws Exception {
         UserAccount userAccount = Factory.userAccount();
-        mockMvc.perform(post("/v1/users")
+        mockMvc.perform(get("/v1/users")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("username", userAccount.getEmail())
                 .param("password", userAccount.getPassword())
@@ -135,11 +159,11 @@ public class UserRestControllerTest {
         UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
-        MvcResult result = mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))
+        MvcResult result = mockMvc.perform(get("/v1/users")
                 .headers(Header.basic(userAccount.getEmail(), userAccount.getPassword())))
                 .andReturn();
         assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
-        // assertNotNull(result.getResponse().getHeader("x-auth-token"));
+//        assertNotNull(result.getResponse().getHeader("x-auth-token"));
     }
 
     @Test
@@ -157,6 +181,10 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.lastName").value(userAccount.getLastName()))
                 .andExpect(jsonPath("$.email").value(userAccount.getEmail()))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    private String path(String context) {
+        return String.format("http://localhost:%s%s", port, context);
     }
 
 }

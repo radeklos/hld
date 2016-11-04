@@ -1,6 +1,7 @@
 package com.caribou.auth.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.springframework.http.HttpStatus;
 
 import java.util.Map;
@@ -17,19 +18,36 @@ public class Error {
     @JsonProperty
     Status status;
 
-    public void setValidationErrors(Map<String, ErrorField> validationErrors) {
-        this.validationErrors = validationErrors;
+    public Error() {
+    }
+
+    public Error(HttpStatus httpStatus) {
+        setStatus(httpStatus);
     }
 
     public void setObject(String object) {
         this.object = object;
     }
 
-    public void setStatus(HttpStatus code) {
-        status = new Status(code.value(), code.getReasonPhrase());
+    @JsonSetter("status")
+    public Error setStatus(Status status) {
+        this.status = status;
+        return this;
     }
 
-    private class Status {
+    public Map<String, ErrorField> getValidationErrors() {
+        return validationErrors;
+    }
+
+    public void setValidationErrors(Map<String, ErrorField> validationErrors) {
+        this.validationErrors = validationErrors;
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        this.status = new Status(httpStatus.value(), httpStatus.getReasonPhrase());
+    }
+
+    public class Status {
 
         @JsonProperty
         Integer code;
@@ -37,9 +55,13 @@ public class Error {
         @JsonProperty
         String reasonPhrase;
 
+        public Status() {
+        }
+
         public Status(Integer code, String reasonPhrase) {
             this.code = code;
             this.reasonPhrase = reasonPhrase;
         }
     }
+
 }

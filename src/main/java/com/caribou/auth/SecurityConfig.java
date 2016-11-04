@@ -30,15 +30,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//        requestCache().requestCache(new NullRequestCache())
         http
                 .csrf().disable()
                 .httpBasic()
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers(HttpMethod.PUT, "/v1/users").permitAll()
+                .antMatchers(HttpMethod.POST, "/v1/users").permitAll()
                 .anyRequest().authenticated();
     }
 
