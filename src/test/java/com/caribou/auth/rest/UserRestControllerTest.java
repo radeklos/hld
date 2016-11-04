@@ -34,8 +34,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -104,7 +102,7 @@ public class UserRestControllerTest {
                 String.class);
 
         UserAccount user = userRepository.findByEmail(userAccount.getEmail());
-        assertNotNull("User wasn't saved", user);
+        assertThat(user).as("User wasn't saved").isNotNull();
     }
 
     @Test
@@ -133,7 +131,7 @@ public class UserRestControllerTest {
         assertThat(emailError.getRejectedValue()).isEqualTo(userAccount.getEmail());
 
         UserAccount user = userRepository.findByEmail(userAccount.getEmail());
-        assertNotNull("User wasn't saved", user);
+        assertThat(user).as("User wasn't saved").isNotNull();
     }
 
     @Test
@@ -162,8 +160,8 @@ public class UserRestControllerTest {
         MvcResult result = mockMvc.perform(get("/v1/users")
                 .headers(Header.basic(userAccount.getEmail(), userAccount.getPassword())))
                 .andReturn();
-        assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
-//        assertNotNull(result.getResponse().getHeader("x-auth-token"));
+        assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
+//        assertThat(result.getResponse().getHeader("x-auth-token")).isNotNull();
     }
 
     @Test

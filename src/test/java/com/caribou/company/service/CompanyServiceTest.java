@@ -7,7 +7,6 @@ import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -44,8 +45,8 @@ public class CompanyServiceTest {
         testSubscriber.assertNoErrors();
 
         Company created = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertNotNull(created.getUid());
-        Assert.assertEquals(1, created.getEmployees().size());
+        assertThat(created.getUid()).isNotNull();
+        assertThat(created.getEmployees()).hasSize(1);
     }
 
     @Test
@@ -60,11 +61,11 @@ public class CompanyServiceTest {
         testSubscriber.assertNoErrors();
 
         Company updated = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertEquals(company.getUid(), updated.getUid());
-        Assert.assertEquals(updateTo.getName(), updated.getName());
-        Assert.assertEquals(updateTo.getDefaultDaysOff(), updated.getDefaultDaysOff());
-        Assert.assertNotNull(updated.getCreatedAt());
-        Assert.assertNotNull(updated.getUpdatedAt());
+        assertThat(updated.getUid()).isEqualTo(company.getUid());
+        assertThat(updated.getName()).isEqualTo(updateTo.getName());
+        assertThat(updated.getDefaultDaysOff()).isEqualTo(updateTo.getDefaultDaysOff());
+        assertThat(updated.getCreatedAt()).isNotNull();
+        assertThat(updated.getUpdatedAt()).isNotNull();
     }
 
     @Test
@@ -90,7 +91,7 @@ public class CompanyServiceTest {
         companyService.get(company.getUid()).subscribe(testSubscriber);
 
         Company got = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertEquals(company.getUid(), got.getUid());
+        assertThat(got.getUid()).isEqualTo(company.getUid());
     }
 
     @Test
@@ -107,7 +108,7 @@ public class CompanyServiceTest {
 
         testSubscriber.assertNoErrors();
         Company got = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertEquals(company.getUid(), got.getUid());
+        assertThat(got.getUid()).isEqualTo(company.getUid());
     }
 
     @Test

@@ -32,7 +32,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Date;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {WebApplication.class})
@@ -95,10 +95,10 @@ public class LeaveControllerTest {
                 new HttpEntity<>(leaveDto, new HttpHeaders()),
                 LeaveDto.class
         );
-        assertEquals(url, HttpStatus.CREATED, response.getStatusCode());
 
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Leave leave = leaveRepository.findOne(response.getBody().getUid());
-        assertEquals("Department isn't saved into company", userAccount.getUid(), leave.getUserAccount().getUid());
+        assertThat(leave.getUserAccount().getUid()).as("Department isn't saved into company").isEqualTo(userAccount.getUid());
     }
 
     private String path(String context) {

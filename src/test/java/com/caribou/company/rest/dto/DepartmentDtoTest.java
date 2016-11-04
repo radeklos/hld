@@ -8,7 +8,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import javax.validation.ConstraintViolation;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class DepartmentDtoTest {
@@ -31,9 +31,9 @@ public class DepartmentDtoTest {
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
         ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("must be greater than or equal to 0", constraintViolation.getMessage());
-        assertEquals("daysOff", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("must be greater than or equal to 0");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("daysOff");
     }
 
     @Test
@@ -44,9 +44,9 @@ public class DepartmentDtoTest {
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
         ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be null", constraintViolation.getMessage());
-        assertEquals("daysOff", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be null");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("daysOff");
     }
 
     @Test
@@ -57,9 +57,9 @@ public class DepartmentDtoTest {
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
         ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("name", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("name");
     }
 
     @Test
@@ -71,9 +71,9 @@ public class DepartmentDtoTest {
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
         ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("name", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("name");
     }
 
     @Test
@@ -85,9 +85,9 @@ public class DepartmentDtoTest {
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
         ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("size must be between 0 and 255", constraintViolation.getMessage());
-        assertEquals("name", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("size must be between 0 and 255");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("name");
     }
 
     @Test
@@ -97,7 +97,7 @@ public class DepartmentDtoTest {
                 .daysOff(10)
                 .build();
 
-        assertEquals("name", departmentDto.getName());
+        assertThat(departmentDto.getName()).isEqualTo("name");
     }
 
 }

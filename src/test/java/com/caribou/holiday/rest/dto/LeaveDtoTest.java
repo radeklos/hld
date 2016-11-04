@@ -8,7 +8,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import javax.validation.ConstraintViolation;
 import java.util.Set;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class LeaveDtoTest {
@@ -31,8 +31,8 @@ public class LeaveDtoTest {
         Set<ConstraintViolation<LeaveDto>> constraintViolations = localValidatorFactory.validate(leaveDto);
         ConstraintViolation<LeaveDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("size must be between 0 and 255", constraintViolation.getMessage());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("size must be between 0 and 255");
     }
 
 }

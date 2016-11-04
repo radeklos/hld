@@ -32,7 +32,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -88,7 +88,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/0/departments/%s", department.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.getForEntity(path(url), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -99,11 +99,10 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.getForEntity(path(url), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         DepartmentDto body = response.getBody();
-        assertEquals(department.getName(), body.getName());
-        assertEquals(new Integer(10), body.getDaysOff());
+        assertThat(body.getName()).isEqualTo(department.getName());
+        assertThat(body.getDaysOff()).isEqualTo(new Integer(10));
     }
 
     @Test
@@ -115,10 +114,9 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
 
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         DepartmentDto[] departments = response.getBody();
-        assertEquals(2, departments.length);
+        assertThat(departments.length).isEqualTo(2);
     }
 
     @Test
@@ -132,11 +130,10 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto[]> response = restAuthenticated.getForEntity(path(url), DepartmentDto[].class);
 
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         DepartmentDto[] departments = response.getBody();
-        assertEquals(1, departments.length);
-        assertEquals(hr.getName(), departments[0].getName());
+        assertThat(departments.length).isEqualTo(1);
+        assertThat(departments[0].getName()).isEqualTo(hr.getName());
     }
 
     @Test
@@ -148,15 +145,14 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.POST, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         DepartmentDto body = response.getBody();
-        assertEquals(departmentDto.getName(), body.getName());
-        assertEquals(departmentDto.getDaysOff(), body.getDaysOff());
+        assertThat(body.getName()).isEqualTo(departmentDto.getName());
+        assertThat(body.getDaysOff()).isEqualTo(departmentDto.getDaysOff());
 
         department = departmentRepository.findOne(department.getUid());
-        assertEquals(departmentDto.getName(), department.getName());
-        assertEquals(departmentDto.getDaysOff(), department.getDaysOff());
+        assertThat(department.getName()).isEqualTo(departmentDto.getName());
+        assertThat(department.getDaysOff()).isEqualTo(departmentDto.getDaysOff());
     }
 
     @Test
@@ -166,7 +162,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), 0);
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.POST, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -177,7 +173,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = restGuest.getForEntity(path(url), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -187,7 +183,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = restGuest.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -199,7 +195,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = restGuest.postForEntity(path(url), departmentDto, DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -210,7 +206,7 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
         ResponseEntity<Object> response = restAuthenticated.getForEntity(path(url), Object.class);
 
-        assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -228,7 +224,7 @@ public class DepartmentRestControllerTest {
                 DepartmentDto.class
         );
 
-        assertEquals(url, HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -242,11 +238,11 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         ArrayList<Department> departments = new ArrayList<Department>();
         departmentRepository.findAll().forEach(departments::add);
 
-        assertEquals(size, departments.size());
+        assertThat(departments.size()).isEqualTo(size);
     }
 
     @Test
@@ -259,10 +255,9 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.CREATED, response.getStatusCode());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Department department = departmentRepository.findOne(response.getBody().getUid());
-        assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
+        assertThat(department.getCompany().getUid()).as("Department isn't saved into company").isEqualTo(company.getUid());
     }
 
     @Test
@@ -275,10 +270,9 @@ public class DepartmentRestControllerTest {
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = restAuthenticated.exchange(path(url), HttpMethod.PUT, new HttpEntity<>(departmentDto, new HttpHeaders()), DepartmentDto.class);
 
-        assertEquals(url, HttpStatus.CREATED, response.getStatusCode());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Department department = departmentRepository.findOne(response.getBody().getUid());
-        assertEquals("Department isn't saved into company", company.getUid(), department.getCompany().getUid());
+        assertThat(department.getCompany().getUid()).as("Department isn't saved into company").isEqualTo(company.getUid());
     }
 
     @Ignore
@@ -304,9 +298,8 @@ public class DepartmentRestControllerTest {
                 new HttpEntity<>(new HttpHeaders()),
                 DepartmentDto.class
         );
-        assertEquals(url, HttpStatus.OK, response.getStatusCode());
-
-        assertEquals(1, response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(1);
     }
 
     private String path(String context) {

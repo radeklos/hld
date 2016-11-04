@@ -9,7 +9,6 @@ import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +17,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -54,10 +55,10 @@ public class DepartmentServiceTest {
         testSubscriber.assertNoErrors();
 
         Department departmentResult = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertNotNull(departmentResult.getUid());
-        Assert.assertEquals(department.getName(), departmentResult.getName());
-        Assert.assertEquals(10, (int) departmentResult.getDaysOff());
-        Assert.assertEquals(department.getCompany().getName(), departmentResult.getCompany().getName());
+        assertThat(departmentResult.getUid()).isNotNull();
+        assertThat(departmentResult.getName()).isEqualTo(department.getName());
+        assertThat(departmentResult.getDaysOff()).isEqualTo(10);
+        assertThat(departmentResult.getCompany().getName()).isEqualTo(department.getCompany().getName());
     }
 
     @Test
@@ -73,12 +74,12 @@ public class DepartmentServiceTest {
         testSubscriber.assertNoErrors();
 
         Department updated = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertNotNull(updated.getUid());
-        Assert.assertEquals(newName, updated.getName());
-        Assert.assertEquals(20, (int) updated.getDaysOff());
-        Assert.assertEquals(department.getCompany().getName(), updated.getCompany().getName());
-        Assert.assertNotNull(updated.getCreatedAt());
-        Assert.assertNotNull(updated.getUpdatedAt());
+        assertThat(updated.getUid()).isNotNull();
+        assertThat(updated.getName()).isEqualTo(newName);
+        assertThat(updated.getDaysOff()).isEqualTo(20);
+        assertThat(updated.getCompany().getName()).isEqualTo(department.getCompany().getName());
+        assertThat(updated.getCreatedAt()).isNotNull();
+        assertThat(updated.getUpdatedAt()).isNotNull();
     }
 
     @Test
@@ -107,7 +108,7 @@ public class DepartmentServiceTest {
 
         testSubscriber.assertNoErrors();
         Department got = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertEquals(department.getUid(), got.getUid());
+        assertThat(got.getUid()).isEqualTo(department.getUid());
     }
 
     @Test
@@ -126,7 +127,7 @@ public class DepartmentServiceTest {
         testSubscriber.assertNoErrors();
         Department departmentResult = testSubscriber.getOnNextEvents().get(0);
 
-        Assert.assertEquals(1, departmentResult.getEmployees().size());
+        assertThat(departmentResult.getEmployees()).hasSize(1);
     }
 
 }

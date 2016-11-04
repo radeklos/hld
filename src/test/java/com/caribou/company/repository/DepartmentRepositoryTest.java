@@ -15,7 +15,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -63,7 +63,7 @@ public class DepartmentRepositoryTest {
         departmentRepository.save(department);
 
         Department refreshed = departmentRepository.findOne(department.getUid());
-        assertEquals(1, refreshed.getEmployees().size());
+        assertThat(refreshed.getEmployees()).hasSize(1);
     }
 
     @Test
@@ -72,13 +72,13 @@ public class DepartmentRepositoryTest {
         departmentRepository.save(department);
 
         department = departmentRepository.findOne(department.getUid());
-        assertEquals(Role.Admin, department.getEmployees().iterator().next().getRole());
+        assertThat(department.getEmployees().iterator().next().getRole()).isEqualTo(Role.Admin);
 
         department.addEmployee(userAccount, Role.Editor);
         departmentRepository.save(department);
 
         Department refreshed = departmentRepository.findOne(department.getUid());
-        assertEquals(Role.Editor, refreshed.getEmployees().iterator().next().getRole());
+        assertThat(refreshed.getEmployees().iterator().next().getRole()).isEqualTo(Role.Editor);
     }
 
 }

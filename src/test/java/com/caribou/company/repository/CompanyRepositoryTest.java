@@ -15,10 +15,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -53,7 +51,7 @@ public class CompanyRepositoryTest {
     @Test
     public void findEmployeeByEmailForUid() throws Exception {
         Company result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), company.getUid());
-        assertNotNull(result);
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -62,19 +60,19 @@ public class CompanyRepositoryTest {
         companyRepository.save(anotherCompany);
 
         Company result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), anotherCompany.getUid());
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
     public void findEmployeeByEmailForUidNonExistingEmail() throws Exception {
         Company result = companyRepository.findEmployeeByEmailForUid("non.existing@email.com", company.getUid());
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
     public void findEmployeeByEmailForUidNonExistingCompany() throws Exception {
         Company result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), 0L);
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
@@ -83,7 +81,7 @@ public class CompanyRepositoryTest {
         companyRepository.save(company);
 
         Company refreshed = companyRepository.findOne(company.getUid());
-        assertEquals(1, refreshed.getEmployees().size());
+        assertThat(refreshed.getEmployees()).hasSize(1);
     }
 
     @Test
@@ -95,7 +93,7 @@ public class CompanyRepositoryTest {
         Company refreshed = companyRepository.findOne(company.getUid());
 
         assertNotEquals(Role.Admin, role);
-        assertEquals(Role.Admin, refreshed.getEmployees().iterator().next().getRole());
+        assertThat(refreshed.getEmployees().iterator().next().getRole()).isEqualTo(Role.Admin);
     }
 
     @Test
@@ -113,13 +111,13 @@ public class CompanyRepositoryTest {
 
         Company refreshed = companyRepository.findOne(company.getUid());
 
-        assertEquals(2, refreshed.getEmployees().size());
+        assertThat(refreshed.getEmployees()).hasSize(2);
 
         CompanyEmployee anotherUserCompany = userRepository.findOne(anotherUserAccount.getUid()).getCompanies().iterator().next();
-        assertEquals(Role.Viewer, anotherUserCompany.getRole());
+        assertThat(anotherUserCompany.getRole()).isEqualTo(Role.Viewer);
 
         CompanyEmployee defaultUserCompany = userRepository.findOne(userAccount.getUid()).getCompanies().iterator().next();
-        assertEquals(Role.Admin, defaultUserCompany.getRole());
+        assertThat(defaultUserCompany.getRole()).isEqualTo(Role.Admin);
     }
 
 }

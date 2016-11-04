@@ -8,7 +8,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import javax.validation.ConstraintViolation;
 import java.util.Set;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class UserAccountTest {
@@ -32,9 +32,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("email", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("email");
     }
 
     @Test
@@ -48,9 +48,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("email", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("email");
     }
 
     @Test
@@ -64,9 +64,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("not a well-formed email address", constraintViolation.getMessage());
-        assertEquals("email", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("not a well-formed email address");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("email");
     }
 
     @Test
@@ -79,9 +79,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("firstName", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("firstName");
     }
 
     @Test
@@ -95,9 +95,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("firstName", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("firstName");
     }
 
     @Test
@@ -110,9 +110,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("lastName", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("lastName");
     }
 
     @Test
@@ -126,9 +126,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolation.getMessage());
-        assertEquals("lastName", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("lastName");
     }
 
     @Test
@@ -141,9 +141,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("may not be null", constraintViolation.getMessage());
-        assertEquals("password", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be null");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("password");
     }
 
     @Test
@@ -157,9 +157,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("size must be between 6 and 255", constraintViolation.getMessage());
-        assertEquals("password", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("size must be between 6 and 255");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("password");
     }
 
     @Test
@@ -173,9 +173,9 @@ public class UserAccountTest {
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
-        assertEquals(constraintViolations.toString(), 1, constraintViolations.size());
-        assertEquals("size must be between 6 and 255", constraintViolation.getMessage());
-        assertEquals("password", constraintViolation.getPropertyPath().toString());
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("size must be between 6 and 255");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("password");
     }
 
     @Test
@@ -187,7 +187,7 @@ public class UserAccountTest {
                 .password("abcabc")
                 .build();
         Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
-        assertEquals(constraintViolations.toString(), 0, constraintViolations.size());
+        assertThat(constraintViolations).isEmpty();
     }
 
 }

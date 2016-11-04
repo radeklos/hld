@@ -10,7 +10,6 @@ import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
 import com.caribou.holiday.repository.LeaveTypeRepository;
 import com.github.javafaker.Faker;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +20,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
 
 import java.util.Date;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = WebApplication.class)
@@ -76,7 +77,7 @@ public class LeaveServiceTest {
         testSubscriber.assertNoErrors();
 
         Leave created = testSubscriber.getOnNextEvents().get(0);
-        Assert.assertNotNull(created.getUid());
+        assertThat(created.getUid()).isNotNull();
     }
 
 }

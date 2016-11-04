@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -25,9 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.http.HttpServletResponse;
-
-import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -96,7 +95,7 @@ public class CompanyRestControllerTest {
                         .headers(authHeader)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_CREATED, result.getResponse().getStatus());
+        assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -115,7 +114,7 @@ public class CompanyRestControllerTest {
                         .headers(authHeader)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-        assertEquals(result.getResponse().getContentAsString(), HttpServletResponse.SC_OK, result.getResponse().getStatus());
+        assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
