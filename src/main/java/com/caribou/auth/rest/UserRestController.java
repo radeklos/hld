@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,13 +31,8 @@ public class UserRestController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public UserAccountDto login() {
-        return null; // TODO return current user details
-    }
-
-    @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-    public UserAccountDto get(@PathVariable("uid") Long uid) {
+    @RequestMapping(value = "/me", method = RequestMethod.GET)
+    public UserAccountDto me() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Observable<UserAccountDto> bla = userService.findByEmail(userDetails.getUsername())
                 .map(u -> modelMapper.map(u, UserAccountDto.class));

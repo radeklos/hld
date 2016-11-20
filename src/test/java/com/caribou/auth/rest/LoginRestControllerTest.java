@@ -4,7 +4,7 @@ import com.caribou.Factory;
 import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
-import com.caribou.auth.rest.dto.UserAccountDto;
+import com.caribou.auth.rest.dto.TokenDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class LoginRestControllerTest {
 
     @Test
     public void loginViewIsUnauthorized() throws Exception {
-        ResponseEntity<UserAccountDto> response = new TestRestTemplate().getForEntity(path("/v1/login"), UserAccountDto.class);
+        ResponseEntity<TokenDto> response = new TestRestTemplate().getForEntity(path("/v1/login"), TokenDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -43,10 +43,11 @@ public class LoginRestControllerTest {
         userRepository.save(user);
 
         TestRestTemplate rest = new TestRestTemplate(user.getEmail(), user.getPassword());
-        ResponseEntity<UserAccountDto> response = rest.getForEntity(path("/v1/login"), UserAccountDto.class);
+        ResponseEntity<TokenDto> response = rest.getForEntity(path("/v1/login"), TokenDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(response.getHeaders().get("x-auth-token")).isNotNull();
+        assertThat(response.getBody().getToken()).isEqualTo(response.getHeaders().get("x-auth-token").get(0));
     }
 
     @Test
@@ -55,7 +56,7 @@ public class LoginRestControllerTest {
         userRepository.save(user);
 
         TestRestTemplate rest = new TestRestTemplate(user.getEmail(), "incorrectpassword");
-        ResponseEntity<UserAccountDto> response = rest.getForEntity(path("/v1/login"), UserAccountDto.class);
+        ResponseEntity<TokenDto> response = rest.getForEntity(path("/v1/login"), TokenDto.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 
         assertThat(response.getHeaders().get("x-auth-token")).isNull();

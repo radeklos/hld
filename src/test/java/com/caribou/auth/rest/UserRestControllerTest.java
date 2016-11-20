@@ -140,16 +140,16 @@ public class UserRestControllerTest {
         UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
-        mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))).andExpect(status.isUnauthorized());
+        mockMvc.perform(get(String.format("/v1/users/me", userAccount.getUid()))).andExpect(status.isUnauthorized());
     }
 
     @Test
-    public void getUserDetail() throws Exception {
+    public void getMineUserDetail() throws Exception {
         UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
         mockMvc.perform(
-                get(String.format("/v1/users/%s", userAccount.getUid()))
+                get(String.format("/v1/users/me", userAccount.getUid()))
                         .headers(Header.basic(userAccount.getEmail(), userAccount.getPassword())
                         )
         ).andExpect(status().isOk())
