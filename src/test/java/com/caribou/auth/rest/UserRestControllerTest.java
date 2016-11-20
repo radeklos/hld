@@ -9,7 +9,6 @@ import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.rest.dto.Error;
 import com.caribou.auth.rest.dto.ErrorField;
 import com.caribou.auth.rest.dto.UserAccountDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +29,6 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -50,17 +48,19 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class UserRestControllerTest {
 
     @Autowired
-    protected FilterChainProxy[] filterChainProxy;
+    FilterChainProxy[] filterChainProxy;
 
     @Autowired
-    protected WebApplicationContext webApplicationContext;
+    WebApplicationContext webApplicationContext;
 
     @Autowired
     UserRepository userRepository;
-    ObjectMapper mapper = new ObjectMapper();
+
     @Value("${local.server.port}")
     private int port = 0;
+
     private MockMvc mockMvc;
+
     private StatusResultMatchers status;
 
     @Before
@@ -101,6 +101,7 @@ public class UserRestControllerTest {
                 new HttpEntity<>(json, headers),
                 String.class);
 
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         UserAccount user = userRepository.findByEmail(userAccount.getEmail());
         assertThat(user).as("User wasn't saved").isNotNull();
     }
@@ -140,28 +141,6 @@ public class UserRestControllerTest {
         userRepository.save(userAccount);
 
         mockMvc.perform(get(String.format("/v1/users/%s", userAccount.getUid()))).andExpect(status.isUnauthorized());
-    }
-
-    @Test
-    public void loginWithIncorrectCredentials() throws Exception {
-        UserAccount userAccount = Factory.userAccount();
-        mockMvc.perform(get("/v1/users")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .param("username", userAccount.getEmail())
-                .param("password", userAccount.getPassword())
-        ).andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void loginWithCorrectCredentials() throws Exception {
-        UserAccount userAccount = Factory.userAccount();
-        userRepository.save(userAccount);
-
-        MvcResult result = mockMvc.perform(get("/v1/users")
-                .headers(Header.basic(userAccount.getEmail(), userAccount.getPassword())))
-                .andReturn();
-        assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-//        assertThat(result.getResponse().getHeader("x-auth-token")).isNotNull();
     }
 
     @Test
