@@ -4,6 +4,9 @@ package com.caribou.auth.rest;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.rest.dto.UserAccountDto;
 import com.caribou.auth.service.UserService;
+import com.caribou.company.domain.Company;
+import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.rest.CompanyRestController;
 import com.caribou.company.rest.ErrorHandler;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +18,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import rx.Observable;
 import rx.Single;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 
 @RestController
@@ -31,12 +36,22 @@ public class UserRestController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
     @RequestMapping(value = "/me", method = RequestMethod.GET)
-    public UserAccountDto me() {
+    public Single<UserAccountDto> me() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Observable<UserAccountDto> bla = userService.findByEmail(userDetails.getUsername())
-                .map(u -> modelMapper.map(u, UserAccountDto.class));
-        return bla.toBlocking().first();
+        return userService.findByEmail(userDetails.getUsername())
+                .map(u -> modelMapper.map(u, UserAccountDto.class))
+                .map(u -> {
+                    Company company = companyRepository.findByEmployeeEmail(u.getEmail());
+                    if (company != null) {
+                        u.add(linkTo(methodOn(CompanyRestController.class).get(company.getUid())).withRel("company"));
+                    }
+                    return u;
+                })
+                .toSingle();
     }
 
     @RequestMapping(method = RequestMethod.POST)

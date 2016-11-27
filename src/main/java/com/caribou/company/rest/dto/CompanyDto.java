@@ -35,6 +35,10 @@ public class CompanyDto {
         return new Builder();
     }
 
+    public Long getUid() {
+        return uid;
+    }
+
     public void setUid(Long uid) {
         this.uid = uid;
     }
