@@ -5,9 +5,9 @@ machine:
     - postgresql
     - docker
   post:
-    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS quay.io
   environment:
-      NAME: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+      NAME: quay.io/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
 database:
   override:
