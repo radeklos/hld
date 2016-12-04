@@ -1,7 +1,7 @@
 package com.caribou.holiday.rest;
 
 import com.caribou.Factory;
-import com.caribou.WebApplication;
+import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
@@ -15,30 +15,18 @@ import com.caribou.holiday.rest.dto.LeaveDto;
 import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {WebApplication.class})
-@WebAppConfiguration
-@IntegrationTest({"server.port=0"})
-public class LeaveControllerTest {
+
+public class LeaveControllerTest extends IntegrationTests {
 
     private static TestRestTemplate restGuest = new TestRestTemplate();
 
@@ -50,20 +38,17 @@ public class LeaveControllerTest {
     @Autowired
     LeaveRepository leaveRepository;
 
+    @Autowired
+    CompanyRepository companyRepository;
+
+    @Autowired
+    LeaveTypeRepository leaveTypeRepository;
+
     Company company = Company.newBuilder().name(faker.company().name()).build();
 
     LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
 
-    @Value("${local.server.port}")
-    private int port = 0;
-
-    @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    private LeaveTypeRepository leaveTypeRepository;
-
-    private UserAccount userAccount;
+    UserAccount userAccount;
 
     @Before
     public void before() throws Exception {
@@ -89,20 +74,17 @@ public class LeaveControllerTest {
                 .build();
 
         String url = String.format("/v1/users/%s/leaves", userAccount.getUid());
-        ResponseEntity<LeaveDto> response = new TestRestTemplate(userAccount.getEmail(), userAccount.getPassword()).exchange(
-                path(url),
-                HttpMethod.PUT,
-                new HttpEntity<>(leaveDto, new HttpHeaders()),
-                LeaveDto.class
+        ResponseEntity<LeaveDto> response = post(
+                url,
+                leaveDto,
+                LeaveDto.class,
+                userAccount.getEmail(),
+                userAccount.getPassword()
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Leave leave = leaveRepository.findOne(response.getBody().getUid());
         assertThat(leave.getUserAccount().getUid()).as("Department isn't saved into company").isEqualTo(userAccount.getUid());
-    }
-
-    private String path(String context) {
-        return String.format("http://localhost:%s%s", port, context);
     }
 
 }

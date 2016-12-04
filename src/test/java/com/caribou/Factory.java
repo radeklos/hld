@@ -31,7 +31,10 @@ public class Factory {
     }
 
     public static Company company() {
-        return Company.newBuilder().name(faker.company().name()).defaultDaysOff(10).build();
+        return Company.newBuilder()
+                .name(faker.company().name())
+                .defaultDaysOff(10)
+                .build();
     }
 
     public static CompanyDto companyDto() {

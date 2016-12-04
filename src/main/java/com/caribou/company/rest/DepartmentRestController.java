@@ -1,6 +1,7 @@
 package com.caribou.company.rest;
 
 
+import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Department;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +52,7 @@ public class DepartmentRestController {
 
     @RequestMapping(method = RequestMethod.GET)
     public Observable<DepartmentDto> getList(@PathVariable("companyUid") Long companyUid) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getForEmployeeEmail(companyUid, userDetails.getUsername())
                 .flatMap(d -> Observable.create(subscriber -> {
                     d.getDepartments().forEach(subscriber::onNext);
@@ -60,9 +60,9 @@ public class DepartmentRestController {
                 })).map(m -> this.convert((Department) m));
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.POST)
     public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") Long companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getForEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
                     for (Iterator<CompanyEmployee> iterator = company1.getEmployees().iterator(); iterator.hasNext(); ) {
@@ -83,8 +83,9 @@ public class DepartmentRestController {
                 .toSingle();
     }
 
-    @RequestMapping(value = "/{uid}", method = RequestMethod.POST)
+    @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
     public Single<DepartmentDto> update(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid, @Valid @RequestBody DepartmentDto departmentDto) {
+        // TODO acl
         return companyService.get(companyUid)
                 .flatMap(company -> {
                     Department entity = convert(departmentDto);
@@ -99,6 +100,7 @@ public class DepartmentRestController {
 
     @RequestMapping(value = "/{departmentUid}/employees")
     public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
+        // TODO acl
         return departmentService.get(departmentUid)
                 .flatMap(department -> Observable.create(subscriber -> {
                     department.getEmployees().forEach(subscriber::onNext);

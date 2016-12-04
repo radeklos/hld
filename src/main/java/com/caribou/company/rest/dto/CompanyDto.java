@@ -44,7 +44,7 @@ public class CompanyDto {
     }
 
     public String getName() {
-        return name.trim();
+        return name;
     }
 
     public void setName(String name) {

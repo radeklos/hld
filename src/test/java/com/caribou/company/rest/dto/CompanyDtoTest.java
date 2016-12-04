@@ -77,7 +77,7 @@ public class CompanyDtoTest {
     }
 
     @Test
-    public void nameShouldntBeEmpty() {
+    public void nameShouldNotBeEmpty() {
         CompanyDto company = CompanyDto.newBuilder()
                 .name("")
                 .defaultDaysOf(10)
@@ -98,16 +98,6 @@ public class CompanyDtoTest {
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         assertThat(constraintViolations).isEmpty();
-    }
-
-    @Test
-    public void nameTrimsWhiteSpaces() {
-        CompanyDto company = CompanyDto.newBuilder()
-                .name(" name ")
-                .defaultDaysOf(10)
-                .build();
-
-        assertThat(company.getName()).isEqualTo("name");
     }
 
 }

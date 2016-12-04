@@ -13,3 +13,8 @@ spring:
 
   redis:
     host: localhost
+
+app.security.jwt:
+  tokenExpirationTime: 15 # Minutes
+  refreshTokenExpTime: 60 # Minutes
+  tokenSigningKey: dummy

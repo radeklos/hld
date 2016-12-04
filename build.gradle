@@ -33,24 +33,22 @@ repositories {
 
 dependencies {
     // core
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile("org.springframework.boot:spring-boot-starter-actuator")
-    compile("org.springframework.boot:spring-boot-starter-hateoas")
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-hateoas'
 
     // data
-    compile("org.springframework.boot:spring-boot-starter-data-jpa")
-    compile("postgresql:postgresql:9.0-801.jdbc4")
-    compile("org.codehaus.jackson:jackson-mapper-asl:1.9.13")
-    compile("org.modelmapper.extensions:modelmapper-spring:0.7.5")
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile 'postgresql:postgresql:9.0-801.jdbc4'
+    compile 'org.modelmapper.extensions:modelmapper-spring:0.7.5'
+    compile 'joda-time:joda-time:2.9.6'
 
     // auth
-    compile("org.springframework.session:spring-session-data-redis:1.0.1.RELEASE")
-    compile("org.springframework.boot:spring-boot-starter-security")
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile 'org.springframework.data:spring-data-redis:1.7.2.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'io.jsonwebtoken:jjwt:0.7.0'
 
     // rx
-    compile("io.jmnarloch:rxjava-spring-boot-starter:1.0.0")
+    compile 'io.jmnarloch:rxjava-spring-boot-starter:1.0.0'
 
     // tests
     testCompile("org.springframework.boot:spring-boot-starter-test")

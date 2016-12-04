@@ -2,6 +2,7 @@ package com.caribou.auth.rest;
 
 
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.rest.dto.UserAccountDto;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
@@ -13,14 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import rx.Single;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -41,7 +40,7 @@ public class UserRestController {
 
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public Single<UserAccountDto> me() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.findByEmail(userDetails.getUsername())
                 .map(u -> modelMapper.map(u, UserAccountDto.class))
                 .map(u -> {
@@ -55,7 +54,7 @@ public class UserRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public Single<ResponseEntity<UserAccountDto>> create(@Valid @RequestBody UserAccountDto newUser, HttpServletResponse response) {
+    public Single<ResponseEntity<UserAccountDto>> create(@Valid @RequestBody UserAccountDto newUser) {
         UserAccount user = convertToEntity(newUser);
         return userService.create(user)
                 .map(d -> new ResponseEntity<>(convertToEntity(d), HttpStatus.CREATED))

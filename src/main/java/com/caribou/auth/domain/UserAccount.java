@@ -3,7 +3,15 @@ package com.caribou.auth.domain;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.DepartmentEmployee;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 
@@ -86,6 +94,10 @@ public class UserAccount extends AbstractEntity {
 
     public void setCompanies(Set<CompanyEmployee> companies) {
         this.companies = companies;
+    }
+
+    public List<UserRole> getRoles() {
+        return Arrays.asList(UserRole.MEMBER);
     }
 
     public static final class Builder {

@@ -1,5 +1,6 @@
 package com.caribou.holiday.rest;
 
+import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.rest.ErrorHandler;
 import com.caribou.holiday.domain.Leave;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,9 +32,9 @@ public class LeaveController {
     @Autowired
     private LeaveService leaveService;
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.POST)
     public Single<ResponseEntity<LeaveDto>> create(@PathVariable("userUid") Long userUid, @Valid @RequestBody LeaveDto leaveDto) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService
                 .findByEmail(userDetails.getUsername())
                 .filter(userAccount -> userAccount.getUid().equals(userUid))

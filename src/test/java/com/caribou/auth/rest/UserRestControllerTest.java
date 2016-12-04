@@ -2,8 +2,6 @@ package com.caribou.auth.rest;
 
 import com.caribou.Factory;
 import com.caribou.IntegrationTests;
-import com.caribou.Json;
-import com.caribou.WebApplication;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.rest.dto.Error;
@@ -12,46 +10,23 @@ import com.caribou.auth.rest.dto.UserAccountDto;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.FilterChainProxy;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.StatusResultMatchers;
-import org.springframework.web.context.WebApplicationContext;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {WebApplication.class})
-@WebAppConfiguration
 public class UserRestControllerTest extends IntegrationTests {
-
-    @Autowired
-    FilterChainProxy[] filterChainProxy;
-
-    @Autowired
-    WebApplicationContext webApplicationContext;
 
     @Autowired
     UserRepository userRepository;
@@ -59,26 +34,16 @@ public class UserRestControllerTest extends IntegrationTests {
     @Autowired
     CompanyRepository companyRepository;
 
-    private MockMvc mockMvc;
-
-    private StatusResultMatchers status;
-
-    @Before
-    public void setup() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        this.mockMvc = webAppContextSetup(webApplicationContext).addFilters(filterChainProxy).build();
-        status = status();
-    }
-
     @Test
     public void requestWithEmptyJsonRequestReturnsUnprocessableEntity() throws Exception {
-        UserAccountDto userAccount = UserAccountDto.newBuilder().build();
+        ResponseEntity<HashMap> response = testRestTemplate().exchange(
+                path("/v1/users"),
+                HttpMethod.POST,
+                new HttpEntity("{}", jsonHeader()),
+                HashMap.class);
 
-        mockMvc.perform(post("/v1/users")
-                        .content(Json.dumps(userAccount))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status.isUnprocessableEntity())
-                .andExpect(jsonPath("$.errors").exists());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().get("errors")).isInstanceOf(HashMap.class);
     }
 
     @Test
@@ -95,15 +60,15 @@ public class UserRestControllerTest extends IntegrationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<String> response = new TestRestTemplate().exchange(
+        ResponseEntity<String> response = testRestTemplate().exchange(
                 path("/v1/users"),
                 HttpMethod.POST,
                 new HttpEntity<>(json, headers),
                 String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        UserAccount user = userRepository.findByEmail(userAccount.getEmail());
-        assertThat(user).as("User wasn't saved").isNotNull();
+        Optional<UserAccount> user = userRepository.findByEmail(userAccount.getEmail());
+        assertThat(user.isPresent()).isTrue();
     }
 
     @Test
@@ -117,7 +82,7 @@ public class UserRestControllerTest extends IntegrationTests {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String payload = String.format("{\"email\":\"%s\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"password\":\"abcabc\"}", userAccount.getEmail());
-        ResponseEntity<Error> response = new TestRestTemplate().exchange(
+        ResponseEntity<Error> response = testRestTemplate().exchange(
                 path("/v1/users"),
                 HttpMethod.POST,
                 new HttpEntity<>(payload, headers),
@@ -131,8 +96,8 @@ public class UserRestControllerTest extends IntegrationTests {
         assertThat(emailError.getDefaultMessage()).isEqualTo("Email is already taken");
         assertThat(emailError.getRejectedValue()).isEqualTo(userAccount.getEmail());
 
-        UserAccount user = userRepository.findByEmail(userAccount.getEmail());
-        assertThat(user).as("User wasn't saved").isNotNull();
+        Optional<UserAccount> user = userRepository.findByEmail(userAccount.getEmail());
+        assertThat(user.isPresent()).isTrue();
     }
 
     @Test
@@ -140,7 +105,15 @@ public class UserRestControllerTest extends IntegrationTests {
         UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
-        mockMvc.perform(get(String.format("/v1/users/me", userAccount.getUid()))).andExpect(status.isUnauthorized());
+
+        ResponseEntity<UserAccountDto> response = testRestTemplate().exchange(
+                path("/v1/users/me"),
+                HttpMethod.GET,
+                new HttpEntity<>(null, jsonHeader()),
+                UserAccountDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -148,8 +121,12 @@ public class UserRestControllerTest extends IntegrationTests {
         UserAccount userAccount = Factory.userAccount();
         userAccount = userRepository.save(userAccount);
 
-        TestRestTemplate restAuthenticated = new TestRestTemplate(userAccount.getEmail(), userAccount.getPassword());
-        ResponseEntity<UserAccountDto> response = restAuthenticated.getForEntity(path("/v1/users/me"), UserAccountDto.class);
+        ResponseEntity<UserAccountDto> response = testRestTemplate().exchange(
+                path("/v1/users/me"),
+                HttpMethod.GET,
+                new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userAccount.getPassword())),
+                UserAccountDto.class
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         UserAccountDto user = response.getBody();
@@ -159,20 +136,23 @@ public class UserRestControllerTest extends IntegrationTests {
         assertThat(user.getPassword()).isNull();
     }
 
-    @Ignore
+    @Test
     public void userHasLinkToHisCompany() throws Exception {
         UserAccount userAccount = Factory.userAccount();
         userAccount = userRepository.save(userAccount);
-
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Owner);
         companyRepository.save(company);
 
-        TestRestTemplate restAuthenticated = new TestRestTemplate(userAccount.getEmail(), userAccount.getPassword());
-        ResponseEntity<UserAccountDto> response = restAuthenticated.getForEntity(path("/v1/users/me"), UserAccountDto.class);
+        ResponseEntity<HashMap> response = testRestTemplate().exchange(
+                path("/v1/users/me"),
+                HttpMethod.GET,
+                new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userAccount.getPassword())),
+                HashMap.class
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().hasLink("company")).isTrue();
+        assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
     }
 
 }

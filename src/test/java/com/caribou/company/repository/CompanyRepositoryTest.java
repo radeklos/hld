@@ -1,7 +1,7 @@
 package com.caribou.company.repository;
 
 import com.caribou.Factory;
-import com.caribou.WebApplication;
+import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
@@ -9,20 +9,13 @@ import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Role;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotEquals;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = WebApplication.class)
-@WebAppConfiguration
-public class CompanyRepositoryTest {
+public class CompanyRepositoryTest extends IntegrationTests {
 
     @Autowired
     CompanyRepository companyRepository;

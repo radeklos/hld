@@ -1,6 +1,6 @@
 package com.caribou.holiday.service;
 
-import com.caribou.WebApplication;
+import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
@@ -12,21 +12,15 @@ import com.caribou.holiday.repository.LeaveTypeRepository;
 import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import rx.observers.TestSubscriber;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = WebApplication.class)
-@WebAppConfiguration
-public class LeaveServiceTest {
+
+public class LeaveServiceTest extends IntegrationTests {
 
     Faker faker = new Faker();
 

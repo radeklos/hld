@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import java.util.Optional;
+
 
 @Service
 public class UserService implements UserDetailsService {
@@ -33,8 +35,12 @@ public class UserService implements UserDetailsService {
     public Observable<UserAccount> findByEmail(String email) {
         return Observable.create(subscriber -> {
             try {
-                UserAccount entity = userRepository.findByEmail(email);
-                subscriber.onNext(entity);
+                Optional<UserAccount> entity = userRepository.findByEmail(email);
+                if (entity.isPresent()) {
+                    subscriber.onNext(entity.get());
+                } else {
+                    subscriber.onNext(null);
+                }
                 subscriber.onCompleted();
             } catch (Exception e) {
                 subscriber.onError(e);
@@ -44,10 +50,14 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserAccount userAccount = userRepository.findByEmail(username);
-        if (userAccount == null) {
-            return null;
+        Optional<UserAccount> userAccount = userRepository.findByEmail(username);
+        if (userAccount.isPresent()) {
+            return new User(username, userAccount.get().getPassword(), AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
         }
-        return new User(username, userAccount.getPassword(), AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+        return null;
+    }
+
+    public Optional<UserAccount> getByUsername(String username) {
+        return this.userRepository.findByEmail(username);
     }
 }

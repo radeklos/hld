@@ -1,53 +1,56 @@
 package com.caribou.auth.rest;
 
 import com.caribou.Factory;
-import com.caribou.WebApplication;
+import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.jwt.ajax.LoginRequest;
+import com.caribou.auth.jwt.response.TokenResponse;
 import com.caribou.auth.repository.UserRepository;
-import com.caribou.auth.rest.dto.TokenDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {WebApplication.class})
-@WebAppConfiguration
-@IntegrationTest({"server.port=0"})
-public class LoginRestControllerTest {
+
+public class LoginRestControllerTest extends IntegrationTests {
 
     @Autowired
     UserRepository userRepository;
 
-    @Value("${local.server.port}")
-    private int port = 0;
-
-    @Test
-    public void loginViewIsUnauthorized() throws Exception {
-        ResponseEntity<TokenDto> response = new TestRestTemplate().getForEntity(path("/v1/login"), TokenDto.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     public void authorizedWithValidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
         userRepository.save(user);
 
-        TestRestTemplate rest = new TestRestTemplate(user.getEmail(), user.getPassword());
-        ResponseEntity<TokenDto> response = rest.getForEntity(path("/v1/login"), TokenDto.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        LoginRequest loginRequest = new LoginRequest(user.getEmail(), user.getPassword());
+        objectMapper.writeValueAsString(loginRequest);
 
-        assertThat(response.getHeaders().get("x-auth-token")).isNotNull();
-        assertThat(response.getBody().getToken()).isEqualTo(response.getHeaders().get("x-auth-token").get(0));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Requested-With", "XMLHttpRequest");
+
+        ResponseEntity<TokenResponse> response = testRestTemplate().exchange(
+                path("/v1/auth/login"),
+                HttpMethod.POST,
+                new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers),
+                TokenResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getToken()).isNotNull();
+        assertThat(response.getBody().getRefreshToken()).isNotNull();
     }
 
     @Test
@@ -55,15 +58,22 @@ public class LoginRestControllerTest {
         UserAccount user = Factory.userAccount();
         userRepository.save(user);
 
-        TestRestTemplate rest = new TestRestTemplate(user.getEmail(), "incorrectpassword");
-        ResponseEntity<TokenDto> response = rest.getForEntity(path("/v1/login"), TokenDto.class);
+        LoginRequest loginRequest = new LoginRequest(user.getEmail(), "incorrect password");
+        objectMapper.writeValueAsString(loginRequest);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Requested-With", "XMLHttpRequest");
+
+        ResponseEntity<HashMap> response = testRestTemplate().exchange(
+                path("/v1/auth/login"),
+                HttpMethod.POST,
+                new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers),
+                HashMap.class
+        );
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-
-        assertThat(response.getHeaders().get("x-auth-token")).isNull();
-    }
-
-    private String path(String context) {
-        return String.format("http://localhost:%s%s", port, context);
+        assertThat(response.getBody().get("message")).isEqualTo("Invalid username or password");
     }
 
 }

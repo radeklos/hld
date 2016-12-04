@@ -2,7 +2,6 @@ machine:
   java:
     version: oraclejdk8
   services:
-    - redis
     - postgresql
     - docker
   post:
