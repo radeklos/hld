@@ -11,9 +11,6 @@ spring:
     username: postgres
     password: postgres
 
-  redis:
-    host: localhost
-
 app.security.jwt:
   tokenExpirationTime: 15 # Minutes
   refreshTokenExpTime: 60 # Minutes

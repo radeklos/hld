@@ -107,7 +107,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests()
-                .anyRequest().authenticated()
+                .antMatchers(TOKEN_BASED_AUTH_ENTRY_POINT).authenticated()  // Protected API End-points
 
                 .and()
                 .addFilterBefore(buildAjaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)

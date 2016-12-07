@@ -76,4 +76,17 @@ public class LoginRestControllerTest extends IntegrationTests {
         assertThat(response.getBody().get("message")).isEqualTo("Invalid username or password");
     }
 
+    @Test
+    public void loginViewOptionsIsAllowed() throws Exception {
+        ResponseEntity<HashMap> response = testRestTemplate().exchange(
+                path("/v1/auth/login"),
+                HttpMethod.OPTIONS,
+                new HttpEntity<>(objectMapper.writeValueAsString(null), new HttpHeaders()),
+                HashMap.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNull();
+    }
+
 }

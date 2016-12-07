@@ -1,6 +1,5 @@
 package com.caribou.auth.jwt.ajax;
 
-import com.caribou.auth.jwt.WebUtil;
 import com.caribou.auth.jwt.exception.AuthMethodNotSupportedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;
@@ -12,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
@@ -28,7 +28,7 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
     private final ObjectMapper objectMapper;
 
     public AjaxLoginProcessingFilter(String formBasedLoginEntryPoint, AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler, ObjectMapper objectMapper) {
-        super(formBasedLoginEntryPoint);
+        super(new AntPathRequestMatcher(formBasedLoginEntryPoint, HttpMethod.POST.toString()));
         this.successHandler = successHandler;
         this.failureHandler = failureHandler;
         this.objectMapper = objectMapper;
@@ -36,7 +36,7 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        if (!HttpMethod.POST.name().equals(request.getMethod()) || !WebUtil.isAjax(request)) {
+        if (!HttpMethod.POST.name().equals(request.getMethod())) {
             throw new AuthMethodNotSupportedException("Authentication method not supported");
         }
         LoginRequest loginRequest = objectMapper.readValue(request.getReader(), LoginRequest.class);
