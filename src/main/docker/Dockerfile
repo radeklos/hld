@@ -1,7 +1,7 @@
 FROM java:8-alpine
 VOLUME /tmp
 
-ADD api-0.0.1-SNAPSHOT.jar app.jar
+COPY api-0.0.1-SNAPSHOT.jar app.jar
 
 RUN sh -c 'touch /app.jar'
 
