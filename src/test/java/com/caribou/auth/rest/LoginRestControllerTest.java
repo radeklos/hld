@@ -39,7 +39,7 @@ public class LoginRestControllerTest extends IntegrationTests {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Requested-With", "XMLHttpRequest");
+        headers.set("Origin", path(""));
 
         ResponseEntity<TokenResponse> response = testRestTemplate().exchange(
                 path("/v1/auth/login"),
@@ -50,7 +50,6 @@ public class LoginRestControllerTest extends IntegrationTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getToken()).isNotNull();
-        assertThat(response.getBody().getRefreshToken()).isNotNull();
     }
 
     @Test
@@ -63,7 +62,6 @@ public class LoginRestControllerTest extends IntegrationTests {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Requested-With", "XMLHttpRequest");
 
         ResponseEntity<HashMap> response = testRestTemplate().exchange(
                 path("/v1/auth/login"),
