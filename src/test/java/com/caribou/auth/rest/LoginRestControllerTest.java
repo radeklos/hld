@@ -5,7 +5,7 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.ajax.LoginRequest;
 import com.caribou.auth.jwt.response.TokenResponse;
-import com.caribou.auth.repository.UserRepository;
+import com.caribou.auth.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import rx.observers.TestSubscriber;
 
 import java.util.HashMap;
 
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LoginRestControllerTest extends IntegrationTests {
 
     @Autowired
-    UserRepository userRepository;
+    UserService userService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -32,9 +33,10 @@ public class LoginRestControllerTest extends IntegrationTests {
     @Test
     public void authorizedWithValidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
-        userRepository.save(user);
+        String userPassword = user.getPassword();
+        userService.create(user).subscribe(new TestSubscriber<>());
 
-        LoginRequest loginRequest = new LoginRequest(user.getEmail(), user.getPassword());
+        LoginRequest loginRequest = new LoginRequest(user.getEmail(), userPassword);
         objectMapper.writeValueAsString(loginRequest);
 
         HttpHeaders headers = new HttpHeaders();
@@ -55,7 +57,7 @@ public class LoginRestControllerTest extends IntegrationTests {
     @Test
     public void authorizedWithInvalidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
-        userRepository.save(user);
+        userService.create(user).subscribe(new TestSubscriber<>());
 
         LoginRequest loginRequest = new LoginRequest(user.getEmail(), "incorrect password");
         objectMapper.writeValueAsString(loginRequest);

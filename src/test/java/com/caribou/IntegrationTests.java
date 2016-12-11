@@ -7,9 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,12 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.client.RestTemplate;
 
-@WebAppConfiguration
-@IntegrationTest({"server.port=0"})
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = {WebApplication.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {WebApplication.class})
 public abstract class IntegrationTests {
 
     @Autowired
@@ -38,9 +36,9 @@ public abstract class IntegrationTests {
     protected TestRestTemplate testRestTemplate() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setOutputStreaming(false);
-        TestRestTemplate testRestTemplate = new TestRestTemplate();
-        testRestTemplate.setRequestFactory(requestFactory);
-        return testRestTemplate;
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(requestFactory);
+        return new TestRestTemplate(restTemplate);
     }
 
     protected HttpHeaders getTokenHeader(String token) {

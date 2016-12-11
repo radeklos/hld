@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -18,11 +19,15 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     @Autowired
+    BCryptPasswordEncoder encoder;
+
+    @Autowired
     UserRepository userRepository;
 
     public Observable<UserAccount> create(final UserAccount userAccount) {
         return Observable.create(subscriber -> {
             try {
+                userAccount.setPassword(encoder.encode(userAccount.getPassword()));
                 userRepository.save(userAccount);
                 subscriber.onNext(userAccount);
                 subscriber.onCompleted();

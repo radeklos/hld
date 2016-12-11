@@ -3,7 +3,7 @@ package com.caribou.holiday.rest;
 import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
-import com.caribou.auth.repository.UserRepository;
+import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.holiday.domain.Leave;
@@ -12,14 +12,12 @@ import com.caribou.holiday.domain.When;
 import com.caribou.holiday.repository.LeaveRepository;
 import com.caribou.holiday.repository.LeaveTypeRepository;
 import com.caribou.holiday.rest.dto.LeaveDto;
-import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import rx.observers.TestSubscriber;
 
 import java.util.Date;
 
@@ -28,12 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LeaveControllerTest extends IntegrationTests {
 
-    private static TestRestTemplate restGuest = new TestRestTemplate();
-
-    Faker faker = new Faker();
-
     @Autowired
-    UserRepository userRepository;
+    UserService userService;
 
     @Autowired
     LeaveRepository leaveRepository;
@@ -44,24 +38,22 @@ public class LeaveControllerTest extends IntegrationTests {
     @Autowired
     LeaveTypeRepository leaveTypeRepository;
 
-    Company company = Company.newBuilder().name(faker.company().name()).build();
+    Company company = Factory.company();
 
     LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
 
     UserAccount userAccount;
 
+    private String password;
+
     @Before
     public void before() throws Exception {
         userAccount = Factory.userAccount();
-        userRepository.save(userAccount);
+        password = userAccount.getPassword();
+        userService.create(userAccount).subscribe(new TestSubscriber<>());
 
         companyRepository.save(company);
         leaveTypeRepository.save(leaveType);
-
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setOutputStreaming(false);
-
-        restGuest.setRequestFactory(requestFactory);
     }
 
     @Test
@@ -79,12 +71,12 @@ public class LeaveControllerTest extends IntegrationTests {
                 leaveDto,
                 LeaveDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                password
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Leave leave = leaveRepository.findOne(response.getBody().getUid());
-        assertThat(leave.getUserAccount().getUid()).as("Department isn't saved into company").isEqualTo(userAccount.getUid());
+        assertThat(leave.getUserAccount().getUid()).isEqualTo(userAccount.getUid());
     }
 
 }

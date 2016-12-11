@@ -3,7 +3,7 @@ package com.caribou.company.rest;
 import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
-import com.caribou.auth.repository.UserRepository;
+import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import rx.observers.TestSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,14 +24,17 @@ public class CompanyRestControllerTest extends IntegrationTests {
     CompanyRepository companyRepository;
 
     @Autowired
-    UserRepository userRepository;
+    UserService userService;
 
     UserAccount userAccount;
+
+    private String userPassword;
 
     @Before
     public void setup() throws Exception {
         userAccount = Factory.userAccount();
-        userRepository.save(userAccount);
+        userPassword = userAccount.getPassword();
+        userService.create(userAccount).subscribe(new TestSubscriber<>());
     }
 
     @Test
@@ -42,7 +46,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 String.format("/v1/companies/%s", company.getUid()),
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -58,7 +62,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 String.format("/v1/companies/%s", company.getUid()),
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         CompanyDto companyDto = response.getBody();
@@ -75,7 +79,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 company,
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -89,7 +93,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 company,
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -108,7 +112,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 companyDto,
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -122,7 +126,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 companyDto,
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -134,7 +138,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 "/v1/companies/0",
                 CompanyDto.class,
                 userAccount.getEmail(),
-                userAccount.getPassword()
+                userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

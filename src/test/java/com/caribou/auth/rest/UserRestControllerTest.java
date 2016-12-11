@@ -7,6 +7,7 @@ import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.rest.dto.Error;
 import com.caribou.auth.rest.dto.ErrorField;
 import com.caribou.auth.rest.dto.UserAccountDto;
+import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
@@ -27,6 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class UserRestControllerTest extends IntegrationTests {
+
+    @Autowired
+    UserService userService;
 
     @Autowired
     UserRepository userRepository;
@@ -119,12 +123,13 @@ public class UserRestControllerTest extends IntegrationTests {
     @Test
     public void getMineUserDetail() throws Exception {
         UserAccount userAccount = Factory.userAccount();
-        userAccount = userRepository.save(userAccount);
+        String userPassword = userAccount.getPassword();
+        userAccount = userService.create(userAccount).toBlocking().first();
 
         ResponseEntity<UserAccountDto> response = testRestTemplate().exchange(
                 path("/v1/users/me"),
                 HttpMethod.GET,
-                new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userAccount.getPassword())),
+                new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userPassword)),
                 UserAccountDto.class
         );
 
@@ -139,7 +144,8 @@ public class UserRestControllerTest extends IntegrationTests {
     @Test
     public void userHasLinkToHisCompany() throws Exception {
         UserAccount userAccount = Factory.userAccount();
-        userAccount = userRepository.save(userAccount);
+        String userPassword = userAccount.getPassword();
+        userAccount = userService.create(userAccount).toBlocking().first();
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Owner);
         companyRepository.save(company);
@@ -147,7 +153,7 @@ public class UserRestControllerTest extends IntegrationTests {
         ResponseEntity<HashMap> response = testRestTemplate().exchange(
                 path("/v1/users/me"),
                 HttpMethod.GET,
-                new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userAccount.getPassword())),
+                new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userPassword)),
                 HashMap.class
         );
 

@@ -1,5 +1,7 @@
 spring:
   jpa:
+    hibernate:
+      ddl-auto: create
     generate-ddl: true
     database: POSTGRESQL
     show-sql: false
