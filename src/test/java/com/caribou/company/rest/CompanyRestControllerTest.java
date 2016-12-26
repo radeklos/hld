@@ -105,7 +105,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         companyRepository.save(company);
         CompanyDto companyDto = CompanyDto.newBuilder()
                 .name("company name")
-                .defaultDaysOf(10)
+                .defaultDaysOff(10)
                 .build();
         ResponseEntity<CompanyDto> response = put(
                 String.format("/v1/companies/%s", company.getUid()),

@@ -1,5 +1,6 @@
 package com.caribou.company.rest.dto;
 
+import com.github.javafaker.Faker;
 import org.hibernate.validator.HibernateValidator;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +16,8 @@ public class CompanyDtoTest {
 
     private LocalValidatorFactoryBean localValidatorFactory;
 
+    private Faker faker = new Faker();
+
     @Before
     public void setUp() throws Exception {
         localValidatorFactory = new LocalValidatorFactoryBean();
@@ -25,22 +28,30 @@ public class CompanyDtoTest {
     @Test
     public void defaultDaysOfShouldBePositive() {
         CompanyDto company = CompanyDto.newBuilder()
-                .name("name")
-                .defaultDaysOf(-10)
+                .name(faker.company().name())
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(-100, 0))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
-        assertThat(constraintViolation.getMessage()).isEqualTo("must be greater than or equal to 0");
         assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("defaultDaysOff");
+        assertThat(constraintViolation.getMessage()).isEqualTo("must be greater than or equal to 0");
     }
 
     @Test
     public void nameShouldntBeLongerThan255() {
         CompanyDto company = CompanyDto.newBuilder()
                 .name(new String(new char[256]).replace('\0', 'A'))
-                .defaultDaysOf(10)
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
@@ -53,7 +64,11 @@ public class CompanyDtoTest {
     @Test
     public void defaultDaysOfShouldntBeEmpty() {
         CompanyDto company = CompanyDto.newBuilder()
-                .name("name")
+                .name(faker.company().name())
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
@@ -66,7 +81,11 @@ public class CompanyDtoTest {
     @Test
     public void nameShouldntBeNull() {
         CompanyDto company = CompanyDto.newBuilder()
-                .defaultDaysOf(10)
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
@@ -80,7 +99,11 @@ public class CompanyDtoTest {
     public void nameShouldNotBeEmpty() {
         CompanyDto company = CompanyDto.newBuilder()
                 .name("")
-                .defaultDaysOf(10)
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
@@ -91,10 +114,86 @@ public class CompanyDtoTest {
     }
 
     @Test
+    public void regNumberShouldNotBeEmpty() {
+        CompanyDto company = CompanyDto.newBuilder()
+                .name(faker.company().name())
+                .regNo("")
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
+                .build();
+        Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
+        ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
+
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("regNo");
+    }
+
+    @Test
+    public void address1ShouldNotBeEmpty() {
+        CompanyDto company = CompanyDto.newBuilder()
+                .name(faker.company().name())
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1("")
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
+                .build();
+        Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
+        ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
+
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("address1");
+    }
+
+    @Test
+    public void cityShouldNotBeEmpty() {
+        CompanyDto company = CompanyDto.newBuilder()
+                .name(faker.company().name())
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city("")
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
+                .build();
+        Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
+        ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
+
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("city");
+    }
+
+    @Test
+    public void postCodeShouldNotBeEmpty() {
+        CompanyDto company = CompanyDto.newBuilder()
+                .name(faker.company().name())
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode("")
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
+                .build();
+        Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
+        ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
+
+        assertThat(constraintViolations).hasSize(1);
+        assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("postCode");
+    }
+    @Test
     public void isValid() {
         CompanyDto company = CompanyDto.newBuilder()
-                .name("name")
-                .defaultDaysOf(10)
+                .name(faker.company().name())
+                .defaultDaysOff(10)
+                .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
+                .address1(faker.address().streetAddress())
+                .city(faker.address().city())
+                .postCode(faker.address().zipCode())
+                .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         assertThat(constraintViolations).isEmpty();
