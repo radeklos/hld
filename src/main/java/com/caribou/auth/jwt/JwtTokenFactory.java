@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,7 +26,7 @@ public class JwtTokenFactory {
     /**
      * Factory method for issuing new JWT Tokens.
      *
-     * @param userContext
+     * @param userContext user context
      */
     public AccessJwtToken createAccessJwtToken(UserContext userContext) {
         if (StringUtils.isEmpty(userContext.getUsername()))
@@ -36,7 +36,7 @@ public class JwtTokenFactory {
             throw new IllegalArgumentException("User doesn't have any privileges");
 
         Claims claims = Jwts.claims().setSubject(userContext.getUsername());
-        claims.put("scopes", userContext.getAuthorities().stream().map(s -> s.toString()).collect(Collectors.toList()));
+        claims.put("scopes", userContext.getAuthorities().stream().map(Object::toString).collect(Collectors.toList()));
 
         DateTime currentTime = new DateTime();
 
@@ -59,7 +59,7 @@ public class JwtTokenFactory {
         DateTime currentTime = new DateTime();
 
         Claims claims = Jwts.claims().setSubject(userContext.getUsername());
-        claims.put("scopes", Arrays.asList(Scopes.REFRESH_TOKEN.authority()));
+        claims.put("scopes", Collections.singletonList(Scopes.REFRESH_TOKEN.authority()));
 
         String token = Jwts.builder()
                 .setClaims(claims)

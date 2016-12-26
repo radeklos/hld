@@ -21,12 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CompanyRestControllerTest extends IntegrationTests {
 
     @Autowired
-    CompanyRepository companyRepository;
+    private CompanyRepository companyRepository;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
-    UserAccount userAccount;
+    private UserAccount userAccount;
 
     private String userPassword;
 
@@ -103,10 +103,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
     public void updateCompany() throws Exception {
         Company company = Factory.company();
         companyRepository.save(company);
-        CompanyDto companyDto = CompanyDto.newBuilder()
-                .name("company name")
-                .defaultDaysOff(10)
-                .build();
+        CompanyDto companyDto = Factory.companyDto();
         ResponseEntity<CompanyDto> response = put(
                 String.format("/v1/companies/%s", company.getUid()),
                 companyDto,
@@ -116,6 +113,11 @@ public class CompanyRestControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getName()).isEqualTo(companyDto.getName());
+        assertThat(response.getBody().getAddress1()).isEqualTo(companyDto.getAddress1());
+        assertThat(response.getBody().getCity()).isEqualTo(companyDto.getCity());
+        assertThat(response.getBody().getDefaultDaysOff()).isEqualTo(companyDto.getDefaultDaysOff());
+        assertThat(response.getBody().getRegNo()).isEqualTo(companyDto.getRegNo());
     }
 
     @Test

@@ -2,9 +2,13 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 
@@ -74,8 +78,7 @@ public class Department extends AbstractEntity {
         }
         DepartmentEmployee departmentEmployee = new DepartmentEmployee(this, userAccount, role);
         if (employees.contains(departmentEmployee)) {
-            for (Iterator<DepartmentEmployee> it = employees.iterator(); it.hasNext(); ) {
-                DepartmentEmployee f = it.next();
+            for (DepartmentEmployee f : employees) {
                 if (f.equals(departmentEmployee)) {
                     f.setRole(role);
                     break;

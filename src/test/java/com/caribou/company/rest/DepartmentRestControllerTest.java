@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Autowired
-    CompanyRepository companyRepository;
+    private CompanyRepository companyRepository;
 
     @Autowired
-    UserService userRepository;
+    private UserService userRepository;
 
     @Autowired
-    DepartmentRepository departmentRepository;
+    private DepartmentRepository departmentRepository;
 
     private UserAccount userAccount;
 
@@ -183,7 +183,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void getListOfDepartmentsForUnemployedReturns404() throws Exception {
-        Company anotherCompany = Company.newBuilder().name("another company").defaultDaysOff(10).build();
+        Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
         String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
@@ -194,7 +194,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void createNewDepartmentAsUnemployedReturns404() throws Exception {
-        Company anotherCompany = Company.newBuilder().name("another company").defaultDaysOff(10).build();
+        Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
@@ -229,7 +229,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        ArrayList<Department> departments = new ArrayList<Department>();
+        ArrayList<Department> departments = new ArrayList<>();
         departmentRepository.findAll().forEach(departments::add);
 
         assertThat(departments.size()).isEqualTo(size);

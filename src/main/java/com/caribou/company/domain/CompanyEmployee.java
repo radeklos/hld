@@ -2,7 +2,13 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 
 @Table(
@@ -24,7 +30,7 @@ public class CompanyEmployee extends AbstractEntity {
     public CompanyEmployee() {
     }
 
-    public CompanyEmployee(Company company, UserAccount member, Role role) {
+    CompanyEmployee(Company company, UserAccount member, Role role) {
         this.company = company;
         this.member = member;
         this.role = role;
@@ -61,8 +67,7 @@ public class CompanyEmployee extends AbstractEntity {
 
         CompanyEmployee that = (CompanyEmployee) o;
 
-        if (!getCompany().equals(that.getCompany())) return false;
-        return getMember().equals(that.getMember());
+        return getCompany().equals(that.getCompany()) && getMember().equals(that.getMember());
 
     }
 

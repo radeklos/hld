@@ -25,7 +25,6 @@ import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
-import java.util.Iterator;
 
 
 @RestController
@@ -65,8 +64,7 @@ public class DepartmentRestController {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getForEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
-                    for (Iterator<CompanyEmployee> iterator = company1.getEmployees().iterator(); iterator.hasNext(); ) {
-                        CompanyEmployee f = iterator.next();
+                    for (CompanyEmployee f : company1.getEmployees()) {
                         if (f.getMember().getEmail().equals(userDetails.getUsername()) && f.getRole() == Role.Viewer) {
                             throw new AccessDeniedException("omg");
                         }

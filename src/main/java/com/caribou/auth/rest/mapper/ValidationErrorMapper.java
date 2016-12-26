@@ -12,8 +12,7 @@ public class ValidationErrorMapper {
 
     public static Map<String, ErrorField> map(List<FieldError> fieldErrors) {
         Map<String, ErrorField> validationErrors = new HashMap<>();
-        for (int i = 0, fieldErrorsSize = fieldErrors.size(); i < fieldErrorsSize; i++) {
-            FieldError fieldError = fieldErrors.get(i);
+        for (FieldError fieldError : fieldErrors) {
             validationErrors.put(fieldError.getField(), ValidationErrorMapper.map(fieldError));
         }
         return validationErrors;

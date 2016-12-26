@@ -14,7 +14,7 @@ public class RootApiController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ArrayList<String> nodes() {
-        ArrayList<String> data = new ArrayList<String>();
+        ArrayList<String> data = new ArrayList<>();
         data.add("/v1/users/");
         return data;
     }

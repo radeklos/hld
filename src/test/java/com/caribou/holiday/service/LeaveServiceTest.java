@@ -1,5 +1,6 @@
 package com.caribou.holiday.service;
 
+import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
@@ -9,7 +10,6 @@ import com.caribou.company.service.CompanyService;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
 import com.caribou.holiday.repository.LeaveTypeRepository;
-import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LeaveServiceTest extends IntegrationTests {
 
-    Faker faker = new Faker();
+    Company company = Factory.company();
 
-    Company company = Company.newBuilder().name(faker.company().name()).build();
-
-    UserAccount userAccount = UserAccount.newBuilder()
-            .email(faker.internet().emailAddress())
-            .firstName(faker.name().firstName())
-            .lastName(faker.name().lastName())
-            .password(faker.internet().password())
-            .build();
+    UserAccount userAccount = Factory.userAccount();
 
     LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
 

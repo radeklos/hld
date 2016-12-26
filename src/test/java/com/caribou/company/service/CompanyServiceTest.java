@@ -64,7 +64,7 @@ public class CompanyServiceTest extends IntegrationTests {
     @Test
     public void updateNonExistingObject() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.update(0L, new Company("new name", 20)).subscribe(testSubscriber);
+        companyService.update(0L, Factory.company()).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
@@ -77,7 +77,7 @@ public class CompanyServiceTest extends IntegrationTests {
 
     @Test
     public void get() throws Exception {
-        Company company = new Company("name", 10);
+        Company company = Factory.company();
         companyRepository.save(company);
 
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
@@ -89,7 +89,7 @@ public class CompanyServiceTest extends IntegrationTests {
 
     @Test
     public void getByEmployeeEmail() {
-        Company company = Company.newBuilder().name("name").defaultDaysOff(10).build();
+        Company company = Factory.company();
         companyRepository.save(company);
         UserAccount user = Factory.userAccount();
         userRepository.save(user);

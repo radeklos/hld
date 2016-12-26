@@ -10,7 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -97,7 +97,7 @@ public class UserAccount extends AbstractEntity {
     }
 
     public List<UserRole> getRoles() {
-        return Arrays.asList(UserRole.MEMBER);
+        return Collections.singletonList(UserRole.MEMBER);
     }
 
     public static final class Builder {

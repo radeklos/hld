@@ -2,7 +2,13 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"department_uid", "member_uid"})
@@ -23,7 +29,7 @@ public class DepartmentEmployee extends AbstractEntity {
     public DepartmentEmployee() {
     }
 
-    public DepartmentEmployee(Department department, UserAccount member, Role role) {
+    DepartmentEmployee(Department department, UserAccount member, Role role) {
         this.department = department;
         this.member = member;
         this.role = role;
@@ -44,8 +50,7 @@ public class DepartmentEmployee extends AbstractEntity {
 
         DepartmentEmployee that = (DepartmentEmployee) o;
 
-        if (!department.equals(that.department)) return false;
-        return member.equals(that.member);
+        return department.equals(that.department) && member.equals(that.member);
 
     }
 
