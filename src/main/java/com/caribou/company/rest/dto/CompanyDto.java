@@ -45,7 +45,7 @@ public class CompanyDto {
 
     @NotBlank
     @JsonProperty
-    private String postCode;
+    private String postcode;
 
     public CompanyDto() {
     }
@@ -60,7 +60,7 @@ public class CompanyDto {
         setAddress1(builder.address1);
         setAddress2(builder.address2);
         setCity(builder.city);
-        setPostCode(builder.postCode);
+        setPostcode(builder.postcode);
     }
 
     public static Builder newBuilder() {
@@ -148,12 +148,12 @@ public class CompanyDto {
         return this;
     }
 
-    public String getPostCode() {
-        return postCode;
+    public String getPostcode() {
+        return postcode;
     }
 
-    public CompanyDto setPostCode(String postCode) {
-        this.postCode = postCode;
+    public CompanyDto setPostcode(String postcode) {
+        this.postcode = postcode;
         return this;
     }
 
@@ -167,7 +167,7 @@ public class CompanyDto {
         private String address1;
         private String address2;
         private String city;
-        private String postCode;
+        private String postcode;
 
         private Builder() {
         }
@@ -217,8 +217,8 @@ public class CompanyDto {
             return this;
         }
 
-        public Builder postCode(String val) {
-            postCode = val;
+        public Builder postcode(String val) {
+            postcode = val;
             return this;
         }
 

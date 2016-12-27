@@ -47,7 +47,7 @@ public class Factory {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
     }

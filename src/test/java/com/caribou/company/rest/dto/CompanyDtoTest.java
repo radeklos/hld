@@ -32,7 +32,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(-100, 0))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -50,7 +50,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -68,7 +68,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
         ConstraintViolation<CompanyDto> constraintViolation = constraintViolations.iterator().next();
@@ -84,7 +84,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -102,7 +102,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -120,7 +120,7 @@ public class CompanyDtoTest {
                 .regNo("")
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -138,7 +138,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1("")
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -156,7 +156,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city("")
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -174,7 +174,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode("")
+                .postcode("")
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
@@ -182,7 +182,7 @@ public class CompanyDtoTest {
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
-        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("postCode");
+        assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("postcode");
     }
     @Test
     public void isValid() {
@@ -192,7 +192,7 @@ public class CompanyDtoTest {
                 .regNo(String.valueOf(faker.number().numberBetween(1_000_000, 9_000_000)))
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
-                .postCode(faker.address().zipCode())
+                .postcode(faker.address().zipCode())
                 .defaultDaysOff(faker.number().numberBetween(1, 100))
                 .build();
         Set<ConstraintViolation<CompanyDto>> constraintViolations = localValidatorFactory.validate(company);
