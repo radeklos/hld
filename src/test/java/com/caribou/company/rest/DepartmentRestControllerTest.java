@@ -84,6 +84,18 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     }
 
     @Test
+    public void departmentHasLinkToEmployee() throws Exception {
+        Department department = Factory.department(company);
+        departmentRepository.save(department);
+
+        String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
+        ResponseEntity<HashMap> response = get(url, HashMap.class, userAccount.getEmail(), userPassword);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
+    }
+
+    @Test
     public void getList() throws Exception {
         Department hr = Factory.department(company);
         Department account = Factory.department(company);

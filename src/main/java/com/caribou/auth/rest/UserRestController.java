@@ -41,7 +41,7 @@ public class UserRestController {
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public Single<UserAccountDto> me() {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userService.findByEmail(userDetails.getUsername())
+        Single<UserAccountDto> bla = userService.findByEmail(userDetails.getUsername())
                 .map(u -> modelMapper.map(u, UserAccountDto.class))
                 .map(u -> {
                     Company company = companyRepository.findByEmployeeEmail(u.getEmail());
@@ -51,6 +51,8 @@ public class UserRestController {
                     return u;
                 })
                 .toSingle();
+
+        return bla;
     }
 
     @RequestMapping(method = RequestMethod.POST)

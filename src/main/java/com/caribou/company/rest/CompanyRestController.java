@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import rx.Single;
 
 import javax.validation.Valid;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 
 @RestController
@@ -35,16 +39,15 @@ public class CompanyRestController {
     private UserService userService;
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-    public CompanyDto get(@PathVariable("uid") Long uid) {
+    public Single<CompanyDto> get(@PathVariable("uid") Long uid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return companyService.getForEmployeeEmail(uid, userDetails.getUsername())
+        return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
                 .map(c -> convert(c))
-                .toBlocking()
-                .first();
+                .toSingle();
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<CompanyDto> create(@Valid @RequestBody CompanyDto newCompany) {
+    public Single<ResponseEntity<CompanyDto>> create(@Valid @RequestBody CompanyDto newCompany) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserAccount loggedUser = userService.findByEmail(userDetails.getUsername()).toBlocking().first();
 
@@ -52,16 +55,16 @@ public class CompanyRestController {
         company.addEmployee(loggedUser, Role.Owner);
         return companyService.create(company)
                 .map(d -> new ResponseEntity<>(convert(d), HttpStatus.CREATED))
-                .toBlocking().first();
+                .toSingle();
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
-    public CompanyDto update(@PathVariable("uid") Long uid, @Valid @RequestBody CompanyDto companyDto) {
+    public Single<CompanyDto> update(@PathVariable("uid") Long uid, @Valid @RequestBody CompanyDto companyDto) {
         // TODO some acl
         Company company = convert(companyDto);
         return companyService.update(uid, company)
                 .map(d -> convert(d))
-                .toBlocking().first();
+                .toSingle();
     }
 
     private Company convert(CompanyDto newCompany) {
@@ -69,7 +72,9 @@ public class CompanyRestController {
     }
 
     private CompanyDto convert(Company company) {
-        return modelMapper.map(company, CompanyDto.class);
+        CompanyDto companyDto = modelMapper.map(company, CompanyDto.class);
+        companyDto.add(linkTo(methodOn(DepartmentRestController.class).getList(company.getUid())).withRel("department"));
+        return companyDto;
     }
 
 }

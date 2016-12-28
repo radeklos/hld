@@ -97,7 +97,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.getForEmployeeEmail(company.getUid(), user.getEmail()).subscribe(testSubscriber);
+        companyService.getByEmployeeEmail(company.getUid(), user.getEmail()).subscribe(testSubscriber);
 
         testSubscriber.assertNoErrors();
         Company got = testSubscriber.getOnNextEvents().get(0);
@@ -114,7 +114,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.getForEmployeeEmail(company.getUid(), "non.existing@email.com").subscribe(testSubscriber);
+        companyService.getByEmployeeEmail(company.getUid(), "non.existing@email.com").subscribe(testSubscriber);
 
         testSubscriber.assertError(NotFound.class);
     }
@@ -129,7 +129,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.getForEmployeeEmail(0L, user.getEmail()).subscribe(testSubscriber);
+        companyService.getByEmployeeEmail(0L, user.getEmail()).subscribe(testSubscriber);
 
         testSubscriber.assertError(NotFound.class);
     }

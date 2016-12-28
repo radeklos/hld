@@ -2,12 +2,13 @@ package com.caribou.company.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.hateoas.ResourceSupport;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class CompanyDto {
+public class CompanyDto extends ResourceSupport {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long uid;

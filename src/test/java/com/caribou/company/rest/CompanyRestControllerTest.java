@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rx.observers.TestSubscriber;
 
+import java.util.HashMap;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -144,6 +146,23 @@ public class CompanyRestControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void companyHasLinkToDepartment() throws Exception {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Owner);
+        companyRepository.save(company);
+
+        ResponseEntity<HashMap> response = get(
+                String.format("/v1/companies/%s", company.getUid()),
+                HashMap.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
     }
 
 }

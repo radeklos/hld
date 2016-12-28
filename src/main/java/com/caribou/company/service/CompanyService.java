@@ -13,7 +13,7 @@ public class CompanyService extends RxService.Imp<CompanyRepository, Company, Lo
     @Autowired
     private CompanyRepository companyRepository;
 
-    public Observable<Company> getForEmployeeEmail(Long uid, String email) {
+    public Observable<Company> getByEmployeeEmail(Long uid, String email) {
         return Observable.create(subscriber -> {
             try {
                 Company entity = companyRepository.findEmployeeByEmailForUid(email, uid);

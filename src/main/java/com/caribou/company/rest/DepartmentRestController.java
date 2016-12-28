@@ -26,6 +26,9 @@ import rx.Single;
 
 import javax.validation.Valid;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 
 @RestController
 @RequestMapping("/v1/companies/{companyUid}/departments")
@@ -52,7 +55,7 @@ public class DepartmentRestController {
     @RequestMapping(method = RequestMethod.GET)
     public Observable<DepartmentDto> getList(@PathVariable("companyUid") Long companyUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return companyService.getForEmployeeEmail(companyUid, userDetails.getUsername())
+        return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .flatMap(d -> Observable.create(subscriber -> {
                     d.getDepartments().forEach(subscriber::onNext);
                     subscriber.onCompleted();
@@ -62,7 +65,7 @@ public class DepartmentRestController {
     @RequestMapping(method = RequestMethod.POST)
     public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") Long companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return companyService.getForEmployeeEmail(companyUid, userDetails.getUsername())
+        return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
                     for (CompanyEmployee f : company1.getEmployees()) {
                         if (f.getMember().getEmail().equals(userDetails.getUsername()) && f.getRole() == Role.Viewer) {
@@ -112,7 +115,9 @@ public class DepartmentRestController {
     }
 
     private DepartmentDto convert(Department entity) {
-        return modelMapper.map(entity, DepartmentDto.class);
+        DepartmentDto departmentDto = modelMapper.map(entity, DepartmentDto.class);
+        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid(), entity.getUid())).withRel("employees"));
+        return departmentDto;
     }
 
 }
