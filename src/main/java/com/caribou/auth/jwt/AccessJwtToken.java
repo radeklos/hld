@@ -3,6 +3,7 @@ package com.caribou.auth.jwt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.jsonwebtoken.Claims;
 
+
 public class AccessJwtToken implements JwtToken {
 
     private final String rawToken;

@@ -13,11 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rx.Single;
 
 import javax.validation.Valid;
@@ -46,6 +42,12 @@ public class CompanyRestController {
                 .toSingle();
     }
 
+    private CompanyDto convert(Company company) {
+        CompanyDto companyDto = modelMapper.map(company, CompanyDto.class);
+        companyDto.add(linkTo(methodOn(DepartmentRestController.class).getList(company.getUid())).withRel("department"));
+        return companyDto;
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     public Single<ResponseEntity<CompanyDto>> create(@Valid @RequestBody CompanyDto newCompany) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -58,6 +60,10 @@ public class CompanyRestController {
                 .toSingle();
     }
 
+    private Company convert(CompanyDto newCompany) {
+        return modelMapper.map(newCompany, Company.class);
+    }
+
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
     public Single<CompanyDto> update(@PathVariable("uid") Long uid, @Valid @RequestBody CompanyDto companyDto) {
         // TODO some acl
@@ -65,16 +71,6 @@ public class CompanyRestController {
         return companyService.update(uid, company)
                 .map(d -> convert(d))
                 .toSingle();
-    }
-
-    private Company convert(CompanyDto newCompany) {
-        return modelMapper.map(newCompany, Company.class);
-    }
-
-    private CompanyDto convert(Company company) {
-        CompanyDto companyDto = modelMapper.map(company, CompanyDto.class);
-        companyDto.add(linkTo(methodOn(DepartmentRestController.class).getList(company.getUid())).withRel("department"));
-        return companyDto;
     }
 
 }

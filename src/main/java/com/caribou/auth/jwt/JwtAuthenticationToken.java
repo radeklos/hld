@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
+
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     private static final long serialVersionUID = 2877954820905567501L;
 
@@ -34,6 +35,12 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     }
 
     @Override
+    public void eraseCredentials() {
+        super.eraseCredentials();
+        this.rawAccessToken = null;
+    }
+
+    @Override
     public Object getCredentials() {
         return rawAccessToken;
     }
@@ -41,11 +48,5 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return this.userContext;
-    }
-
-    @Override
-    public void eraseCredentials() {
-        super.eraseCredentials();
-        this.rawAccessToken = null;
     }
 }

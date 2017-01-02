@@ -17,10 +17,6 @@ abstract class AbstractEntity implements Serializable {
 
     private Date updatedAt;
 
-    public Long getUid() {
-        return uid;
-    }
-
     @PrePersist
     void createdAt() {
         this.createdAt = this.updatedAt = new Date();
@@ -40,6 +36,11 @@ abstract class AbstractEntity implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        return getUid() != null ? getUid().hashCode() : 0;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -50,8 +51,7 @@ abstract class AbstractEntity implements Serializable {
 
     }
 
-    @Override
-    public int hashCode() {
-        return getUid() != null ? getUid().hashCode() : 0;
+    public Long getUid() {
+        return uid;
     }
 }

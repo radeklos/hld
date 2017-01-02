@@ -25,6 +25,10 @@ public class Error {
         setStatus(httpStatus);
     }
 
+    public void setStatus(HttpStatus httpStatus) {
+        this.status = new Status(httpStatus.value(), httpStatus.getReasonPhrase());
+    }
+
     public void setObject(String object) {
         this.object = object;
     }
@@ -41,10 +45,6 @@ public class Error {
 
     public void setValidationErrors(Map<String, ErrorField> validationErrors) {
         this.validationErrors = validationErrors;
-    }
-
-    public void setStatus(HttpStatus httpStatus) {
-        this.status = new Status(httpStatus.value(), httpStatus.getReasonPhrase());
     }
 
     public class Status {

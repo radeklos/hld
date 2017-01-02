@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
+
 public class LeaveDto {
 
     @JsonProperty

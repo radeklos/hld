@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+
 @Component
 public class JwtHeaderTokenExtractor implements TokenExtractor {
     public static String HEADER_PREFIX = "Bearer ";

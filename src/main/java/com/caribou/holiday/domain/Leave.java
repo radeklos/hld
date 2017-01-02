@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import java.util.Date;
 
+
 @Entity
 public class Leave extends AbstractEntity {
 

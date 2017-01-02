@@ -1,12 +1,6 @@
 package com.caribou.holiday.domain;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -22,10 +16,6 @@ abstract class AbstractEntity implements Serializable {
     private Date createdAt;
 
     private Date updatedAt;
-
-    public Long getUid() {
-        return uid;
-    }
 
     @PrePersist
     void createdAt() {
@@ -46,6 +36,11 @@ abstract class AbstractEntity implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        return getUid() != null ? getUid().hashCode() : 0;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -56,8 +51,7 @@ abstract class AbstractEntity implements Serializable {
 
     }
 
-    @Override
-    public int hashCode() {
-        return getUid() != null ? getUid().hashCode() : 0;
+    public Long getUid() {
+        return uid;
     }
 }

@@ -2,6 +2,7 @@ package com.caribou.auth.jwt.response;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+
 public enum ErrorCode {
     GLOBAL(2),
 

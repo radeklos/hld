@@ -3,6 +3,7 @@ package com.caribou.auth.jwt.response;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
 public class TokenResponse {
 
     private String token;

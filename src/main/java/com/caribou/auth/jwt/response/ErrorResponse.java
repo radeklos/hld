@@ -2,6 +2,7 @@ package com.caribou.auth.jwt.response;
 
 import org.springframework.http.HttpStatus;
 
+
 public class ErrorResponse {
 
     // HTTP Response Status Code

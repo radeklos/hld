@@ -184,6 +184,7 @@ public class CompanyDtoTest {
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
         assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("postcode");
     }
+
     @Test
     public void isValid() {
         CompanyDto company = CompanyDto.newBuilder()

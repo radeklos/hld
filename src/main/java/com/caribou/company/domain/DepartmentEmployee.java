@@ -2,13 +2,8 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
+
 
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"department_uid", "member_uid"})
@@ -44,6 +39,13 @@ public class DepartmentEmployee extends AbstractEntity {
     }
 
     @Override
+    public int hashCode() {
+        int result = department.hashCode();
+        result = 31 * result + member.hashCode();
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -52,12 +54,5 @@ public class DepartmentEmployee extends AbstractEntity {
 
         return department.equals(that.department) && member.equals(that.member);
 
-    }
-
-    @Override
-    public int hashCode() {
-        int result = department.hashCode();
-        result = 31 * result + member.hashCode();
-        return result;
     }
 }

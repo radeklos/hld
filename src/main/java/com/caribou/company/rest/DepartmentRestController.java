@@ -16,11 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rx.Observable;
 import rx.Single;
 
@@ -62,6 +58,23 @@ public class DepartmentRestController {
                 })).map(m -> this.convert((Department) m));
     }
 
+    private DepartmentDto convert(Department entity) {
+        DepartmentDto departmentDto = modelMapper.map(entity, DepartmentDto.class);
+        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid(), entity.getUid())).withRel("employees"));
+        return departmentDto;
+    }
+
+    @RequestMapping(value = "/{departmentUid}/employees")
+    public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
+        // TODO acl
+        return departmentService.get(departmentUid)
+                .flatMap(department -> Observable.create(subscriber -> {
+                    department.getEmployees().forEach(subscriber::onNext);
+                    subscriber.onCompleted();
+                }))
+                .map(entity -> modelMapper.map(entity, EmployeeDto.class));
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") Long companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -84,6 +97,10 @@ public class DepartmentRestController {
                 .toSingle();
     }
 
+    private Department convert(DepartmentDto dto) {
+        return modelMapper.map(dto, Department.class);
+    }
+
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
     public Single<DepartmentDto> update(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid, @Valid @RequestBody DepartmentDto departmentDto) {
         // TODO acl
@@ -97,27 +114,6 @@ public class DepartmentRestController {
                     modelMapper.map(d, departmentDto);
                     return departmentDto;
                 }).toSingle();
-    }
-
-    @RequestMapping(value = "/{departmentUid}/employees")
-    public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
-        // TODO acl
-        return departmentService.get(departmentUid)
-                .flatMap(department -> Observable.create(subscriber -> {
-                    department.getEmployees().forEach(subscriber::onNext);
-                    subscriber.onCompleted();
-                }))
-                .map(entity -> modelMapper.map(entity, EmployeeDto.class));
-    }
-
-    private Department convert(DepartmentDto dto) {
-        return modelMapper.map(dto, Department.class);
-    }
-
-    private DepartmentDto convert(Department entity) {
-        DepartmentDto departmentDto = modelMapper.map(entity, DepartmentDto.class);
-        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid(), entity.getUid())).withRel("employees"));
-        return departmentDto;
     }
 
 }

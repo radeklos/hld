@@ -1,15 +1,10 @@
 package com.caribou.auth.jwt;
 
 import com.caribou.auth.jwt.exception.JwtExpiredTokenException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
+
 
 public class RawAccessJwtToken implements JwtToken {
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(RawAccessJwtToken.class);

@@ -2,13 +2,7 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 
 @Table(
@@ -44,6 +38,24 @@ public class CompanyEmployee extends AbstractEntity {
         this.role = role;
     }
 
+    @Override
+    public int hashCode() {
+        int result = getCompany().hashCode();
+        result = 31 * result + getMember().hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CompanyEmployee that = (CompanyEmployee) o;
+
+        return getCompany().equals(that.getCompany()) && getMember().equals(that.getMember());
+
+    }
+
     public Company getCompany() {
         return company;
     }
@@ -58,23 +70,5 @@ public class CompanyEmployee extends AbstractEntity {
 
     public void setMember(UserAccount member) {
         this.member = member;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        CompanyEmployee that = (CompanyEmployee) o;
-
-        return getCompany().equals(that.getCompany()) && getMember().equals(that.getMember());
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getCompany().hashCode();
-        result = 31 * result + getMember().hashCode();
-        return result;
     }
 }

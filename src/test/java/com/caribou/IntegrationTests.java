@@ -9,11 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
@@ -29,8 +25,17 @@ public abstract class IntegrationTests {
     @Value("${local.server.port}")
     private int port = 0;
 
-    protected String path(String context) {
-        return String.format("http://localhost:%s%s", port, context);
+    protected <T> ResponseEntity<T> get(String path, Class<T> responseType, String username, String password) throws JsonProcessingException {
+        return exchange(path, HttpMethod.GET, null, responseType, username, password);
+    }
+
+    protected <T> ResponseEntity<T> exchange(String path, HttpMethod method, Object requestBody, Class<T> responseType, String username, String password) throws JsonProcessingException {
+        return testRestTemplate().exchange(
+                path(path),
+                method,
+                new HttpEntity<>(objectMapper.writeValueAsString(requestBody), getTokenHeader(username, password)),
+                responseType
+        );
     }
 
     protected TestRestTemplate testRestTemplate() {
@@ -41,10 +46,8 @@ public abstract class IntegrationTests {
         return new TestRestTemplate(restTemplate);
     }
 
-    protected HttpHeaders getTokenHeader(String token) {
-        HttpHeaders headers = jsonHeader();
-        headers.set("X-Authorization", String.format("Bearer %s", token));
-        return headers;
+    protected String path(String context) {
+        return String.format("http://localhost:%s%s", port, context);
     }
 
     protected HttpHeaders getTokenHeader(String username, String password) throws JsonProcessingException {
@@ -71,17 +74,10 @@ public abstract class IntegrationTests {
         return headers;
     }
 
-    protected <T> ResponseEntity<T> exchange(String path, HttpMethod method, Object requestBody, Class<T> responseType, String username, String password) throws JsonProcessingException {
-        return testRestTemplate().exchange(
-                path(path),
-                method,
-                new HttpEntity<>(objectMapper.writeValueAsString(requestBody), getTokenHeader(username, password)),
-                responseType
-        );
-    }
-
-    protected <T> ResponseEntity<T> get(String path, Class<T> responseType, String username, String password) throws JsonProcessingException {
-        return exchange(path, HttpMethod.GET, null, responseType, username, password);
+    protected HttpHeaders getTokenHeader(String token) {
+        HttpHeaders headers = jsonHeader();
+        headers.set("X-Authorization", String.format("Bearer %s", token));
+        return headers;
     }
 
     protected <T> ResponseEntity<T> get(String path, Class<T> responseType) throws JsonProcessingException {

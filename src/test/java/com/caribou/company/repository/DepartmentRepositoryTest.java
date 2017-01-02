@@ -29,9 +29,11 @@ public class DepartmentRepositoryTest extends IntegrationTests {
 
     private Department department;
 
+    private Company company;
+
     @Before
     public void setUp() throws Exception {
-        Company company = Factory.company();
+        company = Factory.company();
         companyRepository.save(company);
 
         userAccount = Factory.userAccount();

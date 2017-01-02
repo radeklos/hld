@@ -8,6 +8,7 @@ import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.rest.dto.DepartmentDto;
 import com.github.javafaker.Faker;
 
+
 public class Factory {
 
     public static Faker faker = new Faker();

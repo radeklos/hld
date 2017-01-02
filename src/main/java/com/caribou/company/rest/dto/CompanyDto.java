@@ -8,6 +8,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+
 public class CompanyDto extends ResourceSupport {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
