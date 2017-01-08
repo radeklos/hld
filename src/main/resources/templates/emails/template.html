@@ -1,0 +1,94 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head th:replace="fragments/html_header :: html_header"></head>
+<body>
+<center>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
+        <tr>
+            <td align="center" valign="top" id="bodyCell">
+                <!-- BEGIN TEMPLATE // -->
+                <!--[if gte mso 9]>
+                <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;">
+                    <tr>
+                        <td align="center" valign="top" width="600" style="width:600px;">
+                <![endif]-->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
+                    <tr>
+                        <td valign="top" id="templateHeader">
+                            <table th:replace="fragments/header :: header"></table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="top" id="templateBody">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock"
+                                   style="min-width:100%;">
+                                <tbody class="mcnTextBlockOuter">
+                                <tr>
+                                    <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
+                                        <!--[if mso]>
+                                        <table align="left" border="0" cellspacing="0" cellpadding="0" width="100%"
+                                               style="width:100%;">
+                                            <tr>
+                                        <![endif]-->
+
+                                        <!--[if mso]>
+                                        <td valign="top" width="600" style="width:600px;">
+                                        <![endif]-->
+                                        <table align="left" border="0" cellpadding="0" cellspacing="0"
+                                               style="max-width:100%; min-width:100%;" width="100%"
+                                               class="mcnTextContentContainer">
+                                            <tbody>
+                                            <tr>
+                                                <td valign="top" class="mcnTextContent"
+                                                    style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
+
+                                                    <h1>It's time to design your email.</h1>
+                                                    <p>Now that you've selected a template, you'll define the layout of
+                                                        your email and give your content a place to live by adding,
+                                                        rearranging, and deleting content blocks.</p>
+                                                    <p>When you're ready to change the look of your email, take a look
+                                                        through the “design” tab to set background colors, borders, and
+                                                        other styles.</p>
+                                                    <p>If you need a bit of inspiration, you can <a
+                                                            href="http://inspiration.mailchimp.com"
+                                                            class="mc-template-link">see what other MailChimp users are
+                                                        doing</a>, or <a
+                                                            href="http://mailchimp.com/resources/email-design-guide/"
+                                                            class="mc-template-link">learn about email design</a> and
+                                                        blaze your own trail.</p>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <!--[if mso]>
+                                        </td>
+                                        <![endif]-->
+
+                                        <!--[if mso]>
+                                        </tr>
+                                        </table>
+                                        <![endif]-->
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="top" id="templateFooter">
+                            <div th:replace="fragments/footer :: footer"></div>
+                        </td>
+                    </tr>
+                </table>
+                <!--[if gte mso 9]>
+                </td>
+                </tr>
+                </table>
+                <![endif]-->
+                <!-- // END TEMPLATE -->
+            </td>
+        </tr>
+    </table>
+</center>
+</body>
+</html>

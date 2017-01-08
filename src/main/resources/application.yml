@@ -13,6 +13,12 @@ spring:
     username: postgres
     password: postgres
 
+services:
+  mailgun:
+    host: smtp.mailgun.org
+    username:
+    password:
+
 app.security.jwt:
   tokenExpirationTime: 15 # Minutes
   refreshTokenExpTime: 60 # Minutes
