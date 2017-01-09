@@ -1,4 +1,4 @@
-package com.caribou.company.service;
+package com.caribou.company.service.parser;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -6,14 +6,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 
-@Service
-public class EmployeeCsvParser {
+@Component
+public class EmployeeCsvParser implements EmployeeParser {
 
+    @Override
     public MappingIterator<Row> read(String csv) throws IOException {
         CsvMapper mapper = new CsvMapper();
         CsvSchema schema = mapper.schemaFor(Row.class).withHeader();
@@ -21,6 +22,7 @@ public class EmployeeCsvParser {
         return mapper.readerFor(Row.class).with(schema).readValues(csv);
     }
 
+    @Override
     public String generateExample() throws JsonProcessingException {
         CsvMapper mapper = new CsvMapper();
         CsvSchema schema = mapper.schemaFor(Row.class).withHeader();
@@ -34,7 +36,7 @@ public class EmployeeCsvParser {
     }
 
     @JsonPropertyOrder(value = {"firstName", "lastName", "email", "department", "reamingHoliday"})
-    public static class Row {
+    public static class Row implements EmployeeParser.Row {
 
         @JsonProperty("reaming holiday")
         public Double reamingHoliday;
@@ -62,45 +64,31 @@ public class EmployeeCsvParser {
             this.reamingHoliday = reamingHoliday;
         }
 
+        @Override
         public String getFirstName() {
             return firstName;
         }
 
-        public void setFirstName(String firstName) {
-            this.firstName = firstName;
-        }
-
+        @Override
         public String getLastName() {
             return lastName;
         }
 
-        public void setLastName(String lastName) {
-            this.lastName = lastName;
-        }
-
+        @Override
         public String getEmail() {
             return email;
         }
 
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
+        @Override
         public String getDepartment() {
             return department;
         }
 
-        public void setDepartment(String department) {
-            this.department = department;
-        }
-
+        @Override
         public Double getReamingHoliday() {
             return reamingHoliday;
         }
 
-        public void setReamingHoliday(Double reamingHoliday) {
-            this.reamingHoliday = reamingHoliday;
-        }
     }
 
 }

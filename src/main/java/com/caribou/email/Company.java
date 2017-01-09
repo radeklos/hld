@@ -16,4 +16,5 @@ public class Company {
         this.twitter = twitter;
         this.url = url;
     }
+
 }

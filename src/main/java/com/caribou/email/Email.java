@@ -1,5 +1,7 @@
 package com.caribou.email;
 
+import com.caribou.email.templates.EmailTemplate;
+
 public class Email {
 
     private Contact from;

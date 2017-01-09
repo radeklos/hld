@@ -1,4 +1,4 @@
-package com.caribou.company.service;
+package com.caribou.company.service.parser;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
@@ -18,7 +18,7 @@ public class EmployeeCsvParserTest {
 
         MappingIterator<EmployeeCsvParser.Row> output = employeeImporter.read(csv);
 
-        EmployeeCsvParser.Row employee = output.next();
+        EmployeeParser.Row employee = output.next();
         assertThat(employee.getFirstName()).isEqualTo("john");
         assertThat(employee.getLastName()).isEqualTo("doe");
         assertThat(employee.getEmail()).isEqualTo("john.doe@missing.com");
