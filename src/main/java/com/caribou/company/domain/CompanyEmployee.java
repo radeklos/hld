@@ -53,7 +53,6 @@ public class CompanyEmployee extends AbstractEntity {
         CompanyEmployee that = (CompanyEmployee) o;
 
         return getCompany().equals(that.getCompany()) && getMember().equals(that.getMember());
-
     }
 
     public Company getCompany() {

@@ -67,7 +67,7 @@ public class Department extends AbstractEntity {
         this.company.addDepartment(this);
     }
 
-    public void addEmployee(UserAccount userAccount, Role role) {
+    public DepartmentEmployee addEmployee(UserAccount userAccount, Role role) {
         if (employees == null) {
             employees = new HashSet<>();
         }
@@ -82,6 +82,7 @@ public class Department extends AbstractEntity {
         } else {
             employees.add(departmentEmployee);
         }
+        return departmentEmployee;
     }
 
     public static final class Builder {

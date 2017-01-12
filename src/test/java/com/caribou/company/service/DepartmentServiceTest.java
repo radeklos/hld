@@ -6,13 +6,18 @@ import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
+import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import rx.Observable;
 import rx.observers.TestSubscriber;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,7 +110,7 @@ public class DepartmentServiceTest extends IntegrationTests {
     }
 
     @Test
-    public void addEmployee() {
+    public void employeeIsAddedWhenDepartmentIsSaved() {
         Department department = Factory.department(company);
         departmentRepository.save(department);
 
@@ -123,4 +128,24 @@ public class DepartmentServiceTest extends IntegrationTests {
         assertThat(departmentResult.getEmployees()).hasSize(1);
     }
 
+    @Test
+    public void addEmployeeIntoDepartment() throws Exception {
+        Department department = Factory.department(company);
+        departmentRepository.save(department);
+
+        UserAccount user = Factory.userAccount();
+        userRepository.save(user);
+
+        Observable<DepartmentEmployee> returned = departmentService.addEmployee(department, user, Role.Viewer);
+
+        TestSubscriber testSubscriber = new TestSubscriber<>();
+        returned.subscribe(testSubscriber);
+
+        department = departmentRepository.findOne(department.getUid());
+        List<DepartmentEmployee> employees = department.getEmployees().stream().collect(Collectors.toList());
+
+        assertThat(employees).hasSize(1);
+        assertThat(employees.get(0).getRole()).isEqualTo(Role.Viewer);
+        assertThat(employees.get(0).getMember().getEmail()).isEqualTo(user.getEmail());
+    }
 }

@@ -110,7 +110,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     }
 
     @Test
-    public void getListOfDepartmentsInEmploeeysCompanyOnly() throws Exception {
+    public void getListOfDepartmentsInEmployeesCompanyOnly() throws Exception {
         Department hr = Factory.department(company);
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
