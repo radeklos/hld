@@ -24,10 +24,14 @@ public class DepartmentEmployee extends AbstractEntity {
     public DepartmentEmployee() {
     }
 
-    DepartmentEmployee(Department department, UserAccount member, Role role) {
+    public DepartmentEmployee(Department department, UserAccount member, Role role) {
         this.department = department;
         this.member = member;
         this.role = role;
+    }
+
+    public UserAccount getMember() {
+        return member;
     }
 
     public Role getRole() {
@@ -36,6 +40,10 @@ public class DepartmentEmployee extends AbstractEntity {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Department getDepartment() {
+        return department;
     }
 
     @Override
