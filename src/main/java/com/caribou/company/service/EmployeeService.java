@@ -1,6 +1,7 @@
 package com.caribou.company.service;
 
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
@@ -11,6 +12,7 @@ import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rx.Observable;
 import rx.exceptions.Exceptions;
 
@@ -24,8 +26,12 @@ public class EmployeeService {
     private final DepartmentService departmentRepository;
     private final UserService userService;
     private final EmailSender emailSender;
+
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public EmployeeService(DepartmentService departmentRepository, UserService userService, EmailSender emailSender) {
@@ -34,11 +40,12 @@ public class EmployeeService {
         this.emailSender = emailSender;
     }
 
-    public void importEmployee(List<EmployeeCsvParser.Row> row, final Company compamy) {
+    @Transactional
+    public void importEmployee(List<EmployeeCsvParser.Row> row, final Company company) {
         Observable<DepartmentEmployee> source = Observable.from(row)
                 .map(r -> {
                     try {
-                        Company refreshedCompany = companyRepository.findOne(compamy.getUid());
+                        Company refreshedCompany = companyRepository.findOne(company.getUid());
                         return createDepartmentEmployee(r, refreshedCompany);
                     } catch (Throwable t) {
                         throw Exceptions.propagate(t);
@@ -49,12 +56,18 @@ public class EmployeeService {
     }
 
     DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws NotFound {
-        UserAccount userAccount = UserAccount.newBuilder()
-                .firstName(row.getFirstName())
-                .lastName(row.getLastName())
-                .email(row.getEmail())
-                .password(UUID.randomUUID().toString())
-                .build();
+        Optional<UserAccount> alreadyExistingUser = userRepository.findByEmail(row.getEmail());
+        UserAccount userAccount;
+        if (alreadyExistingUser.isPresent()) {
+            userAccount = alreadyExistingUser.get();
+        } else {
+            userAccount = UserAccount.newBuilder()
+                    .firstName(row.getFirstName())
+                    .lastName(row.getLastName())
+                    .email(row.getEmail())
+                    .password(UUID.randomUUID().toString())
+                    .build();
+        }
 
         Optional<Department> department = company.getDepartments().stream()
                 .filter(d -> d.getName().equals(row.getDepartment()))

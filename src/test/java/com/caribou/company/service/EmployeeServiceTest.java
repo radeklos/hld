@@ -14,7 +14,6 @@ import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.EmailSender;
 import com.github.javafaker.Faker;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -121,7 +120,7 @@ public class EmployeeServiceTest extends IntegrationTests {
         assertThat(company.getEmployees().size()).isEqualTo(2);
     }
 
-    @Ignore
+    @Test
     public void failedTransactionDueInvalidDepartmentName() throws Exception {
         Department department = Factory.department(company);
         departmentRepository.save(department);
@@ -137,7 +136,7 @@ public class EmployeeServiceTest extends IntegrationTests {
                 faker.name().firstName(),
                 faker.name().lastName(),
                 faker.internet().emailAddress(),
-                "some department",
+                "not existing department",
                 faker.number().randomDouble(2, 0, 30)
         );
         try {
@@ -151,6 +150,9 @@ public class EmployeeServiceTest extends IntegrationTests {
 
         company = companyRepository.findOne(department.getCompany().getUid());
         assertThat(company.getEmployees().toArray()).isEmpty();
+
+        assertThat(userRepository.findByEmail(empl1.getEmail())).isNotPresent();
+        assertThat(userRepository.findByEmail(empl2.getEmail())).isNotPresent();
     }
 
 }

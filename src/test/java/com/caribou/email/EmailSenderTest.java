@@ -17,10 +17,10 @@ import static org.mockito.Mockito.*;
 
 public class EmailSenderTest extends IntegrationTests {
 
-    private Faker faker = new Faker();
-
     @Autowired
     private SpringTemplateEngine templateEngine;
+
+    private Faker faker = new Faker();
 
     private JavaMailSender javaMailSender;
 
