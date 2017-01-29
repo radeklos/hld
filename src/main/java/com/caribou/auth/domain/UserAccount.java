@@ -50,6 +50,11 @@ public class UserAccount extends AbstractEntity {
         return new Builder();
     }
 
+    public UserAccount setDepartment(Set<DepartmentEmployee> department) {
+        this.department = department;
+        return this;
+    }
+
     public String getEmail() {
         return email;
     }

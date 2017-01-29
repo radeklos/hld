@@ -142,7 +142,6 @@ public class EmployeeServiceTest extends IntegrationTests {
         try {
             employeeService.importEmployee(Arrays.asList(empl1, empl2), company);
         } catch (Exception ex) {
-
         }
 
         department = departmentRepository.findOne(department.getUid());

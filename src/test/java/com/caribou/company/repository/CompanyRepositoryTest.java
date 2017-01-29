@@ -11,6 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotEquals;
 
@@ -111,6 +114,24 @@ public class CompanyRepositoryTest extends IntegrationTests {
 
         CompanyEmployee defaultUserCompany = userRepository.findOne(userAccount.getUid()).getCompanies().iterator().next();
         assertThat(defaultUserCompany.getRole()).isEqualTo(Role.Admin);
+    }
+
+    @Test
+    public void addEmployee() throws Exception {
+        UserAccount anotherUserAccount = Factory.userAccount();
+        userRepository.save(anotherUserAccount);
+        companyRepository.addEmployee(company, anotherUserAccount, Role.Admin);
+
+        Optional<CompanyEmployee> employee = companyRepository.findOne(company.getUid()).getEmployees().stream().collect(Collectors.toList()).stream()
+                .filter(e -> e.getMember().getEmail().equals(anotherUserAccount.getEmail()))
+                .findFirst();
+
+        assertThat(employee).isPresent();
+        assertThat(employee.get().getRole()).isEqualTo(Role.Admin);
+        assertThat(employee.get().getCompany()).isEqualTo(company);
+        assertThat(employee.get().getMember()).isEqualTo(anotherUserAccount);
+        assertThat(employee.get().getCreatedAt()).isNotNull();
+        assertThat(employee.get().getUpdatedAt()).isNotNull();
     }
 
 }

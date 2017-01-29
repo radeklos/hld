@@ -10,12 +10,15 @@ import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 import rx.observers.TestSubscriber;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -110,25 +113,6 @@ public class DepartmentServiceTest extends IntegrationTests {
     }
 
     @Test
-    public void employeeIsAddedWhenDepartmentIsSaved() {
-        Department department = Factory.department(company);
-        departmentRepository.save(department);
-
-        UserAccount user = Factory.userAccount();
-        userRepository.save(user);
-
-        department.addEmployee(user, Role.Admin);
-
-        TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.create(department).subscribe(testSubscriber);
-
-        testSubscriber.assertNoErrors();
-        Department departmentResult = testSubscriber.getOnNextEvents().get(0);
-
-        assertThat(departmentResult.getEmployees()).hasSize(1);
-    }
-
-    @Test
     public void addEmployeeIntoDepartment() throws Exception {
         Department department = Factory.department(company);
         departmentRepository.save(department);
@@ -148,4 +132,35 @@ public class DepartmentServiceTest extends IntegrationTests {
         assertThat(employees.get(0).getRole()).isEqualTo(Role.Viewer);
         assertThat(employees.get(0).getMember().getEmail()).isEqualTo(user.getEmail());
     }
+
+    @Ignore
+    public void overwritePreviousEmployeeDepartment() throws Exception {
+        Department department1 = Factory.department(company);
+        Department department2 = Factory.department(company);
+        departmentRepository.save(Arrays.asList(department1, department2));
+
+        UserAccount user = Factory.userAccount();
+        userRepository.save(user);
+
+
+        TestSubscriber<DepartmentEmployee> sub1 = new TestSubscriber<>();
+        Observable<DepartmentEmployee> addEmployee = departmentService.addEmployee(department1, user, Role.Viewer);
+        addEmployee.subscribe(sub1);
+        sub1.assertNoErrors();
+
+        TestSubscriber<DepartmentEmployee> sub2 = new TestSubscriber<>();
+        addEmployee = departmentService.addEmployee(department2, userRepository.findOne(user.getUid()), Role.Viewer);
+        addEmployee.subscribe(sub2);
+        sub2.assertNoErrors();
+
+        department1 = departmentRepository.findOne(department1.getUid());
+        AssertionsForClassTypes.assertThat(department1.getEmployees().size()).isEqualTo(0);
+
+        department2 = departmentRepository.findOne(department2.getUid());
+        AssertionsForClassTypes.assertThat(department2.getEmployees().size()).isEqualTo(1);
+
+        company = companyRepository.findOne(department1.getCompany().getUid());
+        AssertionsForClassTypes.assertThat(company.getEmployees().size()).isEqualTo(1);
+    }
+
 }

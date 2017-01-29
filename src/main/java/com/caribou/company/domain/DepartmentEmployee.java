@@ -46,21 +46,4 @@ public class DepartmentEmployee extends AbstractEntity {
         return department;
     }
 
-    @Override
-    public int hashCode() {
-        int result = department.hashCode();
-        result = 31 * result + member.hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DepartmentEmployee that = (DepartmentEmployee) o;
-
-        return department.equals(that.department) && member.equals(that.member);
-
-    }
 }

@@ -20,10 +20,13 @@ public class DepartmentService extends RxService.Imp<DepartmentRepository, Depar
     public Observable<DepartmentEmployee> addEmployee(Department department, UserAccount user, Role role) {
         return Observable.create(subscriber -> {
             try {
-                DepartmentEmployee departmentEmployee = department.addEmployee(user, role);
-                department.getCompany().addEmployee(user, role);
-                companyRepository.save(department.getCompany());
-                subscriber.onNext(departmentEmployee);
+                if (repository.getEmployee(department, user).isPresent()) {
+                    repository.updateEmployee(user, role);
+                } else {
+                    repository.addEmployee(department, user, role);
+                    companyRepository.addEmployee(department.getCompany(), user, Role.Viewer);
+                }
+                subscriber.onNext(repository.getEmployee(department, user).get());
                 subscriber.onCompleted();
             } catch (Exception e) {
                 subscriber.onError(e);

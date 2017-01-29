@@ -301,9 +301,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Department anotherDepartment = Factory.department(company);
         departmentRepository.save(Arrays.asList(department, anotherDepartment));
 
-        anotherDepartment.addEmployee(anotherUserAccount, Role.Editor);
-        department.addEmployee(userAccount, Role.Admin);
-        departmentRepository.save(Arrays.asList(department, anotherDepartment));
+        departmentRepository.addEmployee(anotherDepartment, anotherUserAccount, Role.Editor);
+        departmentRepository.addEmployee(department, userAccount, Role.Admin);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = get(
