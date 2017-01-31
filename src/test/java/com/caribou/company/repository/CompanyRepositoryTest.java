@@ -10,12 +10,12 @@ import com.caribou.company.domain.Role;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotEquals;
 
 
 public class CompanyRepositoryTest extends IntegrationTests {
@@ -37,9 +37,7 @@ public class CompanyRepositoryTest extends IntegrationTests {
 
         userAccount = Factory.userAccount();
         userRepository.save(userAccount);
-
-        company.addEmployee(userAccount, Role.Viewer);
-        companyRepository.save(company);
+        companyRepository.addEmployee(company, userAccount, Role.Admin);
 
         company = companyRepository.findOne(company.getUid());
     }
@@ -71,49 +69,11 @@ public class CompanyRepositoryTest extends IntegrationTests {
         assertThat(result).isNull();
     }
 
-    @Test
+    @Test(expected = DataIntegrityViolationException.class)
     public void onlyOneEmployeeCanBeInSameCompany() {
-        company.addEmployee(userAccount, Role.Viewer);
-        companyRepository.save(company);
-
-        Company refreshed = companyRepository.findOne(company.getUid());
-        assertThat(refreshed.getEmployees()).hasSize(1);
-    }
-
-    @Test
-    public void changeEmployeeRoleInCompany() {
-        Role role = company.getEmployees().iterator().next().getRole();
-        company.addEmployee(userAccount, Role.Admin);
-        companyRepository.save(company);
-
-        Company refreshed = companyRepository.findOne(company.getUid());
-
-        assertNotEquals(Role.Admin, role);
-        assertThat(refreshed.getEmployees().iterator().next().getRole()).isEqualTo(Role.Admin);
-    }
-
-    @Test
-    public void changeEmployeeRoleInCompanyDoNotChangeOtherUsers() {
-        UserAccount anotherUserAccount = Factory.userAccount();
-        userRepository.save(anotherUserAccount);
-
-        company.addEmployee(anotherUserAccount, Role.Viewer);
-        companyRepository.save(company);
-        company = companyRepository.findOne(company.getUid());
-
-        company.addEmployee(userAccount, Role.Admin);
-        companyRepository.save(company);
-        company = companyRepository.findOne(company.getUid());
-
-        Company refreshed = companyRepository.findOne(company.getUid());
-
-        assertThat(refreshed.getEmployees()).hasSize(2);
-
-        CompanyEmployee anotherUserCompany = userRepository.findOne(anotherUserAccount.getUid()).getCompanies().iterator().next();
-        assertThat(anotherUserCompany.getRole()).isEqualTo(Role.Viewer);
-
-        CompanyEmployee defaultUserCompany = userRepository.findOne(userAccount.getUid()).getCompanies().iterator().next();
-        assertThat(defaultUserCompany.getRole()).isEqualTo(Role.Admin);
+        UserAccount userAccount = userRepository.save(Factory.userAccount());
+        companyRepository.addEmployee(company, userAccount, Role.Viewer);
+        companyRepository.addEmployee(company, userAccount, Role.Editor);
     }
 
     @Test
@@ -132,6 +92,27 @@ public class CompanyRepositoryTest extends IntegrationTests {
         assertThat(employee.get().getMember()).isEqualTo(anotherUserAccount);
         assertThat(employee.get().getCreatedAt()).isNotNull();
         assertThat(employee.get().getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    public void getEmployee() throws Exception {
+        UserAccount userAccount = userRepository.save(Factory.userAccount());
+        companyRepository.addEmployee(company, userAccount, Role.Owner);
+
+        Optional<CompanyEmployee> departmentEmployee = companyRepository.findEmployeeByUserAccount(userAccount);
+
+        assertThat(departmentEmployee).isPresent();
+        assertThat(departmentEmployee.get().getRole()).isEqualTo(Role.Owner);
+        assertThat(departmentEmployee.get().getCompany()).isEqualTo(company);
+        assertThat(departmentEmployee.get().getMember()).isEqualTo(userAccount);
+    }
+
+    @Test
+    public void getNonExistingEmployee() throws Exception {
+        UserAccount userAccount = userRepository.save(Factory.userAccount());
+        Optional<CompanyEmployee> departmentEmployee = companyRepository.findEmployeeByUserAccount(userAccount);
+
+        assertThat(departmentEmployee).isNotPresent();
     }
 
 }

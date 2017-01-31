@@ -38,23 +38,6 @@ public class CompanyEmployee extends AbstractEntity {
         this.role = role;
     }
 
-    @Override
-    public int hashCode() {
-        int result = getCompany().hashCode();
-        result = 31 * result + getMember().hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        CompanyEmployee that = (CompanyEmployee) o;
-
-        return getCompany().equals(that.getCompany()) && getMember().equals(that.getMember());
-    }
-
     public Company getCompany() {
         return company;
     }

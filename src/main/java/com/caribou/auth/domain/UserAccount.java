@@ -1,12 +1,11 @@
 package com.caribou.auth.domain;
 
-import com.caribou.company.domain.CompanyEmployee;
-import com.caribou.company.domain.DepartmentEmployee;
-
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 
 @Entity
@@ -25,12 +24,6 @@ public class UserAccount extends AbstractEntity {
     @Column
     private String lastName;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER)
-    private Set<CompanyEmployee> companies;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "member", fetch = FetchType.EAGER)
-    private Set<DepartmentEmployee> department;
-
     public UserAccount() {
     }
 
@@ -48,11 +41,6 @@ public class UserAccount extends AbstractEntity {
 
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    public UserAccount setDepartment(Set<DepartmentEmployee> department) {
-        this.department = department;
-        return this;
     }
 
     public String getEmail() {
@@ -85,14 +73,6 @@ public class UserAccount extends AbstractEntity {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Set<CompanyEmployee> getCompanies() {
-        return companies;
-    }
-
-    public void setCompanies(Set<CompanyEmployee> companies) {
-        this.companies = companies;
     }
 
     public List<UserRole> getRoles() {

@@ -16,6 +16,7 @@ import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import rx.observers.TestSubscriber;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,6 +72,31 @@ public class EmployeeServiceTest extends IntegrationTests {
         assertThat(employee.getRole()).isEqualTo(Role.Viewer);
     }
 
+    @Test
+    public void getDepartmentEmployeeFromDatabase() throws Exception {
+        UserAccount userAccount = userRepository.save(Factory.userAccount());
+        Department department = Factory.department(company);
+        company.setDepartments(Collections.singleton(department));
+
+        EmployeeCsvParser.Row row = new EmployeeCsvParser.Row(
+                faker.name().firstName(),
+                faker.name().lastName(),
+                userAccount.getEmail(),
+                department.getName(),
+                faker.number().randomDouble(2, 0, 30)
+        );
+
+        DepartmentEmployee employee = employeeService.createDepartmentEmployee(row, company);
+
+        UserAccount user = employee.getMember();
+        assertThat(user.getFirstName()).isNotEqualTo(row.getFirstName());
+        assertThat(user.getLastName()).isNotEqualTo(row.getLastName());
+        assertThat(user).isEqualTo(userAccount);
+
+        assertThat(employee.getDepartment()).isEqualTo(department);
+        assertThat(employee.getRole()).isEqualTo(Role.Viewer);
+    }
+
     @Test(expected = NotFound.class)
     public void cannotFindDepartmentForEmployee() throws Exception {
         Company company = Factory.company();
@@ -108,7 +134,9 @@ public class EmployeeServiceTest extends IntegrationTests {
                 faker.number().randomDouble(2, 0, 30)
         );
 
-        employeeService.importEmployee(Arrays.asList(empl1, empl2), company);
+        TestSubscriber<DepartmentEmployee> testSubscriber = new TestSubscriber<>();
+        employeeService.importEmployee(Arrays.asList(empl1, empl2), company).subscribe(testSubscriber);
+        testSubscriber.assertNoErrors();
 
         department1 = departmentRepository.findOne(department1.getUid());
         assertThat(department1.getEmployees().size()).isEqualTo(1);
@@ -139,18 +167,18 @@ public class EmployeeServiceTest extends IntegrationTests {
                 "not existing department",
                 faker.number().randomDouble(2, 0, 30)
         );
-        try {
-            employeeService.importEmployee(Arrays.asList(empl1, empl2), company);
-        } catch (Exception ex) {
-        }
+
+        TestSubscriber<DepartmentEmployee> testSubscriber = new TestSubscriber<>();
+        employeeService.importEmployee(Arrays.asList(empl1, empl2), company).subscribe(testSubscriber);
+        testSubscriber.assertError(RuntimeException.class);
 
         department = departmentRepository.findOne(department.getUid());
-        assertThat(department.getEmployees().toArray()).isEmpty();
+        assertThat(department.getEmployees().toArray()).isNotEmpty();
 
         company = companyRepository.findOne(department.getCompany().getUid());
-        assertThat(company.getEmployees().toArray()).isEmpty();
+        assertThat(company.getEmployees().toArray()).hasSize(1);
 
-        assertThat(userRepository.findByEmail(empl1.getEmail())).isNotPresent();
+        assertThat(userRepository.findByEmail(empl1.getEmail())).isPresent();
         assertThat(userRepository.findByEmail(empl2.getEmail())).isNotPresent();
     }
 

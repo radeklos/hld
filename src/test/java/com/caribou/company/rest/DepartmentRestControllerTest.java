@@ -225,8 +225,10 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void createNewDepartmentAsViewerReturns401() throws Exception {
-        company.addEmployee(userAccount, Role.Viewer);
-        companyRepository.save(company);
+        UserAccount viewer = Factory.userAccount();
+        String viewPassword = viewer.getPassword();
+        userRepository.create(viewer).subscribe(new TestSubscriber<>());
+        companyRepository.addEmployee(company, viewer, Role.Viewer);
 
         DepartmentDto departmentDto = Factory.departmentDto();
         int size = Lists.from(departmentRepository.findAll().iterator()).size();
@@ -236,8 +238,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
                 url,
                 departmentDto,
                 DepartmentDto.class,
-                userAccount.getEmail(),
-                userPassword
+                viewer.getEmail(),
+                viewPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -249,8 +251,10 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void createNewDepartmentAsAdmin() throws Exception {
-        company.addEmployee(userAccount, Role.Admin);
-        companyRepository.save(company);
+        UserAccount admin = Factory.userAccount();
+        String adminPassword = admin.getPassword();
+        userRepository.create(admin).subscribe(new TestSubscriber<>());
+        companyRepository.addEmployee(company, admin, Role.Admin);
 
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
 
@@ -259,8 +263,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
                 url,
                 departmentDto,
                 DepartmentDto.class,
-                userAccount.getEmail(),
-                userPassword
+                admin.getEmail(),
+                adminPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -270,8 +274,11 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void createNewDepartmentAsEditor() throws Exception {
-        company.addEmployee(userAccount, Role.Editor);
-        companyRepository.save(company);
+        UserAccount editor = Factory.userAccount();
+        String editorPassword = editor.getPassword();
+        userRepository.create(editor).subscribe(new TestSubscriber<>());
+        companyRepository.addEmployee(company, editor, Role.Editor);
+
 
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
 
@@ -280,13 +287,13 @@ public class DepartmentRestControllerTest extends IntegrationTests {
                 url,
                 departmentDto,
                 DepartmentDto.class,
-                userAccount.getEmail(),
-                userPassword
+                editor.getEmail(),
+                editorPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Department department = departmentRepository.findOne(response.getBody().getUid());
-        assertThat(department.getCompany().getUid()).as("Department isn't saved into company").isEqualTo(company.getUid());
+        assertThat(department.getCompany().getUid()).isEqualTo(company.getUid());
     }
 
     @Ignore

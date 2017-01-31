@@ -12,7 +12,6 @@ import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import rx.Observable;
 import rx.exceptions.Exceptions;
 
@@ -40,9 +39,8 @@ public class EmployeeService {
         this.emailSender = emailSender;
     }
 
-    @Transactional
-    public void importEmployee(List<EmployeeCsvParser.Row> row, final Company company) {
-        Observable<DepartmentEmployee> source = Observable.from(row)
+    public Observable<DepartmentEmployee> importEmployee(List<EmployeeCsvParser.Row> rows, final Company company) throws NotFound {
+        return Observable.from(rows)
                 .map(r -> {
                     try {
                         Company refreshedCompany = companyRepository.findOne(company.getUid());
@@ -52,28 +50,23 @@ public class EmployeeService {
                     }
                 })
                 .flatMap(e -> userService.create(e.getMember()).flatMap(u -> departmentRepository.addEmployee(e.getDepartment(), u, Role.Viewer)));
-        source.toBlocking().forEach(u -> System.out.println(u.getMember().getEmail()));
     }
 
     DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws NotFound {
         Optional<UserAccount> alreadyExistingUser = userRepository.findByEmail(row.getEmail());
         UserAccount userAccount;
-        if (alreadyExistingUser.isPresent()) {
-            userAccount = alreadyExistingUser.get();
-        } else {
-            userAccount = UserAccount.newBuilder()
-                    .firstName(row.getFirstName())
-                    .lastName(row.getLastName())
-                    .email(row.getEmail())
-                    .password(UUID.randomUUID().toString())
-                    .build();
-        }
+        userAccount = alreadyExistingUser.orElseGet(() -> UserAccount.newBuilder()
+                .firstName(row.getFirstName())
+                .lastName(row.getLastName())
+                .email(row.getEmail())
+                .password(UUID.randomUUID().toString())
+                .build());
 
         Optional<Department> department = company.getDepartments().stream()
                 .filter(d -> d.getName().equals(row.getDepartment()))
                 .findFirst();
         if (!department.isPresent()) {
-            throw new NotFound(String.format("Can't find department %s for company %s", row.getDepartment(), company.getName()));
+            throw new NotFound(String.format("Can't find department %s for company %s", row.getDepartment(), company.getName()), row.getDepartment());
         }
         return new DepartmentEmployee(department.get(), userAccount, Role.Viewer);
     }

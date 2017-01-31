@@ -95,13 +95,11 @@ public class DepartmentRepositoryTest extends IntegrationTests {
         assertThat(departmentEmployee.get().getMember()).isEqualTo(userAccount);
     }
 
-
     @Test
     public void getNonExistingEmployee() throws Exception {
         Optional<DepartmentEmployee> departmentEmployee = departmentRepository.getEmployee(department, userAccount);
 
         assertThat(departmentEmployee).isNotPresent();
     }
-
 
 }
