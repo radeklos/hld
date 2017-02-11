@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 import rx.observers.TestSubscriber;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,7 +121,7 @@ public class DepartmentServiceTest extends IntegrationTests {
         UserAccount user = Factory.userAccount();
         userRepository.save(user);
 
-        Observable<DepartmentEmployee> returned = departmentService.addEmployee(department, user, Role.Viewer);
+        Observable<DepartmentEmployee> returned = departmentService.addEmployee(new DepartmentEmployee(department, user, BigDecimal.TEN, Role.Viewer));
 
         TestSubscriber testSubscriber = new TestSubscriber<>();
         returned.subscribe(testSubscriber);
@@ -144,12 +145,12 @@ public class DepartmentServiceTest extends IntegrationTests {
 
 
         TestSubscriber<DepartmentEmployee> sub1 = new TestSubscriber<>();
-        Observable<DepartmentEmployee> addEmployee = departmentService.addEmployee(department1, user, Role.Viewer);
+        Observable<DepartmentEmployee> addEmployee = departmentService.addEmployee(new DepartmentEmployee(department1, user, BigDecimal.TEN, Role.Viewer));
         addEmployee.subscribe(sub1);
         sub1.assertNoErrors();
 
         TestSubscriber<DepartmentEmployee> sub2 = new TestSubscriber<>();
-        addEmployee = departmentService.addEmployee(department2, userRepository.findOne(user.getUid()), Role.Viewer);
+        addEmployee = departmentService.addEmployee(new DepartmentEmployee(department2, userRepository.findOne(user.getUid()), BigDecimal.TEN, Role.Viewer));
         addEmployee.subscribe(sub2);
         sub2.assertNoErrors();
 

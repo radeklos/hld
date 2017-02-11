@@ -11,13 +11,14 @@ import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import com.caribou.email.EmailSender;
+import com.caribou.email.providers.EmailSender;
 import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.observers.TestSubscriber;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -70,6 +71,7 @@ public class EmployeeServiceTest extends IntegrationTests {
 
         assertThat(employee.getDepartment()).isEqualTo(department);
         assertThat(employee.getRole()).isEqualTo(Role.Viewer);
+        assertThat(employee.getRemainingDaysOff()).isEqualByComparingTo(BigDecimal.valueOf(row.getReamingHoliday()));
     }
 
     @Test
@@ -149,7 +151,7 @@ public class EmployeeServiceTest extends IntegrationTests {
     }
 
     @Test
-    public void failedTransactionDueInvalidDepartmentName() throws Exception {
+    public void failedToSaveEmployeeIntoNonExistingDepartment() throws Exception {
         Department department = Factory.department(company);
         departmentRepository.save(department);
 

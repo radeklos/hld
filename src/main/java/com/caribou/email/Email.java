@@ -1,13 +1,21 @@
 package com.caribou.email;
 
+import com.caribou.auth.domain.UserAccount;
 import com.caribou.email.templates.EmailTemplate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
 
 public class Email {
 
+    @Getter
     private Contact from;
 
+    @Getter
     private Contact to;
 
+    @Getter
     private String subject;
 
     private EmailTemplate template;
@@ -19,44 +27,24 @@ public class Email {
         template = builder.template;
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
-    }
-
-    public Contact getFrom() {
-        return from;
-    }
-
-    public Contact getTo() {
-        return to;
-    }
-
-    public String getSubject() {
-        return subject;
     }
 
     public EmailTemplate getTemplate() {
         return template;
     }
 
+    @ToString
+    @AllArgsConstructor
     public static class Contact {
 
+        @Getter
+        private final String email;
+
+        @Getter
         private final String alias;
 
-        private final String address;
-
-        public Contact(String email, String alias) {
-            this.alias = alias;
-            this.address = email;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
-
-        public String getAddress() {
-            return address;
-        }
     }
 
     public static final class Builder {
@@ -70,6 +58,11 @@ public class Email {
 
         public Builder from(Contact val) {
             from = val;
+            return this;
+        }
+
+        public Builder to(UserAccount user) {
+            to = new Email.Contact(user.getEmail(), String.format("%s %s", user.getFirstName(), user.getLastName()));
             return this;
         }
 

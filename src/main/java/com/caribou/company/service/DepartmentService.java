@@ -1,6 +1,5 @@
 package com.caribou.company.service;
 
-import com.caribou.auth.domain.UserAccount;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Role;
@@ -17,16 +16,16 @@ public class DepartmentService extends RxService.Imp<DepartmentRepository, Depar
     @Autowired
     CompanyRepository companyRepository;
 
-    public Observable<DepartmentEmployee> addEmployee(Department department, UserAccount user, Role role) {
+    public Observable<DepartmentEmployee> addEmployee(DepartmentEmployee departmentEmployee) {
         return Observable.create(subscriber -> {
             try {
-                if (repository.getEmployee(department, user).isPresent()) {
-                    repository.updateEmployee(user, role);
+                if (repository.getEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember()).isPresent()) {
+                    repository.updateEmployee(departmentEmployee.getMember(), departmentEmployee.getRole());
                 } else {
-                    repository.addEmployee(department, user, role);
-                    companyRepository.addEmployee(department.getCompany(), user, Role.Viewer);
+                    repository.addEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember(), departmentEmployee.getRemainingDaysOff(), departmentEmployee.getRole());
+                    companyRepository.addEmployee(departmentEmployee.getDepartment().getCompany(), departmentEmployee.getMember(), Role.Viewer);
                 }
-                subscriber.onNext(repository.getEmployee(department, user).get());
+                subscriber.onNext(repository.getEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember()).get());
                 subscriber.onCompleted();
             } catch (Exception e) {
                 subscriber.onError(e);

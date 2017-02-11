@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class DepartmentRepositoryTest extends IntegrationTests {
 
     @Test
     public void addEmployee() throws Exception {
-        departmentRepository.addEmployee(department, userAccount, Role.Admin);
+        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
 
         List<DepartmentEmployee> employees = departmentRepository.findOne(department.getUid()).getEmployees().stream().collect(Collectors.toList());
 
@@ -71,7 +72,7 @@ public class DepartmentRepositoryTest extends IntegrationTests {
 
     @Test
     public void updateEmployeeRole() throws Exception {
-        departmentRepository.addEmployee(department, userAccount, Role.Admin);
+        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
         departmentRepository.save(department);
 
         departmentRepository.updateEmployee(userAccount, Role.Viewer);
@@ -84,7 +85,7 @@ public class DepartmentRepositoryTest extends IntegrationTests {
 
     @Test
     public void getEmployee() throws Exception {
-        departmentRepository.addEmployee(department, userAccount, Role.Owner);
+        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Owner);
         departmentRepository.save(department);
 
         Optional<DepartmentEmployee> departmentEmployee = departmentRepository.getEmployee(department, userAccount);

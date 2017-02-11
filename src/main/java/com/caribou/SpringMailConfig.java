@@ -1,5 +1,6 @@
 package com.caribou;
 
+import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -43,6 +44,7 @@ public class SpringMailConfig {
         final SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.addTemplateResolver(templateResolver());
         engine.setMessageSource(messageSource());
+        engine.addDialect(new LayoutDialect());
         return engine;
     }
 

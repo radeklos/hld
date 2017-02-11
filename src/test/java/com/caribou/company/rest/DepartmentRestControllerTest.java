@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rx.observers.TestSubscriber;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -308,8 +309,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Department anotherDepartment = Factory.department(company);
         departmentRepository.save(Arrays.asList(department, anotherDepartment));
 
-        departmentRepository.addEmployee(anotherDepartment, anotherUserAccount, Role.Editor);
-        departmentRepository.addEmployee(department, userAccount, Role.Admin);
+        departmentRepository.addEmployee(anotherDepartment, anotherUserAccount, BigDecimal.TEN, Role.Editor);
+        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = get(

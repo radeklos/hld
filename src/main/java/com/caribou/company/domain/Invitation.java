@@ -25,7 +25,7 @@ public class Invitation extends AbstractEntity {
     private UserAccount userAccount;
 
     private Invitation(Builder builder) {
-        this();
+        this();  // create random token
         company = builder.company;
         department = builder.department;
         userAccount = builder.userAccount;
