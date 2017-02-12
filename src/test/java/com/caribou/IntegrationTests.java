@@ -54,18 +54,7 @@ public abstract class IntegrationTests {
         if (username == null && password == null) {
             return jsonHeader();
         }
-        HttpHeaders headers = jsonHeader();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Requested-With", "XMLHttpRequest");
-
-        LoginRequest loginRequest = new LoginRequest(username, password);
-        ResponseEntity<TokenResponse> response = testRestTemplate().exchange(
-                path("/v1/auth/login"),
-                HttpMethod.POST,
-                new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers),
-                TokenResponse.class
-        );
-        return getTokenHeader(response.getBody().getToken());
+        return getTokenHeader(getUserToken(username, password));
     }
 
     protected HttpHeaders jsonHeader() {
@@ -78,6 +67,21 @@ public abstract class IntegrationTests {
         HttpHeaders headers = jsonHeader();
         headers.set("X-Authorization", String.format("Bearer %s", token));
         return headers;
+    }
+
+    protected String getUserToken(String username, String password) throws JsonProcessingException {
+        HttpHeaders headers = jsonHeader();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("X-Requested-With", "XMLHttpRequest");
+
+        LoginRequest loginRequest = new LoginRequest(username, password);
+        ResponseEntity<TokenResponse> response = testRestTemplate().exchange(
+                path("/v1/auth/login"),
+                HttpMethod.POST,
+                new HttpEntity<>(objectMapper.writeValueAsString(loginRequest), headers),
+                TokenResponse.class
+        );
+        return response.getBody().getToken();
     }
 
     protected <T> ResponseEntity<T> get(String path, Class<T> responseType) throws JsonProcessingException {

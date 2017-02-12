@@ -12,11 +12,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import rx.Single;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -38,7 +41,7 @@ public class CompanyRestController {
     public Single<CompanyDto> get(@PathVariable("uid") Long uid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
-                .map(c -> convert(c))
+                .map(c -> convert(c.getCompany()))
                 .toSingle();
     }
 
@@ -69,8 +72,20 @@ public class CompanyRestController {
         // TODO some acl
         Company company = convert(companyDto);
         return companyService.update(uid, company)
-                .map(d -> convert(d))
+                .map(this::convert)
                 .toSingle();
+    }
+
+    @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
+    public Single<String> update(@PathVariable("uid") Long uid, @RequestParam("file") MultipartFile file) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
+                .map(employee -> {
+                    if (!Arrays.asList(Role.Admin, Role.Editor).contains(employee.getRole())) {
+                        throw new AccessDeniedException("omg");
+                    }
+                    return employee.getMember().getEmail();
+                }).toSingle();
     }
 
 }

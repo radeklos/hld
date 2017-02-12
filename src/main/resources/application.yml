@@ -15,8 +15,8 @@ spring:
 services:
   mailgun:
     host: smtp.mailgun.org
-    username: postmaster@sandboxbb6129ee545e47a683cecce938eb51a5.mailgun.org
-    password: ahojahoj
+    username:
+    password:
 
 app.security.jwt:
   tokenExpirationTime: 15 # Minutes

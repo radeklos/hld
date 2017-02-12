@@ -9,12 +9,17 @@ import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.rest.dto.CompanyDto;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import rx.observers.TestSubscriber;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -163,6 +168,52 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
+    }
+
+    @Ignore
+    public void uploadCsvWithEmployees() throws IOException {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Owner);
+        companyRepository.save(company);
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(File.createTempFile("abc", ".csv")));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                String.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
+    public void onlyCompanyAdminAndEditorCanImportEmployees() throws IOException {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(File.createTempFile("employees", ".csv")));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                String.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
     }
 
 }

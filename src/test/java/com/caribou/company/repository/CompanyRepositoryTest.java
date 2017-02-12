@@ -44,8 +44,8 @@ public class CompanyRepositoryTest extends IntegrationTests {
 
     @Test
     public void findEmployeeByEmailForUid() throws Exception {
-        Company result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), company.getUid());
-        assertThat(result).isNotNull();
+        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), company.getUid());
+        assertThat(result).isPresent();
     }
 
     @Test
@@ -53,20 +53,20 @@ public class CompanyRepositoryTest extends IntegrationTests {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
-        Company result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), anotherCompany.getUid());
-        assertThat(result).isNull();
+        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), anotherCompany.getUid());
+        assertThat(result).isNotPresent();
     }
 
     @Test
     public void findEmployeeByEmailForUidNonExistingEmail() throws Exception {
-        Company result = companyRepository.findEmployeeByEmailForUid("non.existing@email.com", company.getUid());
-        assertThat(result).isNull();
+        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid("non.existing@email.com", company.getUid());
+        assertThat(result).isNotPresent();
     }
 
     @Test
     public void findEmployeeByEmailForUidNonExistingCompany() throws Exception {
-        Company result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), 0L);
-        assertThat(result).isNull();
+        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), 0L);
+        assertThat(result).isNotPresent();
     }
 
     @Test(expected = DataIntegrityViolationException.class)

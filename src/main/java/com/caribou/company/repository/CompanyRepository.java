@@ -16,18 +16,18 @@ import java.util.Optional;
 
 public interface CompanyRepository extends CrudRepository<Company, Long> {
 
-    @Query("from Company c " +
-            "join c.employees e " +
+    @Query("select e " +
+            "from CompanyEmployee e " +
             "join e.member u " +
-            "WHERE u.email = :email and c.uid = :uid")
-    Company findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") Long uid);
+            "WHERE u.email = :email and e.company.uid = :uid")
+    Optional<CompanyEmployee> findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") Long uid);
 
-    @Query("from Company c " +
+    @Query("select c " +
+            "from Company c " +
             "join c.employees e " +
             "join e.member u " +
             "WHERE u.email = :email")
-    Company findByEmployeeEmail(@Param("email") String email);
-
+    Optional<Company> findByEmployeeEmail(@Param("email") String email);
 
     @Modifying
     @Transactional

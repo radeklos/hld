@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import rx.Single;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -41,18 +42,14 @@ public class UserRestController {
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public Single<UserAccountDto> me() {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Single<UserAccountDto> bla = userService.findByEmail(userDetails.getUsername())
+        return userService.findByEmail(userDetails.getUsername())
                 .map(u -> modelMapper.map(u, UserAccountDto.class))
                 .map(u -> {
-                    Company company = companyRepository.findByEmployeeEmail(u.getEmail());
-                    if (company != null) {
-                        u.add(linkTo(methodOn(CompanyRestController.class).get(company.getUid())).withRel("company"));
-                    }
+                    Optional<Company> company = companyRepository.findByEmployeeEmail(u.getEmail());
+                    company.ifPresent(company1 -> u.add(linkTo(methodOn(CompanyRestController.class).get(company1.getUid())).withRel("company")));
                     return u;
                 })
                 .toSingle();
-
-        return bla;
     }
 
     @RequestMapping(method = RequestMethod.POST)

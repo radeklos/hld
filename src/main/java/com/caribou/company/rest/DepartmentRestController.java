@@ -53,7 +53,7 @@ public class DepartmentRestController {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .flatMap(d -> Observable.create(subscriber -> {
-                    d.getDepartments().forEach(subscriber::onNext);
+                    d.getCompany().getDepartments().forEach(subscriber::onNext);
                     subscriber.onCompleted();
                 })).map(m -> this.convert((Department) m));
     }
@@ -80,16 +80,16 @@ public class DepartmentRestController {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
-                    for (CompanyEmployee f : company1.getEmployees()) {
+                    for (CompanyEmployee f : company1.getCompany().getEmployees()) {
                         if (f.getMember().getEmail().equals(userDetails.getUsername()) && f.getRole() == Role.Viewer) {
                             throw new AccessDeniedException("omg");
                         }
                     }
                     return company1;
                 })
-                .flatMap(company -> {
+                .flatMap(employee -> {
                     Department entity = convert(departmentDto);
-                    entity.setCompany(company);
+                    entity.setCompany(employee.getCompany());
                     return departmentService.create(entity);
                 })
                 .map(d -> new ResponseEntity<>(convert(d), HttpStatus.CREATED))
