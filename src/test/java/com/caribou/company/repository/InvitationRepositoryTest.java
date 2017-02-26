@@ -12,7 +12,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InvitationRepositoryTest extends IntegrationTests {
 
@@ -38,25 +41,11 @@ public class InvitationRepositoryTest extends IntegrationTests {
         department = departmentRepository.save(Factory.department(company));
     }
 
-    @Test
-    public void keyIsNotEmpty() throws Exception {
-        UserAccount userAccount = userRepository.save(Factory.userAccount());
-
-        Invitation invitation = Invitation.newBuilder()
-                .company(company)
-                .department(department)
-                .userAccount(userAccount)
-                .build();
-        invitation = invitationRepository.save(invitation);
-
-        assertThat(invitation.getKey()).isNotEmpty();
-    }
-
     @Test(expected = DataIntegrityViolationException.class)
     public void userCannotHaveMoreInvitations() throws Exception {
         UserAccount userAccount = userRepository.save(Factory.userAccount());
 
-        Invitation invitation = Invitation.newBuilder()
+        Invitation invitation = Invitation.builder()
                 .company(company)
                 .department(department)
                 .userAccount(userAccount)
@@ -65,12 +54,30 @@ public class InvitationRepositoryTest extends IntegrationTests {
 
         Company company = companyRepository.save(Factory.company());
         Department department = departmentRepository.save(Factory.department(company));
-        invitation = Invitation.newBuilder()
+        invitation = Invitation.builder()
+                .key(UUID.randomUUID().toString())
                 .company(company)
                 .department(department)
                 .userAccount(userAccount)
                 .build();
         invitationRepository.save(invitation);
+    }
+
+    @Test
+    public void findByEmail() throws Exception {
+        UserAccount userAccount = userRepository.save(Factory.userAccount());
+
+        Invitation invitation = Invitation.builder()
+                .key(UUID.randomUUID().toString())
+                .company(company)
+                .department(department)
+                .userAccount(userAccount)
+                .build();
+        invitationRepository.save(invitation);
+
+        Optional<Invitation> inv = invitationRepository.findByUserEmail(userAccount.getEmail());
+        assertThat(inv).isPresent();
+        assertThat(inv.get().getKey()).isEqualTo(invitation.getKey());
     }
 
 }

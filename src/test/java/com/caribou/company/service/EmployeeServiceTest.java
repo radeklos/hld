@@ -7,22 +7,30 @@ import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
+import com.caribou.company.domain.Invitation;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
+import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.providers.EmailSender;
-import com.github.javafaker.Faker;
+import com.sun.tools.javac.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
 
 public class EmployeeServiceTest extends IntegrationTests {
 
@@ -39,9 +47,10 @@ public class EmployeeServiceTest extends IntegrationTests {
     private UserRepository userRepository;
 
     @Autowired
-    private EmailSender emailSender;
+    private InvitationRepository invitationRepository;
 
-    private Faker faker = new Faker();
+    @MockBean
+    private EmailSender emailSender;
 
     private Company company;
 
@@ -184,4 +193,25 @@ public class EmployeeServiceTest extends IntegrationTests {
         assertThat(userRepository.findByEmail(empl2.getEmail())).isNotPresent();
     }
 
+    @Test
+    public void sendInvitationEmail() throws Exception {
+        Department department = Factory.department(company);
+        departmentRepository.save(department);
+
+        EmployeeCsvParser.Row employee = new EmployeeCsvParser.Row(
+                faker.name().firstName(),
+                faker.name().lastName(),
+                faker.internet().emailAddress(),
+                department.getName(),
+                faker.number().randomDouble(2, 0, 30)
+        );
+
+        TestSubscriber<Pair> testSubscriber = new TestSubscriber<>();
+        employeeService.performImport(Collections.singletonList(employee), company).subscribe(testSubscriber);
+
+        verify(emailSender, times(1)).send(any(), any());
+
+        Optional<Invitation> invitation = invitationRepository.findByUserEmail(employee.getEmail());
+        assertThat(invitation).isPresent();
+    }
 }

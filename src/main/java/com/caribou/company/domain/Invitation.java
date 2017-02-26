@@ -1,15 +1,28 @@
 package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_account_uid"})
 )
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Invitation extends AbstractEntity {
 
     @Column(nullable = false)
@@ -24,77 +37,4 @@ public class Invitation extends AbstractEntity {
     @OneToOne(optional = false, fetch = FetchType.EAGER)
     private UserAccount userAccount;
 
-    private Invitation(Builder builder) {
-        this();  // create random token
-        company = builder.company;
-        department = builder.department;
-        userAccount = builder.userAccount;
-    }
-
-    public Invitation() {
-        key = UUID.randomUUID().toString();
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public Invitation setCompany(Company company) {
-        this.company = company;
-        return this;
-    }
-
-    public Department getDepartment() {
-        return department;
-    }
-
-    public Invitation setDepartment(Department department) {
-        this.department = department;
-        return this;
-    }
-
-    public UserAccount getUserAccount() {
-        return userAccount;
-    }
-
-    public Invitation setUserAccount(UserAccount userAccount) {
-        this.userAccount = userAccount;
-        return this;
-    }
-
-    public static final class Builder {
-        private Company company;
-        private Department department;
-        private UserAccount userAccount;
-
-        private Builder() {
-        }
-
-        public Builder company(Company val) {
-            company = val;
-            return this;
-        }
-
-        public Builder department(Department val) {
-            department = val;
-            return this;
-        }
-
-        public Builder userAccount(UserAccount val) {
-            userAccount = val;
-            return this;
-        }
-
-        public Invitation build() {
-            return new Invitation(this);
-        }
-    }
 }

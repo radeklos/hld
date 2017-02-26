@@ -20,10 +20,13 @@ public class SpringMailConfig {
 
     @Value("${services.mailgun.host}")
     String host;
+
     @Value("${services.mailgun.username}")
     String username;
+
     @Value("${services.mailgun.password}")
     String password;
+
     private ApplicationContext applicationContext;
 
     @Bean

@@ -3,13 +3,19 @@ package com.caribou.company.service;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
-import com.caribou.company.domain.*;
+import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Department;
+import com.caribou.company.domain.DepartmentEmployee;
+import com.caribou.company.domain.Invitation;
+import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.Email;
 import com.caribou.email.providers.EmailSender;
 import com.caribou.email.templates.Invite;
+import com.sun.tools.javac.util.Pair;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
@@ -22,6 +28,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+
+@Slf4j
 @Service
 public class EmployeeService {
 
@@ -47,7 +55,11 @@ public class EmployeeService {
         this.emailSender = emailSender;
     }
 
-    public Observable<DepartmentEmployee> importEmployee(List<EmployeeCsvParser.Row> rows, final Company company) throws NotFound {
+    public Observable<Pair<Boolean, Invitation>> performImport(List<EmployeeCsvParser.Row> rows, final Company company) throws NotFound {
+        return importEmployee(rows, company).map(this::sendInvitationEmail);
+    }
+
+    Observable<DepartmentEmployee> importEmployee(List<EmployeeCsvParser.Row> rows, final Company company) throws NotFound {
         return Observable.from(rows)
                 .map(r -> {
                     try {
@@ -79,23 +91,28 @@ public class EmployeeService {
         return new DepartmentEmployee(department.get(), userAccount, BigDecimal.valueOf(row.getReamingHoliday()), Role.Viewer);
     }
 
-    public void sendInvitationEmail(DepartmentEmployee departmentEmployee) {
+    private Pair<Boolean, Invitation> sendInvitationEmail(DepartmentEmployee departmentEmployee) {
+        Boolean successful;
         Invitation invite = invitationBuilder(departmentEmployee);
-
         Email email = Email.builder()
                 .to(departmentEmployee.getMember())
                 .template(templateBuilder(invite))
                 .build();
 
         try {
+            invitationRepository.save(invite);
             emailSender.send(email, locale);
+            successful = true;
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.error("Can not send invitation to user={} of department={}", departmentEmployee.getMember().getEmail(), departmentEmployee.getDepartment().getUid());
+            successful = false;
         }
+        return new Pair<>(successful, invite);
     }
 
     private static Invitation invitationBuilder(DepartmentEmployee departmentEmployee) {
-        return Invitation.newBuilder()
+        return Invitation.builder()
+                .key(UUID.randomUUID().toString())
                 .department(departmentEmployee.getDepartment())
                 .company(departmentEmployee.getDepartment().getCompany())
                 .userAccount(departmentEmployee.getMember()).build();
