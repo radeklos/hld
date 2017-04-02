@@ -1,19 +1,13 @@
 package com.caribou.company.service;
 
-public class NotFound extends Exception {
+public class NotFound extends RuntimeException {
 
-    private String departmentName;
-
-    public NotFound(String message, String departmentName) {
+    public NotFound(String message) {
         super(message);
-        this.departmentName = departmentName;
     }
 
     public NotFound() {
 
     }
 
-    public String getDepartmentName() {
-        return departmentName;
-    }
 }

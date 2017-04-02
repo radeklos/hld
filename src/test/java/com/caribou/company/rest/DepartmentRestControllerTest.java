@@ -3,6 +3,7 @@ package com.caribou.company.rest;
 import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
@@ -12,18 +13,18 @@ import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.DepartmentDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.modelmapper.internal.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rx.observers.TestSubscriber;
+import rx.observers.TestObserver;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,10 +35,13 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     private CompanyRepository companyRepository;
 
     @Autowired
-    private UserService userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private UserService userService;
 
     private UserAccount userAccount;
 
@@ -49,7 +53,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void before() throws Exception {
         userAccount = Factory.userAccount();
         userPassword = userAccount.getPassword();
-        userRepository.create(userAccount).subscribe(new TestSubscriber<>());
+        userService.create(userAccount).subscribe(new TestObserver<>());
 
         company = Factory.company();
         companyRepository.save(company);
@@ -228,7 +232,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void createNewDepartmentAsViewerReturns401() throws Exception {
         UserAccount viewer = Factory.userAccount();
         String viewPassword = viewer.getPassword();
-        userRepository.create(viewer).subscribe(new TestSubscriber<>());
+        userService.create(viewer).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, viewer, Role.Viewer);
 
         DepartmentDto departmentDto = Factory.departmentDto();
@@ -254,7 +258,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void createNewDepartmentAsAdmin() throws Exception {
         UserAccount admin = Factory.userAccount();
         String adminPassword = admin.getPassword();
-        userRepository.create(admin).subscribe(new TestSubscriber<>());
+        userService.create(admin).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, admin, Role.Admin);
 
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
@@ -277,9 +281,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void createNewDepartmentAsEditor() throws Exception {
         UserAccount editor = Factory.userAccount();
         String editorPassword = editor.getPassword();
-        userRepository.create(editor).subscribe(new TestSubscriber<>());
+        userService.create(editor).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, editor, Role.Editor);
-
 
         DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
 
@@ -297,13 +300,13 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         assertThat(department.getCompany().getUid()).isEqualTo(company.getUid());
     }
 
-    @Ignore
+    @Test
     public void getDepartmentEmployees() throws Exception {
         UserAccount anotherUserAccount = Factory.userAccount();
 
-        userRepository.create(anotherUserAccount);
-        company.addEmployee(anotherUserAccount, Role.Viewer);
+        userRepository.save(anotherUserAccount);
         companyRepository.save(company);
+        companyRepository.addEmployee(company, anotherUserAccount, Role.Viewer);
 
         Department department = Factory.department(company);
         Department anotherDepartment = Factory.department(company);
@@ -313,14 +316,14 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = get(
+        ResponseEntity<List> response = get(
                 url,
-                DepartmentDto.class,
+                List.class,
                 userAccount.getEmail(),
                 userPassword
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(1);
+        assertThat(response.getBody().size()).isEqualTo(1);
     }
 
 }

@@ -5,20 +5,30 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.CompanyDto;
+import com.caribou.company.service.parser.EmployeeCsvParser;
+import com.caribou.email.providers.EmailSender;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import rx.observers.TestSubscriber;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -32,6 +42,15 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmployeeCsvParser employeeCsvParser;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @MockBean
+    private EmailSender emailSender;
 
     private UserAccount userAccount;
 
@@ -170,11 +189,11 @@ public class CompanyRestControllerTest extends IntegrationTests {
         assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
     }
 
-    @Ignore
-    public void uploadCsvWithEmployees() throws IOException {
+    @Test
+    public void uploadCsvWithEmployeesAsViewerIsForbidden() throws IOException {
         Company company = Factory.company();
-        company.addEmployee(userAccount, Role.Owner);
         companyRepository.save(company);
+        companyRepository.addEmployee(company, userAccount, Role.Viewer);
 
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
         parts.add("file", new FileSystemResource(File.createTempFile("abc", ".csv")));
@@ -190,7 +209,6 @@ public class CompanyRestControllerTest extends IntegrationTests {
         );
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-
     }
 
     @Test
@@ -198,9 +216,15 @@ public class CompanyRestControllerTest extends IntegrationTests {
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Editor);
         companyRepository.save(company);
+        departmentRepository.save(Department.newBuilder().company(company).name("HR").daysOff(10).build());
+
+        File myFoo = File.createTempFile("employees", ".csv");
+        FileOutputStream fooStream = new FileOutputStream(myFoo, false);
+        fooStream.write(employeeCsvParser.generateExample().getBytes());
+        fooStream.close();
 
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-        parts.add("file", new FileSystemResource(File.createTempFile("employees", ".csv")));
+        parts.add("file", new FileSystemResource(myFoo));
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -209,11 +233,37 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 path(String.format("/v1/companies/%s/employees", company.getUid())),
                 HttpMethod.POST,
                 new HttpEntity<>(parts, httpHeaders),
-                String.class
+                Object.class
         );
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+    }
 
+    @Test
+    public void unknownDepartmentReturns400() throws IOException {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+
+        File myFoo = File.createTempFile("employees", ".csv");
+        FileOutputStream fooStream = new FileOutputStream(myFoo, false);
+        fooStream.write(employeeCsvParser.generateExample().getBytes());
+        fooStream.close();
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(myFoo));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                Object.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
 }

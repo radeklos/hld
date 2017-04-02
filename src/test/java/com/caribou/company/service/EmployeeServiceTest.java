@@ -14,7 +14,7 @@ import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.providers.EmailSender;
-import com.sun.tools.javac.util.Pair;
+import javafx.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

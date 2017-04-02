@@ -121,7 +121,7 @@ public class DepartmentServiceTest extends IntegrationTests {
         UserAccount user = Factory.userAccount();
         userRepository.save(user);
 
-        Observable<DepartmentEmployee> returned = departmentService.addEmployee(new DepartmentEmployee(department, user, BigDecimal.TEN, Role.Viewer));
+        Observable<DepartmentEmployee> returned = departmentService.addEmployeeRx(new DepartmentEmployee(department, user, BigDecimal.TEN, Role.Viewer));
 
         TestSubscriber testSubscriber = new TestSubscriber<>();
         returned.subscribe(testSubscriber);
@@ -145,12 +145,12 @@ public class DepartmentServiceTest extends IntegrationTests {
 
 
         TestSubscriber<DepartmentEmployee> sub1 = new TestSubscriber<>();
-        Observable<DepartmentEmployee> addEmployee = departmentService.addEmployee(new DepartmentEmployee(department1, user, BigDecimal.TEN, Role.Viewer));
+        Observable<DepartmentEmployee> addEmployee = departmentService.addEmployeeRx(new DepartmentEmployee(department1, user, BigDecimal.TEN, Role.Viewer));
         addEmployee.subscribe(sub1);
         sub1.assertNoErrors();
 
         TestSubscriber<DepartmentEmployee> sub2 = new TestSubscriber<>();
-        addEmployee = departmentService.addEmployee(new DepartmentEmployee(department2, userRepository.findOne(user.getUid()), BigDecimal.TEN, Role.Viewer));
+        addEmployee = departmentService.addEmployeeRx(new DepartmentEmployee(department2, userRepository.findOne(user.getUid()), BigDecimal.TEN, Role.Viewer));
         addEmployee.subscribe(sub2);
         sub2.assertNoErrors();
 

@@ -4,7 +4,11 @@ import com.caribou.auth.rest.dto.Error;
 import com.caribou.auth.rest.mapper.ErrorMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @ControllerAdvice(annotations = RestController.class)
@@ -27,4 +31,3 @@ public class ControllerHandler {
     }
 
 }
-

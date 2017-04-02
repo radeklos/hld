@@ -14,7 +14,7 @@ import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.Email;
 import com.caribou.email.providers.EmailSender;
 import com.caribou.email.templates.Invite;
-import com.sun.tools.javac.util.Pair;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,51 +28,52 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Slf4j
 @Service
 public class EmployeeService {
 
     private final DepartmentService departmentRepository;
+
     private final UserService userService;
+
     private final EmailSender emailSender;
 
-    private final Locale locale = Locale.UK;
+    private final CompanyRepository companyRepository;
+
+    private final UserRepository userRepository;
+
+    private final InvitationRepository invitationRepository;
+
+    private final Locale locale = Locale.UK;  // TODO should be dynamic based on company
 
     @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private InvitationRepository invitationRepository;
-
-    @Autowired
-    public EmployeeService(DepartmentService departmentRepository, UserService userService, EmailSender emailSender) {
+    public EmployeeService(DepartmentService departmentRepository, UserService userService, EmailSender emailSender, InvitationRepository invitationRepository, UserRepository userRepository, CompanyRepository companyRepository) {
         this.departmentRepository = departmentRepository;
         this.userService = userService;
         this.emailSender = emailSender;
+        this.invitationRepository = invitationRepository;
+        this.userRepository = userRepository;
+        this.companyRepository = companyRepository;
     }
 
-    public Observable<Pair<Boolean, Invitation>> performImport(List<EmployeeCsvParser.Row> rows, final Company company) throws NotFound {
+    public Observable<Pair<Boolean, Invitation>> performImport(List<EmployeeCsvParser.Row> rows, final Company company) {
         return importEmployee(rows, company).map(this::sendInvitationEmail);
     }
 
-    Observable<DepartmentEmployee> importEmployee(List<EmployeeCsvParser.Row> rows, final Company company) throws NotFound {
+    public Observable<DepartmentEmployee> importEmployee(List<EmployeeCsvParser.Row> rows, final Company company) {
         return Observable.from(rows)
                 .map(r -> {
                     try {
                         Company refreshedCompany = companyRepository.findOne(company.getUid());
                         return createDepartmentEmployee(r, refreshedCompany);
-                    } catch (Throwable t) {
+                    } catch (Exception t) {
                         throw Exceptions.propagate(t);
                     }
                 })
-                .flatMap(e -> userService.create(e.getMember()).flatMap(u -> departmentRepository.addEmployee(e)));
+                .flatMap(e -> userService.create(e.getMember()).flatMap(u -> departmentRepository.addEmployeeRx(e)));
     }
 
-    DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws NotFound {
+    DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws DepartmentNotFound {
         Optional<UserAccount> alreadyExistingUser = userRepository.findByEmail(row.getEmail());
         UserAccount userAccount;
         userAccount = alreadyExistingUser.orElseGet(() -> UserAccount.newBuilder()
@@ -86,23 +87,21 @@ public class EmployeeService {
                 .filter(d -> d.getName().equals(row.getDepartment()))
                 .findFirst();
         if (!department.isPresent()) {
-            throw new NotFound(String.format("Can't find department %s for company %s", row.getDepartment(), company.getName()), row.getDepartment());
+            throw new DepartmentNotFound(String.format("Can't find department %s for company %s", row.getDepartment(), company.getName()));
         }
         return new DepartmentEmployee(department.get(), userAccount, BigDecimal.valueOf(row.getReamingHoliday()), Role.Viewer);
     }
 
-    private Pair<Boolean, Invitation> sendInvitationEmail(DepartmentEmployee departmentEmployee) {
-        Boolean successful;
+    public Pair<Boolean, Invitation> sendInvitationEmail(DepartmentEmployee departmentEmployee) {
+        boolean successful = true;
         Invitation invite = invitationBuilder(departmentEmployee);
         Email email = Email.builder()
                 .to(departmentEmployee.getMember())
                 .template(templateBuilder(invite))
                 .build();
-
         try {
             invitationRepository.save(invite);
             emailSender.send(email, locale);
-            successful = true;
         } catch (MessagingException e) {
             log.error("Can not send invitation to user={} of department={}", departmentEmployee.getMember().getEmail(), departmentEmployee.getDepartment().getUid());
             successful = false;
@@ -126,4 +125,9 @@ public class EmployeeService {
                 .token(invitation.getKey()).build();
     }
 
+    public class DepartmentNotFound extends NotFound {
+        private DepartmentNotFound(String message) {
+            super(message);
+        }
+    }
 }
