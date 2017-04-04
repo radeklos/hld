@@ -31,7 +31,6 @@ public class SpringMailConfig {
 
     @Bean
     public JavaMailSender mailSender() throws IOException {
-
         final JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
         // Basic mail sender configuration, based on emailconfig.properties

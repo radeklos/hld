@@ -16,7 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import rx.Observable;
 import rx.Single;
 
@@ -30,7 +34,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/v1/companies/{companyUid}/departments")
 public class DepartmentRestController {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private CompanyService companyService;
@@ -68,10 +73,7 @@ public class DepartmentRestController {
     public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
         // TODO acl
         return departmentService.get(departmentUid)
-                .flatMap(department -> Observable.create(subscriber -> {
-                    department.getEmployees().forEach(subscriber::onNext);
-                    subscriber.onCompleted();
-                }))
+                .flatMap(department -> Observable.from(department.getEmployees()))
                 .map(entity -> modelMapper.map(entity, EmployeeDto.class));
     }
 
