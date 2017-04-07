@@ -116,9 +116,9 @@ public class CompanyRestController {
                     }
                     return employee.getCompany();
                 })
-                .flatMap(employee -> Observable.create((Observable.OnSubscribe<Pair<Company, List<EmployeeCsvParser.Row>>>) subscriber -> {
+                .flatMap(company -> Observable.create((Observable.OnSubscribe<Pair<Company, List<EmployeeCsvParser.Row>>>) subscriber -> {
                     try {
-                        subscriber.onNext(new Pair<>(employee, employeeCsvParser.read(file).readAll()));
+                        subscriber.onNext(new Pair<>(company, employeeCsvParser.read(file).readAll()));
                         subscriber.onCompleted();
                     } catch (IOException e) {
                         subscriber.onError(e);
@@ -126,6 +126,7 @@ public class CompanyRestController {
                 }))
                 .flatMap(u -> employeeService.importEmployee(u.getValue(), u.getKey()))
                 .map(employeeService::sendInvitationEmail)
+                .toList()
                 .map(u -> ResponseEntity.accepted().build())
                 .onErrorReturn(CompanyRestController::errorHandler)
                 .toSingle();

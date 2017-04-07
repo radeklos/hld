@@ -11,6 +11,7 @@ import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.company.rest.dto.EmployeeDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +25,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -316,14 +316,20 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
-        ResponseEntity<List> response = get(
+        ResponseEntity<EmployeeDto[]> response = get(
                 url,
-                List.class,
+                EmployeeDto[].class,
                 userAccount.getEmail(),
                 userPassword
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().size()).isEqualTo(1);
+        assertThat(response.getBody().length).isEqualTo(1);
+        EmployeeDto employee = response.getBody()[0];
+        assertThat(employee.getEmail()).isEqualTo(userAccount.getEmail());
+        assertThat(employee.getFirstName()).isEqualTo(userAccount.getFirstName());
+        assertThat(employee.getLastName()).isEqualTo(userAccount.getLastName());
+        assertThat(employee.getRole()).isEqualTo(Role.Admin);
+        assertThat(employee.getUid()).isEqualTo(userAccount.getUid());
     }
 
 }

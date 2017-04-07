@@ -12,7 +12,7 @@ public class EmployeeMap extends PropertyMap<DepartmentEmployee, EmployeeDto> {
         map().setFirstName(source.getMember().getFirstName());
         map().setLastName(source.getMember().getLastName());
         map().setRole(source.getRole());
-        map().setUid(source.getUid());
+        map().setUid(source.getMember().getUid());
     }
 
 }
