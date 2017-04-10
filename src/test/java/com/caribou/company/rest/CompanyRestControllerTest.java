@@ -5,19 +5,40 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.CompanyDto;
+import com.caribou.company.service.parser.EmployeeCsvParser;
+import com.caribou.email.providers.EmailSender;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import rx.observers.TestSubscriber;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 public class CompanyRestControllerTest extends IntegrationTests {
@@ -27,6 +48,15 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmployeeCsvParser employeeCsvParser;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @MockBean
+    private EmailSender emailSender;
 
     private UserAccount userAccount;
 
@@ -163,6 +193,149 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
+    }
+
+    @Test
+    public void uploadCsvWithEmployeesAsViewerIsForbidden() throws IOException {
+        Company company = Factory.company();
+        companyRepository.save(company);
+        companyRepository.addEmployee(company, userAccount, Role.Viewer);
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(File.createTempFile("abc", ".csv")));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                String.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void onlyCompanyAdminAndEditorCanImportEmployees() throws Exception {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+        departmentRepository.save(Department.newBuilder().company(company).name("HR").daysOff(10).build());
+
+        File myFoo = File.createTempFile("employees", ".csv");
+        FileOutputStream fooStream = new FileOutputStream(myFoo, false);
+        fooStream.write(employeeCsvParser.generateExample().getBytes());
+        fooStream.close();
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(myFoo));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                Object.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+    }
+
+    @Test
+    public void sendInvitationsToImportedUsers() throws Exception {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+        departmentRepository.save(Department.newBuilder().company(company).name("HR").daysOff(10).build());
+
+        String file =
+                "first name,last name,email,department,reaming holiday\n" +
+                faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n";
+        File myFoo = File.createTempFile("employees", ".csv");
+        FileOutputStream fooStream = new FileOutputStream(myFoo, false);
+        fooStream.write(file.getBytes());
+        fooStream.close();
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(myFoo));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity<String> result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                String.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        verify(emailSender, times(2)).send(any(), eq(Locale.UK));
+    }
+
+    @Ignore("User import is not transactional")
+    public void doNotSendEmyEmailWhenImportFails() throws Exception {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+        departmentRepository.save(Department.newBuilder().company(company).name("HR").daysOff(10).build());
+
+        String file =
+                "first name,last name,email,department,reaming holiday\n" +
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",Foo,21\n";
+        File myFoo = File.createTempFile("employees", ".csv");
+        FileOutputStream fooStream = new FileOutputStream(myFoo, false);
+        fooStream.write(file.getBytes());
+        fooStream.close();
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(myFoo));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                Object.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(emailSender, times(0)).send(any(), eq(Locale.UK));
+    }
+
+    @Test
+    public void unknownDepartmentReturns400() throws IOException {
+        Company company = Factory.company();
+        company.addEmployee(userAccount, Role.Editor);
+        companyRepository.save(company);
+
+        File myFoo = File.createTempFile("employees", ".csv");
+        FileOutputStream fooStream = new FileOutputStream(myFoo, false);
+        fooStream.write(employeeCsvParser.generateExample().getBytes());
+        fooStream.close();
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", new FileSystemResource(myFoo));
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        httpHeaders.set("X-Authorization", String.format("Bearer %s", getUserToken(userAccount.getEmail(), userPassword)));
+        ResponseEntity result = testRestTemplate().exchange(
+                path(String.format("/v1/companies/%s/employees", company.getUid())),
+                HttpMethod.POST,
+                new HttpEntity<>(parts, httpHeaders),
+                Object.class
+        );
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
 }

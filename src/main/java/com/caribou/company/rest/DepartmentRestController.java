@@ -16,7 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import rx.Observable;
 import rx.Single;
 
@@ -30,7 +34,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/v1/companies/{companyUid}/departments")
 public class DepartmentRestController {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private CompanyService companyService;
@@ -53,7 +58,7 @@ public class DepartmentRestController {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .flatMap(d -> Observable.create(subscriber -> {
-                    d.getDepartments().forEach(subscriber::onNext);
+                    d.getCompany().getDepartments().forEach(subscriber::onNext);
                     subscriber.onCompleted();
                 })).map(m -> this.convert((Department) m));
     }
@@ -68,10 +73,7 @@ public class DepartmentRestController {
     public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
         // TODO acl
         return departmentService.get(departmentUid)
-                .flatMap(department -> Observable.create(subscriber -> {
-                    department.getEmployees().forEach(subscriber::onNext);
-                    subscriber.onCompleted();
-                }))
+                .flatMap(department -> Observable.from(department.getEmployees()))
                 .map(entity -> modelMapper.map(entity, EmployeeDto.class));
     }
 
@@ -80,16 +82,16 @@ public class DepartmentRestController {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
-                    for (CompanyEmployee f : company1.getEmployees()) {
+                    for (CompanyEmployee f : company1.getCompany().getEmployees()) {
                         if (f.getMember().getEmail().equals(userDetails.getUsername()) && f.getRole() == Role.Viewer) {
                             throw new AccessDeniedException("omg");
                         }
                     }
                     return company1;
                 })
-                .flatMap(company -> {
+                .flatMap(employee -> {
                     Department entity = convert(departmentDto);
-                    entity.setCompany(company);
+                    entity.setCompany(employee.getCompany());
                     return departmentService.create(entity);
                 })
                 .map(d -> new ResponseEntity<>(convert(d), HttpStatus.CREATED))

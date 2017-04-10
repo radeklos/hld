@@ -1,9 +1,7 @@
 package com.caribou.company.domain;
 
-import com.caribou.auth.domain.UserAccount;
-
 import javax.persistence.*;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 
 
@@ -36,7 +34,7 @@ public class Department extends AbstractEntity {
     }
 
     public Set<DepartmentEmployee> getEmployees() {
-        return employees;
+        return Collections.unmodifiableSet(employees);
     }
 
     public String getName() {
@@ -65,23 +63,6 @@ public class Department extends AbstractEntity {
         }
         this.company = company;
         this.company.addDepartment(this);
-    }
-
-    public void addEmployee(UserAccount userAccount, Role role) {
-        if (employees == null) {
-            employees = new HashSet<>();
-        }
-        DepartmentEmployee departmentEmployee = new DepartmentEmployee(this, userAccount, role);
-        if (employees.contains(departmentEmployee)) {
-            for (DepartmentEmployee f : employees) {
-                if (f.equals(departmentEmployee)) {
-                    f.setRole(role);
-                    break;
-                }
-            }
-        } else {
-            employees.add(departmentEmployee);
-        }
     }
 
     public static final class Builder {

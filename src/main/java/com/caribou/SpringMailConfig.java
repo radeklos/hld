@@ -1,5 +1,6 @@
 package com.caribou;
 
+import nz.net.ultraq.thymeleaf.LayoutDialect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -19,15 +20,17 @@ public class SpringMailConfig {
 
     @Value("${services.mailgun.host}")
     String host;
+
     @Value("${services.mailgun.username}")
     String username;
+
     @Value("${services.mailgun.password}")
     String password;
+
     private ApplicationContext applicationContext;
 
     @Bean
     public JavaMailSender mailSender() throws IOException {
-
         final JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
         // Basic mail sender configuration, based on emailconfig.properties
@@ -43,6 +46,7 @@ public class SpringMailConfig {
         final SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.addTemplateResolver(templateResolver());
         engine.setMessageSource(messageSource());
+        engine.addDialect(new LayoutDialect());
         return engine;
     }
 

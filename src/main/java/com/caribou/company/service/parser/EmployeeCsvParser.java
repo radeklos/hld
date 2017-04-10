@@ -7,12 +7,18 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 
 @Component
 public class EmployeeCsvParser implements EmployeeParser {
+
+    public MappingIterator<Row> read(MultipartFile file) throws IOException {
+        return read(new String(file.getBytes(), StandardCharsets.UTF_8));
+    }
 
     @Override
     public MappingIterator<Row> read(String csv) throws IOException {
@@ -39,7 +45,7 @@ public class EmployeeCsvParser implements EmployeeParser {
     public static class Row implements EmployeeParser.Row {
 
         @JsonProperty("reaming holiday")
-        public Double reamingHoliday;
+        private Double reamingHoliday;
 
         @JsonProperty("first name")
         private String firstName;

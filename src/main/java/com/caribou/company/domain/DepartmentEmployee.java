@@ -3,6 +3,7 @@ package com.caribou.company.domain;
 import com.caribou.auth.domain.UserAccount;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 
 @Table(
@@ -21,13 +22,17 @@ public class DepartmentEmployee extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    private BigDecimal remainingDaysOff;
+
     public DepartmentEmployee() {
     }
 
-    public DepartmentEmployee(Department department, UserAccount member, Role role) {
+    public DepartmentEmployee(Department department, UserAccount member, BigDecimal remainingDaysOff, Role role) {
         this.department = department;
         this.member = member;
         this.role = role;
+        this.remainingDaysOff = remainingDaysOff;
     }
 
     public UserAccount getMember() {
@@ -46,21 +51,18 @@ public class DepartmentEmployee extends AbstractEntity {
         return department;
     }
 
-    @Override
-    public int hashCode() {
-        int result = department.hashCode();
-        result = 31 * result + member.hashCode();
-        return result;
+    public DepartmentEmployee setDepartment(Department department) {
+        this.department = department;
+        return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DepartmentEmployee that = (DepartmentEmployee) o;
-
-        return department.equals(that.department) && member.equals(that.member);
-
+    public BigDecimal getRemainingDaysOff() {
+        return remainingDaysOff;
     }
+
+    public DepartmentEmployee setRemainingDaysOff(BigDecimal remainingDaysOff) {
+        this.remainingDaysOff = remainingDaysOff;
+        return this;
+    }
+
 }

@@ -47,7 +47,7 @@ public class ErrorHandler {
         return error;
     }
 
-    private static List parseException(Throwable ex) {
+    private static List<String> parseException(Throwable ex) {
         Matcher matcher = Pattern.compile("\\(([^)]+)\\)").matcher(ex.getMessage());
         List<String> matches = new ArrayList<>();
         while (matcher.find()) {

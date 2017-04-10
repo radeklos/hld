@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Leckerli+One');
+
+        @media only screen and (max-width: 600px) {
+            *[id=templateContainer] {
+                width: 100%;
+            }
+            *[class=headerContent] {
+                font-size: 24px !important;
+            }
+            *[class=hide-on-mobile] {
+                display: none !important;
+            }
+            *[class=message-table] {
+                padding:5px !important;
+            }
+            *[class=copyright-table] {
+                padding-top:30px !important;
+                padding-left: 0px !important;
+                padding-right: 0px !important;
+            }
+            *[class=tagline] {
+                padding-top: 4px !important;
+            }
+            *[class=message-table] img {
+                width: 100% !important;
+            }
+        }
+
+        body {
+            background: #F5F5F5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .message-table {
+            padding:5%;
+            background:#fff;
+            margin-top:6px;
+            border-bottom: solid 1px #eee;
+            color: #444;
+            font-family: 'Helvetica', sans-serif;
+            font-size: 16px;
+            line-height:150%;
+            border-radius: 6px;
+            box-shadow: 1px 1px 5px #EEE;;
+        }
+
+        .templateContainer {
+            background: #F5F5F5;
+            margin: 30px 0 0;
+        }
+
+        .templateHeader {
+            background: #F5F5F5;
+            color: #222;
+            -webkit-font-smoothing: antialiased;
+            font-weight: bold;
+            text-align: center;
+            font-size: 24px; padding: 8px 0 14px;
+        }
+
+        .copyright-table {
+            padding: 30px; margin-bottom: 30px;
+        }
+
+        .copyright-table td {
+            font-size: 13px;
+            text-align: left;
+            color: #999;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5em;
+        }
+
+        .copyright-table a {
+            text-decoration:none;
+            color: #999;
+        }
+
+        .headerContent {
+            font-family: 'Leckerli One', cursive;
+            font-size: 50px;
+            letter-spacing: 3px;
+            color: #666666;
+        }
+
+
+    </style>
+</head>
+<body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
+<table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="backgroundTable">
+    <tr>
+        <td align="center" valign="top">
+            <table border="0" cellpadding="0" cellspacing="0" width="600" id="templateContainer"
+                   class="templateContainer">
+                <tr>
+                    <td align="center" valign="top">
+                        <!-- // Begin Template Body \\ -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBody">
+                            <tr>
+                                <td valign="top" align="center">
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateHeader"
+                                           class="templateHeader">
+                                        <tr>
+                                            <td class="headerContent" align="center">Pietary</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td valign="top">
+                                    <table border="0" cellspacing="25" width="100%" class="message-table">
+                                        <tr>
+                                            <td>
+                                                <div layout:fragment="content"></div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        <!-- // End Template Body \\ -->
+                    </td>
+                </tr>
+            </table>
+            <table class="copyright-table" border="0" cellspacing="0" width="100%">
+                <tr>
+                    <td valign="top">
+                        <div style="text-align:center;">
+                            <a th:href="${company.url}">pietary.com</a>
+                        </div>
+                        <br/>
+                        <div style="text-align:center">&copy; <span
+                                th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> Pietary, All rights
+                            reserved.<br/> 29 Little West 12th St &middot; New York, NY 10014
+                        </div>
+                        <br/>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

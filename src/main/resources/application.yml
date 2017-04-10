@@ -2,7 +2,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    generate-ddl: true
     database: POSTGRESQL
     show-sql: false
 
@@ -19,7 +18,9 @@ services:
     username:
     password:
 
-app.security.jwt:
-  tokenExpirationTime: 15 # Minutes
-  refreshTokenExpTime: 60 # Minutes
-  tokenSigningKey: dummy
+app:
+  allowedOrigin: "http://localhost:8000"
+  security.jwt:
+    tokenExpirationTime: 15 # Minutes
+    refreshTokenExpTime: 60 # Minutes
+    tokenSigningKey: dummy

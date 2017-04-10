@@ -5,6 +5,7 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import org.junit.Test;
@@ -96,12 +97,12 @@ public class CompanyServiceTest extends IntegrationTests {
         company.addEmployee(user, Role.Owner);
         companyRepository.save(company);
 
-        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        TestSubscriber<CompanyEmployee> testSubscriber = new TestSubscriber<>();
         companyService.getByEmployeeEmail(company.getUid(), user.getEmail()).subscribe(testSubscriber);
 
         testSubscriber.assertNoErrors();
-        Company got = testSubscriber.getOnNextEvents().get(0);
-        assertThat(got.getUid()).isEqualTo(company.getUid());
+        CompanyEmployee got = testSubscriber.getOnNextEvents().get(0);
+        assertThat(got.getCompany().getUid()).isEqualTo(company.getUid());
     }
 
     @Test
@@ -113,7 +114,7 @@ public class CompanyServiceTest extends IntegrationTests {
         company.addEmployee(user, Role.Owner);
         companyRepository.save(company);
 
-        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        TestSubscriber<CompanyEmployee> testSubscriber = new TestSubscriber<>();
         companyService.getByEmployeeEmail(company.getUid(), "non.existing@email.com").subscribe(testSubscriber);
 
         testSubscriber.assertError(NotFound.class);
@@ -128,7 +129,7 @@ public class CompanyServiceTest extends IntegrationTests {
         company.addEmployee(user, Role.Owner);
         companyRepository.save(company);
 
-        TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
+        TestSubscriber<CompanyEmployee> testSubscriber = new TestSubscriber<>();
         companyService.getByEmployeeEmail(0L, user.getEmail()).subscribe(testSubscriber);
 
         testSubscriber.assertError(NotFound.class);
