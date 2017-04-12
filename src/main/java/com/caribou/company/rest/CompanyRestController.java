@@ -4,13 +4,13 @@ package com.caribou.company.rest;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
+import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.EmployeeService;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import javafx.util.Pair;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -124,7 +124,7 @@ public class CompanyRestController {
                         subscriber.onError(e);
                     }
                 }))
-                .flatMap(u -> employeeService.importEmployee(u.getValue(), u.getKey()))
+                .flatMap(u -> employeeService.importEmployee(u.second, u.first))
                 .map(employeeService::sendInvitationEmail)
                 .toList()
                 .map(u -> ResponseEntity.accepted().build())
