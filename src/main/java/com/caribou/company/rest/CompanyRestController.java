@@ -13,6 +13,7 @@ import com.caribou.company.service.EmployeeService;
 import com.caribou.company.service.parser.EmployeeCsvParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -130,6 +131,16 @@ public class CompanyRestController {
                 .map(u -> ResponseEntity.accepted().build())
                 .onErrorReturn(CompanyRestController::errorHandler)
                 .toSingle();
+    }
+
+    @RequestMapping(value = "/examples/employees", method = RequestMethod.GET)
+    public HttpEntity<byte[]> example() {
+        byte[] documentBody = employeeCsvParser.generateExample().getBytes();
+        HttpHeaders header = new HttpHeaders();
+        header.set(HttpHeaders.CONTENT_TYPE, "text/csv");
+        header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=example.csv");
+        header.setContentLength(documentBody.length);
+        return new HttpEntity<>(documentBody, header);
     }
 
 }

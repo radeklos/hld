@@ -338,4 +338,18 @@ public class CompanyRestControllerTest extends IntegrationTests {
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    public void downloadExampleEmployeesCsv() throws Exception {
+        ResponseEntity<byte[]> response = get(
+                "/v1/companies/examples/employees",
+                byte[].class,
+                userAccount.getEmail(),
+                userPassword
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("text", "csv"));
+        assertThat(response.getBody().length).isNotZero();
+    }
+
 }

@@ -29,16 +29,20 @@ public class EmployeeCsvParser implements EmployeeParser {
     }
 
     @Override
-    public String generateExample() throws JsonProcessingException {
+    public String generateExample() {
         CsvMapper mapper = new CsvMapper();
         CsvSchema schema = mapper.schemaFor(Row.class).withHeader();
-        return mapper.writer(schema).writeValueAsString(new Row(
-                "Bernhard",
-                "Cummerata",
-                "Bernhard.Cummerata@email.com",
-                "HR",
-                24.5d
-        ));
+        try {
+            return mapper.writer(schema).writeValueAsString(new Row(
+                    "Bernhard",
+                    "Cummerata",
+                    "Bernhard.Cummerata@email.com",
+                    "HR",
+                    24.5d
+            ));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @JsonPropertyOrder(value = {"firstName", "lastName", "email", "department", "reamingHoliday"})
