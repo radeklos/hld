@@ -342,9 +342,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
     public void downloadExampleEmployeesCsv() throws Exception {
         ResponseEntity<byte[]> response = get(
                 "/v1/companies/examples/employees",
-                byte[].class,
-                userAccount.getEmail(),
-                userPassword
+                byte[].class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

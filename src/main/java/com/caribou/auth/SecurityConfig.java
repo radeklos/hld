@@ -35,15 +35,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String TOKEN_REFRESH_ENTRY_POINT = "/v1/auth/token";
     public static final String USER_REGISTRATION = "/v1/users";
     public static final String TOKEN_BASED_AUTH_ENTRY_POINT = "/v1/**";
+    public static final String V1_COMPANIES_EXAMPLES_EMPLOYEES = "/v1/companies/examples/employees";
 
     @Autowired
     private RestAuthenticationEntryPoint authenticationEntryPoint;
+
     @Autowired
     private AuthenticationSuccessHandler successHandler;
+
     @Autowired
     private AuthenticationFailureHandler failureHandler;
+
     @Autowired
     private AjaxAuthenticationProvider ajaxAuthenticationProvider;
+
     @Autowired
     private JwtAuthenticationProvider jwtAuthenticationProvider;
 
@@ -83,6 +88,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(TOKEN_REFRESH_ENTRY_POINT).permitAll()  // Token refresh end-point
                 .antMatchers(HttpMethod.POST, USER_REGISTRATION).permitAll()  // User registration
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
+                .antMatchers(V1_COMPANIES_EXAMPLES_EMPLOYEES).permitAll()
 
                 .and()
                 .authorizeRequests()
@@ -102,7 +108,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     protected JwtTokenAuthenticationProcessingFilter buildJwtTokenAuthenticationProcessingFilter() throws Exception {
-        List<String> pathsToSkip = Arrays.asList(TOKEN_REFRESH_ENTRY_POINT, FORM_BASED_LOGIN_ENTRY_POINT, USER_REGISTRATION);
+        List<String> pathsToSkip = Arrays.asList(TOKEN_REFRESH_ENTRY_POINT, FORM_BASED_LOGIN_ENTRY_POINT, USER_REGISTRATION, V1_COMPANIES_EXAMPLES_EMPLOYEES);
         SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, TOKEN_BASED_AUTH_ENTRY_POINT);
         JwtTokenAuthenticationProcessingFilter filter = new JwtTokenAuthenticationProcessingFilter(failureHandler, tokenExtractor, matcher);
         filter.setAuthenticationManager(this.authenticationManager);

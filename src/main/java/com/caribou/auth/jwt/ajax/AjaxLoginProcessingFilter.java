@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
-    static final String ORIGIN = "Origin";
+    private static final String ORIGIN = "Origin";
 
     private final AuthenticationSuccessHandler successHandler;
     private final AuthenticationFailureHandler failureHandler;
