@@ -3,13 +3,12 @@ package com.caribou.auth.rest.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.hateoas.ResourceSupport;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
-public class UserAccountDto extends ResourceSupport {
+public class UserAccountDto extends ResourceWithEmbedded {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long uid;

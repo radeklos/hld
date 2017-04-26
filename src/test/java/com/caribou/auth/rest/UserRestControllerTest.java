@@ -14,7 +14,12 @@ import com.caribou.company.repository.CompanyRepository;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -153,7 +158,7 @@ public class UserRestControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
+        assertThat(response.getBody().getOrDefault("_embedded", null)).isNotNull();
     }
 
 }

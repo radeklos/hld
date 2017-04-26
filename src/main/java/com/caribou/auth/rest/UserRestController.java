@@ -4,13 +4,16 @@ package com.caribou.auth.rest;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.rest.dto.UserAccountDto;
+import com.caribou.auth.service.CompanyResourceAssembler;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
-import com.caribou.company.rest.CompanyRestController;
 import com.caribou.company.rest.ErrorHandler;
+import com.caribou.company.rest.dto.CompanyDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,10 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import rx.Single;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.Optional;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 
 @RestController
@@ -39,6 +40,9 @@ public class UserRestController {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private CompanyResourceAssembler companyResourceAssembler;
+
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public Single<UserAccountDto> me() {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -46,10 +50,18 @@ public class UserRestController {
                 .map(u -> modelMapper.map(u, UserAccountDto.class))
                 .map(u -> {
                     Optional<Company> company = companyRepository.findByEmployeeEmail(u.getEmail());
-                    company.ifPresent(company1 -> u.add(linkTo(methodOn(CompanyRestController.class).get(company1.getUid())).withRel("company")));
+                    if (company.isPresent()) {
+                        final EmbeddedWrappers wrapper = new EmbeddedWrappers(false); // DO NOT prefer collections
+                        final CompanyDto resource = toResource(company.get());
+                        u.setEmbeddeds(new Resources<>(Collections.singletonList(wrapper.wrap(resource, "company"))));
+                    }
                     return u;
                 })
                 .toSingle();
+    }
+
+    private CompanyDto toResource(Company company) {
+        return companyResourceAssembler.toResource(company);
     }
 
     @RequestMapping(method = RequestMethod.POST)
