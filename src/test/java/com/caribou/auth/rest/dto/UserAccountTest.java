@@ -24,7 +24,7 @@ public class UserAccountTest {
 
     @Test
     public void testEmailIsMandatory() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .password("abcabc")
@@ -39,7 +39,7 @@ public class UserAccountTest {
 
     @Test
     public void testEmailCannotBeEmpty() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("")
                 .firstName("John")
                 .lastName("Doe")
@@ -55,7 +55,7 @@ public class UserAccountTest {
 
     @Test
     public void testEmailHasToBeValid() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe.email.com")
                 .firstName("John")
                 .lastName("Doe")
@@ -71,7 +71,7 @@ public class UserAccountTest {
 
     @Test
     public void testFirstNameIsMandatory() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .lastName("Doe")
                 .password("abcabc")
@@ -86,7 +86,7 @@ public class UserAccountTest {
 
     @Test
     public void testFirstNameCannotBeEmpty() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("")
                 .lastName("Doe")
@@ -102,7 +102,7 @@ public class UserAccountTest {
 
     @Test
     public void testLastNameIsMandatory() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .password("abcabc")
@@ -117,7 +117,7 @@ public class UserAccountTest {
 
     @Test
     public void testLastNameCannotBeEmpty() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("")
@@ -133,7 +133,7 @@ public class UserAccountTest {
 
     @Test
     public void testPasswordIsMandatory() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
@@ -148,7 +148,7 @@ public class UserAccountTest {
 
     @Test
     public void testPasswordCannotBeEmpty() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
@@ -164,7 +164,7 @@ public class UserAccountTest {
 
     @Test
     public void testPasswordCannotBeShorterThan6Characters() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")
@@ -180,7 +180,7 @@ public class UserAccountTest {
 
     @Test
     public void testValidUser() {
-        UserAccountDto userAccount = UserAccountDto.newBuilder()
+        UserAccountDto userAccount = UserAccountDto.builder()
                 .email("john.doe@email.com")
                 .firstName("John")
                 .lastName("Doe")

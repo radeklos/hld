@@ -3,6 +3,7 @@ package com.caribou.auth.rest;
 
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.UserContext;
+import com.caribou.auth.rest.dto.NestedSingleObject;
 import com.caribou.auth.rest.dto.UserAccountDto;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
@@ -43,12 +44,8 @@ public class UserRestController {
     public Single<UserAccountDto> me() {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.findByEmail(userDetails.getUsername())
-                .map(u -> modelMapper.map(u, UserAccountDto.class))
-                .map(u -> {
-                    Optional<Company> company = companyRepository.findByEmployeeEmail(u.getEmail());
-                    company.ifPresent(company1 -> u.add(linkTo(methodOn(CompanyRestController.class).get(company1.getUid())).withRel("company")));
-                    return u;
-                })
+                .map(this::convertToEntity)
+                .map(this::addNested)
                 .toSingle();
     }
 
@@ -67,6 +64,20 @@ public class UserRestController {
 
     private UserAccountDto convertToEntity(UserAccount u) {
         return modelMapper.map(u, UserAccountDto.class);
+    }
+
+    private UserAccountDto addNested(UserAccountDto userAccountDto) {
+        Optional<Company> company = companyRepository.findByEmployeeEmail(userAccountDto.getEmail());
+        company.ifPresent(c -> userAccountDto.setCompany(nested(c)));
+        return userAccountDto;
+    }
+
+    private NestedSingleObject nested(Company company) {
+        return NestedSingleObject.builder()
+                .href(linkTo(methodOn(CompanyRestController.class).get(company.getUid())).toString())
+                .uri("chll:company:" + company.getUid())
+                .uid(company.getUid())
+                .build();
     }
 
 }
