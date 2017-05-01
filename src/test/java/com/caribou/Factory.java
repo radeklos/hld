@@ -23,7 +23,7 @@ public class Factory {
     }
 
     public static UserAccountDto userAccountDto() {
-        return UserAccountDto.newBuilder()
+        return UserAccountDto.builder()
                 .email(faker.internet().emailAddress())
                 .firstName(faker.name().firstName())
                 .lastName(faker.name().lastName())

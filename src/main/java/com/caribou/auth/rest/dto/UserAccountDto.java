@@ -3,13 +3,12 @@ package com.caribou.auth.rest.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.hateoas.ResourceSupport;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
-public class UserAccountDto extends ResourceSupport {
+public class UserAccountDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long uid;
@@ -34,6 +33,9 @@ public class UserAccountDto extends ResourceSupport {
     @Size(max = 255)
     private String email;
 
+    @JsonProperty
+    private NestedSingleObject company;
+
     public UserAccountDto() {
     }
 
@@ -44,7 +46,7 @@ public class UserAccountDto extends ResourceSupport {
         email = builder.email;
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -87,6 +89,14 @@ public class UserAccountDto extends ResourceSupport {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public NestedSingleObject getCompany() {
+        return company;
+    }
+
+    public void setCompany(NestedSingleObject company) {
+        this.company = company;
     }
 
     public static final class Builder {

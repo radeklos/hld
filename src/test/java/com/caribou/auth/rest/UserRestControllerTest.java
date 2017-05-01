@@ -14,7 +14,12 @@ import com.caribou.company.repository.CompanyRepository;
 import org.junit.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -104,7 +109,6 @@ public class UserRestControllerTest extends IntegrationTests {
         UserAccount userAccount = Factory.userAccount();
         userRepository.save(userAccount);
 
-
         ResponseEntity<UserAccountDto> response = testRestTemplate().exchange(
                 path("/v1/users/me"),
                 HttpMethod.GET,
@@ -145,15 +149,19 @@ public class UserRestControllerTest extends IntegrationTests {
         company.addEmployee(userAccount, Role.Owner);
         companyRepository.save(company);
 
-        ResponseEntity<HashMap> response = testRestTemplate().exchange(
+        ResponseEntity<UserAccountDto> response = testRestTemplate().exchange(
                 path("/v1/users/me"),
                 HttpMethod.GET,
                 new HttpEntity<>(null, getTokenHeader(userAccount.getEmail(), userPassword)),
-                HashMap.class
+                UserAccountDto.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getOrDefault("_links", null)).isNotNull();
+
+        UserAccountDto user = response.getBody();
+        assertThat(user.getCompany()).isNotNull();
+        assertThat(user.getCompany().getHref()).isNotEmpty();
+        assertThat(user.getCompany().getUid()).isEqualTo(company.getUid());
     }
 
 }
