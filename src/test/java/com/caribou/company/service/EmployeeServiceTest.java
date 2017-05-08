@@ -109,12 +109,8 @@ public class EmployeeServiceTest extends IntegrationTests {
         assertThat(employee.getRole()).isEqualTo(Role.Viewer);
     }
 
-    @Test(expected = NotFound.class)
-    public void cannotFindDepartmentForEmployee() throws Exception {
-        Company company = Factory.company();
-        Department department = Factory.department(company);
-        company.setDepartments(Collections.singleton(department));
-
+    @Test
+    public void createDepartmentWhenItDoesNotExistForEmployeeCreating() throws Exception {
         EmployeeCsvParser.Row row = new EmployeeCsvParser.Row(
                 faker.name().firstName(),
                 faker.name().lastName(),
@@ -123,6 +119,9 @@ public class EmployeeServiceTest extends IntegrationTests {
                 faker.number().randomDouble(2, 0, 30)
         );
         employeeService.createDepartmentEmployee(row, company);
+
+        company = companyRepository.findOne(company.getUid());
+        assertThat(company.getDepartments().iterator().next().getName()).isEqualTo("some department");
     }
 
     @Test
@@ -182,16 +181,15 @@ public class EmployeeServiceTest extends IntegrationTests {
 
         TestSubscriber<DepartmentEmployee> testSubscriber = new TestSubscriber<>();
         employeeService.importEmployee(Arrays.asList(empl1, empl2), company).subscribe(testSubscriber);
-        testSubscriber.assertError(RuntimeException.class);
 
         department = departmentRepository.findOne(department.getUid());
         assertThat(department.getEmployees().toArray()).isNotEmpty();
 
         company = companyRepository.findOne(department.getCompany().getUid());
-        assertThat(company.getEmployees().toArray()).hasSize(1);
+        assertThat(company.getEmployees().toArray()).hasSize(2);
 
         assertThat(userRepository.findByEmail(empl1.getEmail())).isPresent();
-        assertThat(userRepository.findByEmail(empl2.getEmail())).isNotPresent();
+        assertThat(userRepository.findByEmail(empl2.getEmail())).isPresent();
     }
 
     @Test

@@ -115,4 +115,8 @@ public class CompanyRepositoryTest extends IntegrationTests {
         assertThat(departmentEmployee).isNotPresent();
     }
 
+    @Test
+    public void name() throws Exception {
+    }
+
 }

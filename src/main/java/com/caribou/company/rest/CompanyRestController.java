@@ -109,11 +109,10 @@ public class CompanyRestController {
     @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
     public Single<ResponseEntity<Object>> update(@PathVariable("uid") Long uid, @RequestParam("file") MultipartFile file) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
                 .map(employee -> {
-                    if (!Arrays.asList(Role.Admin, Role.Editor).contains(employee.getRole())) {
-                        throw new AccessDeniedException("omg");
+                    if (!Arrays.asList(Role.Admin, Role.Editor, Role.Owner).contains(employee.getRole())) {
+                        throw new AccessDeniedException("Role " + employee.getRole() + " can not import employees");
                     }
                     return employee.getCompany();
                 })

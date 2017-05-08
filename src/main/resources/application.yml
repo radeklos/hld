@@ -19,7 +19,7 @@ services:
     password:
 
 app:
-  allowedOrigin: http://localhost:8000
+  allowedOrigin: http://localhost:3000
   security.jwt:
     tokenExpirationTime: 15 # Minutes
     refreshTokenExpTime: 60 # Minutes
