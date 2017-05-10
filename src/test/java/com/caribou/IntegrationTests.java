@@ -2,6 +2,7 @@ package com.caribou;
 
 import com.caribou.auth.jwt.ajax.LoginRequest;
 import com.caribou.auth.jwt.response.TokenResponse;
+import com.caribou.email.providers.EmailSender;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,9 @@ public abstract class IntegrationTests {
 
     @Value("${local.server.port}")
     private int port = 0;
+
+    @MockBean
+    protected EmailSender emailSender;
 
     protected <T> ResponseEntity<T> get(String path, Class<T> responseType, String username, String password) throws JsonProcessingException {
         return exchange(path, HttpMethod.GET, null, responseType, username, password);

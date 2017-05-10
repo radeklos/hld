@@ -31,9 +31,8 @@ public class ContentGeneratorTest extends IntegrationTests {
                 .departmentName(faker.commerce().department())
                 .user(Factory.userAccount())
                 .token(faker.crypto().sha512()).build();
-        assertThat(contentGenerator.html(emailTemplate, Locale.UK))
+        assertThat(contentGenerator.generate(emailTemplate, Locale.UK).getHtml())
                 .contains(emailTemplate.getToken())
-                .contains(emailTemplate.getCompanyName())
                 .contains(emailTemplate.getUser().getFirstName());
     }
 

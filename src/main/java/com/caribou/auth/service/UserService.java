@@ -2,6 +2,9 @@ package com.caribou.auth.service;
 
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
+import com.caribou.email.Email;
+import com.caribou.email.providers.EmailSender;
+import com.caribou.email.templates.Welcome;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
@@ -18,17 +21,25 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
-    @Autowired
-    BCryptPasswordEncoder encoder;
+    private final BCryptPasswordEncoder encoder;
+
+    private final UserRepository userRepository;
+
+    private final EmailSender emailSender;
 
     @Autowired
-    UserRepository userRepository;
+    public UserService(BCryptPasswordEncoder encoder, UserRepository userRepository, EmailSender emailSender) {
+        this.encoder = encoder;
+        this.userRepository = userRepository;
+        this.emailSender = emailSender;
+    }
 
     public Observable<UserAccount> create(final UserAccount userAccount) {
         return Observable.create(subscriber -> {
             try {
                 userAccount.setPassword(encoder.encode(userAccount.getPassword()));
-                userRepository.save(userAccount);
+                UserAccount user = userRepository.save(userAccount);
+                sendInvitationEmail(user);
                 subscriber.onNext(userAccount);
                 subscriber.onCompleted();
             } catch (Exception e) {
@@ -64,5 +75,13 @@ public class UserService implements UserDetailsService {
 
     public Optional<UserAccount> getByUsername(String username) {
         return this.userRepository.findByEmail(username);
+    }
+
+    private void sendInvitationEmail(UserAccount userAccount) {
+        Email email = Email.builder()
+                .to(userAccount)
+                .template(Welcome.builder().user(userAccount).build())
+                .build();
+        emailSender.send(email);
     }
 }

@@ -17,6 +17,8 @@ services:
     host: smtp.mailgun.org
     username:
     password:
+    defaulAlias:
+    defaultFrom:
 
 app:
   allowedOrigin: http://localhost:3000

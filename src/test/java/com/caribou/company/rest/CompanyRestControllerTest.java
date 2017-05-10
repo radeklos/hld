@@ -11,12 +11,10 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import com.caribou.email.providers.EmailSender;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,9 +52,6 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
     @Autowired
     private DepartmentRepository departmentRepository;
-
-    @MockBean
-    private EmailSender emailSender;
 
     private UserAccount userAccount;
 
@@ -323,7 +318,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         String file =
                 "first name,last name,email,department,reaming holiday\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
-                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + "," + faker.commerce().department() + ",21\n";
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",\"" + faker.commerce().department() + "\",21\n";
         fooStream.write(file.getBytes());
         fooStream.close();
 

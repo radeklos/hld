@@ -11,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import rx.Single;
 
 import javax.validation.Valid;
@@ -21,7 +25,8 @@ import javax.validation.Valid;
 @RequestMapping("/v1/users/{userUid}/leaves")
 public class LeaveController {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private UserService userService;

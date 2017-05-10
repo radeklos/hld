@@ -10,12 +10,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import rx.observers.TestSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 public class UserServiceTest extends IntegrationTests {
 
     @Autowired
-    BCryptPasswordEncoder encoder;
+    private BCryptPasswordEncoder encoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -32,6 +35,15 @@ public class UserServiceTest extends IntegrationTests {
 
         UserAccount us = testSubscriber.getOnNextEvents().get(0);
         assertThat(us.getUid()).isNotNull();
+    }
+
+    @Test
+    public void invitationEmailIsSentWhenUserIsCreated() throws Exception {
+        TestSubscriber<UserAccount> testSubscriber = new TestSubscriber<>();
+        UserAccount userAccount = Factory.userAccount();
+        userService.create(userAccount).subscribe(testSubscriber);
+
+        verify(emailSender, times(1)).send(any());
     }
 
     @Test

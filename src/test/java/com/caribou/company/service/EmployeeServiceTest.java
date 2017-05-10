@@ -14,11 +14,9 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import com.caribou.email.providers.EmailSender;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
@@ -48,9 +46,6 @@ public class EmployeeServiceTest extends IntegrationTests {
 
     @Autowired
     private InvitationRepository invitationRepository;
-
-    @MockBean
-    private EmailSender emailSender;
 
     private Company company;
 
