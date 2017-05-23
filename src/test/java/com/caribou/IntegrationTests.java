@@ -30,7 +30,7 @@ public abstract class IntegrationTests {
     protected Faker faker = new Faker();
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Value("${local.server.port}")
     private int port = 0;

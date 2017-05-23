@@ -15,7 +15,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.observers.TestSubscriber;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,11 +54,11 @@ public class LeaveServiceTest extends IntegrationTests {
 
     @Test
     public void create() throws Exception {
-        Leave leave = Leave.newBuilder()
+        Leave leave = Leave.builder()
                 .userAccount(userAccount)
                 .leaveType(leaveType)
-                .from(new Date())
-                .to(new Date())
+                .from(Timestamp.from(Instant.now()))
+                .to(Timestamp.from(Instant.now().plus(7, ChronoUnit.DAYS)))
                 .build();
         TestSubscriber<Leave> testSubscriber = new TestSubscriber<>();
         leaveService.create(leave).subscribe(testSubscriber);
@@ -65,6 +67,10 @@ public class LeaveServiceTest extends IntegrationTests {
 
         Leave created = testSubscriber.getOnNextEvents().get(0);
         assertThat(created.getUid()).isNotNull();
+        assertThat(created.getTo()).isEqualTo(leave.getTo());
+        assertThat(created.getFrom()).isEqualTo(leave.getFrom());
+        assertThat(created.getLeaveType()).isEqualTo(leave.getLeaveType());
+        assertThat(created.getUserAccount()).isEqualTo(userAccount);
     }
 
 }

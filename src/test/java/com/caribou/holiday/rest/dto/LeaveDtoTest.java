@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.validation.ConstraintViolation;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,7 @@ public class LeaveDtoTest {
 
     @Test
     public void reasonCannotBeLongerThan255Chars() throws Exception {
-        LeaveDto leaveDto = LeaveDto.newBuilder()
+        LeaveDto leaveDto = LeaveDto.builder()
                 .reason(new String(new char[256]).replace('\0', 'A'))
                 .build();
 
@@ -35,4 +36,14 @@ public class LeaveDtoTest {
         assertThat(constraintViolation.getMessage()).isEqualTo("size must be between 0 and 255");
     }
 
+    @Test
+    public void validLeaveDto() throws Exception {
+        LeaveDto leaveDto = LeaveDto.builder()
+                .from(ZonedDateTime.now())
+                .to(ZonedDateTime.now())
+                .build();
+        Set<ConstraintViolation<LeaveDto>> constraintViolations = localValidatorFactory.validate(leaveDto);
+
+        assertThat(constraintViolations).isEmpty();
+    }
 }

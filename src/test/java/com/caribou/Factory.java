@@ -62,7 +62,7 @@ public class Factory {
     }
 
     public static DepartmentDto departmentDto() {
-        return DepartmentDto.newBuilder()
+        return DepartmentDto.builder()
                 .name(faker.commerce().department())
                 .daysOff(10)
                 .build();

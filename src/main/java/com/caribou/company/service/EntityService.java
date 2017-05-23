@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.io.Serializable;
 
 
-public interface Service<E, ID extends Serializable> {
+public interface EntityService<E, ID extends Serializable> {
 
     E create(E e);
 
@@ -15,7 +15,7 @@ public interface Service<E, ID extends Serializable> {
 
     E get(ID id) throws NotFound;
 
-    abstract class Imp<R extends CrudRepository<E, ID>, E, ID extends Serializable> implements Service<E, ID> {
+    abstract class Imp<R extends CrudRepository<E, ID>, E, ID extends Serializable> implements EntityService<E, ID> {
 
         @Autowired
         R repository;

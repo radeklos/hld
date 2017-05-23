@@ -178,7 +178,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void createDepartmentAsGuestReturnUnauthorized() throws JsonProcessingException {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = post(url, departmentDto, DepartmentDto.class);
@@ -190,7 +190,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void updateDepartmentAsGuestReturnUnauthorized() throws Exception {
         Department department = Factory.department(company);
         departmentRepository.save(department);
-        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("new name").daysOff(12).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().name("new validLeaveDto").daysOff(12).build();
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = put(url, departmentDto, DepartmentDto.class);
@@ -214,7 +214,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
-        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
         ResponseEntity<DepartmentDto> response = post(
@@ -261,7 +261,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(admin).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, admin, Role.Admin);
 
-        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = post(
@@ -284,7 +284,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(editor).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, editor, Role.Editor);
 
-        DepartmentDto departmentDto = DepartmentDto.newBuilder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = post(
