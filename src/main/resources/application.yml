@@ -17,8 +17,8 @@ services:
     host: smtp.mailgun.org
     username:
     password:
-    defaulAlias:
-    defaultFrom:
+    defaulAlias: chllbot
+    defaultFrom: chll@email.chll.cz
 
 app:
   allowedOrigin: http://localhost:3000

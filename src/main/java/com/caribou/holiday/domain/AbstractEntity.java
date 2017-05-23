@@ -2,6 +2,8 @@ package com.caribou.holiday.domain;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Date;
 
 
@@ -13,18 +15,18 @@ abstract class AbstractEntity implements Serializable {
     @Column(length = 36)
     private Long uid;
 
-    private Date createdAt;
+    private Timestamp createdAt;
 
-    private Date updatedAt;
+    private Timestamp updatedAt;
 
     @PrePersist
     void createdAt() {
-        this.createdAt = this.updatedAt = new Date();
+        this.createdAt = this.updatedAt = Timestamp.from(Instant.now());
     }
 
     @PreUpdate
     void updatedAt() {
-        this.updatedAt = new Date();
+        this.updatedAt = Timestamp.from(Instant.now());
     }
 
     public Date getCreatedAt() {
