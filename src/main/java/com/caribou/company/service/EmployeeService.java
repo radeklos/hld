@@ -3,18 +3,19 @@ package com.caribou.company.service;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
+import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Invitation;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
 import com.caribou.email.Email;
 import com.caribou.email.providers.EmailSender;
 import com.caribou.email.templates.Invite;
-import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,14 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+
 @Slf4j
 @Service
 public class EmployeeService {
 
-    private final DepartmentService departmentRepository;
+    private final DepartmentRepository departmentRepository;
+
+    private final DepartmentService departmentService;
 
     private final UserService userService;
 
@@ -47,8 +51,9 @@ public class EmployeeService {
     private final Locale locale = Locale.UK;  // TODO should be dynamic based on company
 
     @Autowired
-    public EmployeeService(DepartmentService departmentRepository, UserService userService, EmailSender emailSender, InvitationRepository invitationRepository, UserRepository userRepository, CompanyRepository companyRepository) {
+    public EmployeeService(DepartmentRepository departmentRepository, DepartmentService departmentService, UserService userService, EmailSender emailSender, InvitationRepository invitationRepository, UserRepository userRepository, CompanyRepository companyRepository) {
         this.departmentRepository = departmentRepository;
+        this.departmentService = departmentService;
         this.userService = userService;
         this.emailSender = emailSender;
         this.invitationRepository = invitationRepository;
@@ -70,7 +75,7 @@ public class EmployeeService {
                         throw Exceptions.propagate(t);
                     }
                 })
-                .flatMap(e -> userService.create(e.getMember()).flatMap(u -> departmentRepository.addEmployeeRx(e)));
+                .flatMap(e -> userService.create(e.getMember()).flatMap(u -> departmentService.addEmployeeRx(e)));
     }
 
     DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws DepartmentNotFound {
@@ -82,14 +87,17 @@ public class EmployeeService {
                 .email(row.getEmail())
                 .password(UUID.randomUUID().toString())
                 .build());
-
-        Optional<Department> department = company.getDepartments().stream()
+        Optional<Department> departmentOpt = company.getDepartments().stream()
                 .filter(d -> d.getName().equals(row.getDepartment()))
                 .findFirst();
-        if (!department.isPresent()) {
-            throw new DepartmentNotFound(String.format("Can't find department %s for company %s", row.getDepartment(), company.getName()));
-        }
-        return new DepartmentEmployee(department.get(), userAccount, BigDecimal.valueOf(row.getReamingHoliday()), Role.Viewer);
+        Department department = departmentOpt.orElseGet(() -> departmentRepository.save(
+                Department.newBuilder()
+                        .company(company)
+                        .name(row.getDepartment())
+                        .daysOff(company.getDefaultDaysOff())
+                        .build()
+        ));
+        return new DepartmentEmployee(department, userAccount, BigDecimal.valueOf(row.getReamingHoliday()), Role.Viewer);
     }
 
     public Pair<Boolean, Invitation> sendInvitationEmail(DepartmentEmployee departmentEmployee) {

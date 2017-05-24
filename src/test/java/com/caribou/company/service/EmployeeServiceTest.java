@@ -4,6 +4,7 @@ import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
+import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
@@ -13,12 +14,9 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import com.caribou.email.providers.EmailSender;
-import javafx.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
@@ -49,9 +47,6 @@ public class EmployeeServiceTest extends IntegrationTests {
     @Autowired
     private InvitationRepository invitationRepository;
 
-    @MockBean
-    private EmailSender emailSender;
-
     private Company company;
 
     @Before
@@ -80,6 +75,7 @@ public class EmployeeServiceTest extends IntegrationTests {
 
         assertThat(employee.getDepartment()).isEqualTo(department);
         assertThat(employee.getRole()).isEqualTo(Role.Viewer);
+
         assertThat(employee.getRemainingDaysOff()).isEqualByComparingTo(BigDecimal.valueOf(row.getReamingHoliday()));
     }
 
@@ -108,12 +104,8 @@ public class EmployeeServiceTest extends IntegrationTests {
         assertThat(employee.getRole()).isEqualTo(Role.Viewer);
     }
 
-    @Test(expected = NotFound.class)
-    public void cannotFindDepartmentForEmployee() throws Exception {
-        Company company = Factory.company();
-        Department department = Factory.department(company);
-        company.setDepartments(Collections.singleton(department));
-
+    @Test
+    public void createDepartmentWhenItDoesNotExistForEmployeeCreating() throws Exception {
         EmployeeCsvParser.Row row = new EmployeeCsvParser.Row(
                 faker.name().firstName(),
                 faker.name().lastName(),
@@ -122,6 +114,9 @@ public class EmployeeServiceTest extends IntegrationTests {
                 faker.number().randomDouble(2, 0, 30)
         );
         employeeService.createDepartmentEmployee(row, company);
+
+        company = companyRepository.findOne(company.getUid());
+        assertThat(company.getDepartments().iterator().next().getName()).isEqualTo("some department");
     }
 
     @Test
@@ -181,16 +176,15 @@ public class EmployeeServiceTest extends IntegrationTests {
 
         TestSubscriber<DepartmentEmployee> testSubscriber = new TestSubscriber<>();
         employeeService.importEmployee(Arrays.asList(empl1, empl2), company).subscribe(testSubscriber);
-        testSubscriber.assertError(RuntimeException.class);
 
         department = departmentRepository.findOne(department.getUid());
         assertThat(department.getEmployees().toArray()).isNotEmpty();
 
         company = companyRepository.findOne(department.getCompany().getUid());
-        assertThat(company.getEmployees().toArray()).hasSize(1);
+        assertThat(company.getEmployees().toArray()).hasSize(2);
 
         assertThat(userRepository.findByEmail(empl1.getEmail())).isPresent();
-        assertThat(userRepository.findByEmail(empl2.getEmail())).isNotPresent();
+        assertThat(userRepository.findByEmail(empl2.getEmail())).isPresent();
     }
 
     @Test
@@ -214,4 +208,5 @@ public class EmployeeServiceTest extends IntegrationTests {
         Optional<Invitation> invitation = invitationRepository.findByUserEmail(employee.getEmail());
         assertThat(invitation).isPresent();
     }
+
 }

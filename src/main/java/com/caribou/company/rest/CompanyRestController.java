@@ -4,15 +4,16 @@ package com.caribou.company.rest;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
+import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Role;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.EmployeeService;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import javafx.util.Pair;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -108,11 +109,10 @@ public class CompanyRestController {
     @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
     public Single<ResponseEntity<Object>> update(@PathVariable("uid") Long uid, @RequestParam("file") MultipartFile file) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
                 .map(employee -> {
-                    if (!Arrays.asList(Role.Admin, Role.Editor).contains(employee.getRole())) {
-                        throw new AccessDeniedException("omg");
+                    if (!Arrays.asList(Role.Admin, Role.Editor, Role.Owner).contains(employee.getRole())) {
+                        throw new AccessDeniedException("Role " + employee.getRole() + " can not import employees");
                     }
                     return employee.getCompany();
                 })
@@ -124,12 +124,22 @@ public class CompanyRestController {
                         subscriber.onError(e);
                     }
                 }))
-                .flatMap(u -> employeeService.importEmployee(u.getValue(), u.getKey()))
+                .flatMap(u -> employeeService.importEmployee(u.second, u.first))
                 .map(employeeService::sendInvitationEmail)
                 .toList()
                 .map(u -> ResponseEntity.accepted().build())
                 .onErrorReturn(CompanyRestController::errorHandler)
                 .toSingle();
+    }
+
+    @RequestMapping(value = "/examples/employees", method = RequestMethod.GET)
+    public HttpEntity<byte[]> example() {
+        byte[] documentBody = employeeCsvParser.generateExample().getBytes();
+        HttpHeaders header = new HttpHeaders();
+        header.set(HttpHeaders.CONTENT_TYPE, "text/csv");
+        header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=example.csv");
+        header.setContentLength(documentBody.length);
+        return new HttpEntity<>(documentBody, header);
     }
 
 }

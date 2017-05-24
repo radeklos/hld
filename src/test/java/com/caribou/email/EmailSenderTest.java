@@ -13,7 +13,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import javax.mail.internet.MimeMessage;
 import java.util.Locale;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class EmailSenderTest extends IntegrationTests {
 
@@ -25,7 +29,6 @@ public class EmailSenderTest extends IntegrationTests {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Autowired
     private Mailgun sender;
 
     @Before
@@ -33,7 +36,7 @@ public class EmailSenderTest extends IntegrationTests {
         javaMailSender = mock(JavaMailSender.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
 
-        sender = new Mailgun(javaMailSender, contentGenerator);
+        sender = new Mailgun(javaMailSender, contentGenerator, null, null);
     }
 
     @Test
@@ -41,7 +44,6 @@ public class EmailSenderTest extends IntegrationTests {
         Email mimeMessage = Email.builder()
                 .from(new Email.Contact(faker.internet().emailAddress(), faker.name().fullName()))
                 .to(new Email.Contact(faker.internet().emailAddress(), faker.name().fullName()))
-                .subject("subject")
                 .template(Invite.builder()
                         .companyName(faker.company().name())
                         .departmentName(faker.commerce().department())

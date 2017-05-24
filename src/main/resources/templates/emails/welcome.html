@@ -1,7 +1,7 @@
 <html layout:decorator="layout">
 <body>
 <div layout:fragment="content">
-    <h1>Welcome</h1>
+    <h1 th:text="#{email.welcome.header(${ctx.user.firstName})}">Hello ..</h1>
 </div>
 </body>
 </html>

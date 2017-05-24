@@ -3,7 +3,7 @@
 <div layout:fragment="content">
     <h1 th:text="#{email.employee_invitation.header(${ctx.user.firstName})}">Hello ..</h1>
 
-    <p th:text="#{email.employee_invitation.introduction(${ctx.companyName}, ${company.name})}"></p>
+    <p th:text="#{email.employee_invitation.introduction}"></p>
 
     <div style="text-align: center">
         <a th:href="${ctx.token}">Activate</a>

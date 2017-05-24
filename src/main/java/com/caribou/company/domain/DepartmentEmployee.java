@@ -39,11 +39,6 @@ public class DepartmentEmployee extends AbstractEntity {
         return member;
     }
 
-    public DepartmentEmployee setMember(UserAccount member) {
-        this.member = member;
-        return this;
-    }
-
     public Role getRole() {
         return role;
     }
@@ -69,4 +64,5 @@ public class DepartmentEmployee extends AbstractEntity {
         this.remainingDaysOff = remainingDaysOff;
         return this;
     }
+
 }

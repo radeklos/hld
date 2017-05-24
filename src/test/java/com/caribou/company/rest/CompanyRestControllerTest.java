@@ -11,12 +11,10 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.service.parser.EmployeeCsvParser;
-import com.caribou.email.providers.EmailSender;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,9 +52,6 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
     @Autowired
     private DepartmentRepository departmentRepository;
-
-    @MockBean
-    private EmailSender emailSender;
 
     private UserAccount userAccount;
 
@@ -312,14 +307,19 @@ public class CompanyRestControllerTest extends IntegrationTests {
     }
 
     @Test
-    public void unknownDepartmentReturns400() throws IOException {
+    public void createsUnknownDepartment() throws IOException {
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Editor);
         companyRepository.save(company);
 
         File myFoo = File.createTempFile("employees", ".csv");
         FileOutputStream fooStream = new FileOutputStream(myFoo, false);
-        fooStream.write(employeeCsvParser.generateExample().getBytes());
+
+        String file =
+                "first name,last name,email,department,reaming holiday\n" +
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",\"" + faker.commerce().department() + "\",21\n";
+        fooStream.write(file.getBytes());
         fooStream.close();
 
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
@@ -335,7 +335,19 @@ public class CompanyRestControllerTest extends IntegrationTests {
                 Object.class
         );
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+    }
+
+    @Test
+    public void downloadExampleEmployeesCsv() throws Exception {
+        ResponseEntity<byte[]> response = get(
+                "/v1/companies/examples/employees",
+                byte[].class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("text", "csv"));
+        assertThat(response.getBody().length).isNotZero();
     }
 
 }

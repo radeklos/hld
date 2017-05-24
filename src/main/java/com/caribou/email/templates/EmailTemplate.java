@@ -4,4 +4,6 @@ public interface EmailTemplate {
 
     HtmlTemplates getHtmlTemplate();
 
+    String getSubject();
+
 }

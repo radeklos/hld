@@ -50,7 +50,4 @@ public class CompanyEmployee extends AbstractEntity {
         return member;
     }
 
-    public void setMember(UserAccount member) {
-        this.member = member;
-    }
 }

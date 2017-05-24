@@ -2,7 +2,11 @@ package com.caribou.company.domain;
 
 import com.caribou.auth.domain.UserAccount;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -120,6 +124,9 @@ public class Company extends AbstractEntity {
     }
 
     public Set<Department> getDepartments() {
+        if (departments == null) {
+            return new HashSet<>();
+        }
         return departments;
     }
 

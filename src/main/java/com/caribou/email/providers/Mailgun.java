@@ -4,6 +4,7 @@ import com.caribou.email.ContentGenerator;
 import com.caribou.email.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -23,24 +24,39 @@ public class Mailgun implements EmailSender {
     private final JavaMailSender sender;
 
     private final ContentGenerator contentGenerator;
+    private final Email.Contact defaultFrom;
 
     @Autowired
-    public Mailgun(JavaMailSender sender, ContentGenerator contentGenerator) {
+    public Mailgun(JavaMailSender sender, ContentGenerator contentGenerator,
+                   @Value("${services.mailgun.defaulAlias}") String defaultAlias,
+                   @Value("${services.mailgun.defaultFrom}") String defaultFrom) {
         this.sender = sender;
         this.contentGenerator = contentGenerator;
+        this.defaultFrom = new Email.Contact(defaultFrom, defaultAlias);
+    }
+
+    @Override
+    public boolean send(Email email) {
+        try {
+            send(email, Locale.UK);
+            return true;
+        } catch (MessagingException e) {
+            log.error("Can not sent email {} to {}: {}", email.getTemplate(), email.getTo(), e);
+        }
+        return false;
     }
 
     @Override
     public void send(Email email, Locale locale) throws MessagingException {
-        final String htmlContent = contentGenerator.html(email.getTemplate(), locale);
+        final ContentGenerator.Content emailContent = contentGenerator.generate(email.getTemplate(), locale);
 
         final MimeMessage mimeMessage = this.sender.createMimeMessage();
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, ENCODING);
 
-        message.setFrom(toInternetAddress(email.getFrom()));
+        message.setFrom(toInternetAddress(email.getFrom() == null ? defaultFrom : email.getFrom()));
         message.setTo(toInternetAddress(email.getTo()));
-        message.setSubject(email.getSubject());
-        message.setText("plain", htmlContent);
+        message.setSubject(emailContent.getSubject());
+        message.setText(emailContent.getPlain(), emailContent.getHtml());
 
         sender.send(message.getMimeMessage());
     }

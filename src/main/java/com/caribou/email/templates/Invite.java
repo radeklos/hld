@@ -24,4 +24,9 @@ public class Invite implements EmailTemplate {
         return HtmlTemplates.Invite;
     }
 
+    @Override
+    public String getSubject() {
+        return "email.employee_invitation.subject";
+    }
+
 }
