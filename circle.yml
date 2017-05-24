@@ -21,9 +21,8 @@ deployment:
   prod:
     branch: master
     commands:
-      - ./gradlew container -x test
-      - docker tag hld/api $NAME:prod
-      - docker push $NAME:prod
+    heroku:
+      appname: chll
 
   latest:
     branch: develop
