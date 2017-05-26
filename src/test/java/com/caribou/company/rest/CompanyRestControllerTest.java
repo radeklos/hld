@@ -248,7 +248,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         departmentRepository.save(Department.newBuilder().company(company).name("HR").daysOff(10).build());
 
         String file =
-                "first validLeaveDto,last validLeaveDto,email,department,reaming holiday\n" +
+                "first name,last name,email,department,reaming holiday\n" +
                 faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n";
         File myFoo = File.createTempFile("employees", ".csv");
@@ -281,7 +281,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         departmentRepository.save(Department.newBuilder().company(company).name("HR").daysOff(10).build());
 
         String file =
-                "first validLeaveDto,last validLeaveDto,email,department,reaming holiday\n" +
+                "first name,last name,email,department,reaming holiday\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",Foo,21\n";
         File myFoo = File.createTempFile("employees", ".csv");
@@ -316,7 +316,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         FileOutputStream fooStream = new FileOutputStream(myFoo, false);
 
         String file =
-                "first validLeaveDto,last validLeaveDto,email,department,reaming holiday\n" +
+                "first name,last name,email,department,reaming holiday\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",\"" + faker.commerce().department() + "\",21\n";
         fooStream.write(file.getBytes());

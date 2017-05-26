@@ -13,7 +13,7 @@ public class EmployeeCsvParserTest {
 
     @Test
     public void parserCsv() throws Exception {
-        String csv = "first validLeaveDto,last validLeaveDto,email,department,reaming holiday\n" +
+        String csv = "first name,last name,email,department,reaming holiday\n" +
                 "john,doe,john.doe@missing.com,missing,5.23";
 
         MappingIterator<EmployeeCsvParser.Row> output = employeeImporter.read(csv);
@@ -28,7 +28,7 @@ public class EmployeeCsvParserTest {
 
     @Test(expected = RuntimeJsonMappingException.class)
     public void wrongNumberFormat() throws Exception {
-        String csv = "first validLeaveDto,last validLeaveDto,email,department,reaming holiday\n" +
+        String csv = "first name,last name,email,department,reaming holiday\n" +
                 "john,doe,john.doe@missing.com,missing,5,23";
 
         MappingIterator<EmployeeCsvParser.Row> output = employeeImporter.read(csv);
@@ -37,7 +37,7 @@ public class EmployeeCsvParserTest {
 
     @Test(expected = RuntimeJsonMappingException.class)
     public void quotedWrongFormatOfNumber() throws Exception {
-        String csv = "first validLeaveDto,last validLeaveDto,email,department,reaming holiday\n" +
+        String csv = "first name,last name,email,department,reaming holiday\n" +
                 "john,doe,john.doe@missing.com,missing,\"5,23\"";
 
         MappingIterator<EmployeeCsvParser.Row> output = employeeImporter.read(csv);

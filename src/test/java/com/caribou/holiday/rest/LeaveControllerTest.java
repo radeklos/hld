@@ -21,6 +21,7 @@ import rx.observers.TestSubscriber;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -67,9 +68,10 @@ public class LeaveControllerTest extends IntegrationTests {
 
     @Test
     public void create() throws Exception {
+        ZonedDateTime now = LocalDateTime.of(2017, 1, 1, 12, 0, 0, 0).atZone(ZoneId.of("UTC"));
         LeaveDto leaveDto = LeaveDto.builder()
-                .from(ZonedDateTime.now())
-                .to(ZonedDateTime.now())
+                .from(now)
+                .to(now.plus(7, ChronoUnit.DAYS))
                 .build();
 
         String url = String.format("/v1/users/%s/leaves", userAccount.getUid());
@@ -82,8 +84,57 @@ public class LeaveControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-//        Leave leave = leaveRepository.findOne(response.getBody().getUid());
-//        assertThat(leave.getUserAccount().getUid()).isEqualTo(userAccount.getUid());
+
+        LeaveDto created = response.getBody();
+        assertThat(created.getUid()).isNotNull();
+        assertThat(created.getTo()).isEqualTo(leaveDto.getTo());
+        assertThat(created.getFrom()).isEqualTo(leaveDto.getFrom());
+        assertThat(created.getLeaveType()).isEqualTo(leaveDto.getLeaveType());
+
+        Leave leave = leaveRepository.findOne(created.getUid());
+        assertThat(leave.getUserAccount()).isEqualTo(userAccount);
+    }
+
+    @Test
+    public void returns404ForNonExistingUser() throws Exception {
+        ZonedDateTime now = LocalDateTime.of(2017, 1, 1, 12, 0, 0, 0).atZone(ZoneId.of("UTC"));
+        LeaveDto leaveDto = LeaveDto.builder()
+                .from(now)
+                .to(now.plus(7, ChronoUnit.DAYS))
+                .build();
+
+        String url = String.format("/v1/users/%s/leaves", 0);
+        ResponseEntity<LeaveDto> response = post(
+                url,
+                leaveDto,
+                LeaveDto.class,
+                userAccount.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void updatingAnotherUserReturns404() throws Exception {
+        UserAccount anotherUser = userService.create(Factory.userAccount()).toBlocking().first();
+
+        ZonedDateTime now = LocalDateTime.of(2017, 1, 1, 12, 0, 0, 0).atZone(ZoneId.of("UTC"));
+        LeaveDto leaveDto = LeaveDto.builder()
+                .from(now)
+                .to(now.plus(7, ChronoUnit.DAYS))
+                .build();
+
+        String url = String.format("/v1/users/%s/leaves", anotherUser.getUid());
+        ResponseEntity<LeaveDto> response = post(
+                url,
+                leaveDto,
+                LeaveDto.class,
+                userAccount.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

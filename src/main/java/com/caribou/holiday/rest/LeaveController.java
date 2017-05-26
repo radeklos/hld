@@ -53,6 +53,7 @@ public class LeaveController {
                 .flatMap(leaveService::create)
                 .map(d -> new ResponseEntity<>(convert(d), HttpStatus.CREATED))
                 .onErrorReturn(ErrorHandler::h)
+                .defaultIfEmpty(ResponseEntity.notFound().build())
                 .toSingle();
     }
 
@@ -73,8 +74,8 @@ public class LeaveController {
         return Leave.builder()
                 .leaveType(dto.getLeaveType())
                 .reason(dto.getReason())
-                .from(Timestamp.from(dto.getFrom().toInstant()))
-                .to(Timestamp.from(dto.getTo().toInstant()))
+                .from(Timestamp.valueOf(dto.getFrom().toLocalDateTime()))
+                .to(Timestamp.valueOf(dto.getTo().toLocalDateTime()))
                 .build();
     }
 

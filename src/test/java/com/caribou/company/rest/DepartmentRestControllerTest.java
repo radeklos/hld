@@ -190,7 +190,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void updateDepartmentAsGuestReturnUnauthorized() throws Exception {
         Department department = Factory.department(company);
         departmentRepository.save(department);
-        DepartmentDto departmentDto = DepartmentDto.builder().name("new validLeaveDto").daysOff(12).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().name("new name").daysOff(12).build();
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = put(url, departmentDto, DepartmentDto.class);
