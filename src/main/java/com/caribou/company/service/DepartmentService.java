@@ -13,7 +13,7 @@ import java.util.Optional;
 
 
 @Service
-public class DepartmentService extends RxService.Imp<DepartmentRepository, Department, Long> {
+public class DepartmentService extends RxService.Imp<DepartmentRepository, Department, String> {
 
     private final CompanyRepository companyRepository;
 

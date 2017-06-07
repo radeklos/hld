@@ -14,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 
-public interface CompanyRepository extends CrudRepository<Company, Long> {
+public interface CompanyRepository extends CrudRepository<Company, String> {
 
     @Query("select e " +
             "from CompanyEmployee e " +
             "join e.member u " +
             "WHERE u.email = :email and e.company.uid = :uid")
-    Optional<CompanyEmployee> findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") Long uid);
+    Optional<CompanyEmployee> findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") String uid);
 
     @Query("select e " +
             "from CompanyEmployee e " +
@@ -33,7 +33,7 @@ public interface CompanyRepository extends CrudRepository<Company, Long> {
             "join c.employees e " +
             "join e.member u " +
             "WHERE u.uid = :uid")
-    Optional<CompanyEmployee> findByEmployeeByUid(@Param("uid") Long uid);
+    Optional<CompanyEmployee> findByEmployeeByUid(@Param("uid") String uid);
 
     @Query("select c " +
             "from Company c " +
