@@ -5,6 +5,7 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.holiday.domain.Leave;
@@ -64,6 +65,8 @@ public class LeaveControllerTest extends IntegrationTests {
 
         companyRepository.save(company);
         leaveTypeRepository.save(leaveType);
+
+        companyRepository.addEmployee(company, userAccount, Role.Viewer);
     }
 
     @Test
@@ -73,7 +76,6 @@ public class LeaveControllerTest extends IntegrationTests {
                 .from(now)
                 .to(now.plus(7, ChronoUnit.DAYS))
                 .build();
-
         String url = String.format("/v1/users/%s/leaves", userAccount.getUid());
         ResponseEntity<LeaveDto> response = post(
                 url,
@@ -102,7 +104,6 @@ public class LeaveControllerTest extends IntegrationTests {
                 .from(now)
                 .to(now.plus(7, ChronoUnit.DAYS))
                 .build();
-
         String url = String.format("/v1/users/%s/leaves", 0);
         ResponseEntity<LeaveDto> response = post(
                 url,
@@ -118,13 +119,11 @@ public class LeaveControllerTest extends IntegrationTests {
     @Test
     public void updatingAnotherUserReturns404() throws Exception {
         UserAccount anotherUser = userService.create(Factory.userAccount()).toBlocking().first();
-
         ZonedDateTime now = LocalDateTime.of(2017, 1, 1, 12, 0, 0, 0).atZone(ZoneId.of("UTC"));
         LeaveDto leaveDto = LeaveDto.builder()
                 .from(now)
                 .to(now.plus(7, ChronoUnit.DAYS))
                 .build();
-
         String url = String.format("/v1/users/%s/leaves", anotherUser.getUid());
         ResponseEntity<LeaveDto> response = post(
                 url,
@@ -170,4 +169,61 @@ public class LeaveControllerTest extends IntegrationTests {
         assertThat(items.get(0).get("reason")).isEqualTo("Holiday");
     }
 
+
+    @Test
+    public void geListOfLeavesForColleague() throws Exception {
+        UserAccount colleague = Factory.userAccount();
+        userService.create(colleague).subscribe(new TestSubscriber<>());
+        companyRepository.save(company);
+        companyRepository.addEmployee(company, colleague, Role.Viewer);
+
+        LocalDateTime now = LocalDateTime.of(2017, 1, 1, 12, 0, 0, 0);
+        Leave leave1 = Leave.builder()
+                .userAccount(userAccount)
+                .reason("Holiday")
+                .from(Timestamp.valueOf(now))
+                .to(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .leaveType(leaveType).build();
+        Leave leave2 = Leave.builder()
+                .userAccount(colleague)
+                .from(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
+                .to(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
+                .leaveType(leaveType).build();
+        leaveRepository.save(Arrays.asList(leave1, leave2));
+
+        String url = String.format("/v1/users/%s/leaves", colleague.getUid());
+        ResponseEntity<HashMap> response = get(
+                url,
+                HashMap.class,
+                userAccount.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        HashMap body = response.getBody();
+        List<HashMap> items = (List<HashMap>) body.get("items");
+        assertThat(items).hasSize(1);
+        assertThat(items.get(0).get("from")).isEqualTo("2017-01-04T12:00:00Z");
+        assertThat(items.get(0).get("to")).isEqualTo("2017-01-06T12:00:00Z");
+        assertThat(items.get(0).get("reason")).isNull();
+    }
+
+    @Test
+    public void cannotGetUsersLeavesFromAnotherCompany() throws Exception {
+        UserAccount anotherUser = Factory.userAccount();
+        userService.create(anotherUser).subscribe(new TestSubscriber<>());
+        Company anotherCompany = Factory.company();
+        companyRepository.save(anotherCompany);
+        companyRepository.addEmployee(anotherCompany, anotherUser, Role.Viewer);
+
+        String url = String.format("/v1/users/%s/leaves", anotherUser.getUid());
+        ResponseEntity<HashMap> response = get(
+                url,
+                HashMap.class,
+                userAccount.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
 }

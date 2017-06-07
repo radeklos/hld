@@ -67,10 +67,13 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserAccount> userAccount = userRepository.findByEmail(username);
-        if (userAccount.isPresent()) {
-            return new User(username, userAccount.get().getPassword(), AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
-        }
-        return null;
+        return userAccount.
+                <UserDetails>map(userAccount1 -> new User(
+                        username,
+                        userAccount1.getPassword(),
+                        AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"))
+                )
+                .orElse(null);
     }
 
     public Optional<UserAccount> getByUsername(String username) {

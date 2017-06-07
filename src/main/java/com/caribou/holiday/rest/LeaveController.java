@@ -2,7 +2,10 @@ package com.caribou.holiday.rest;
 
 import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.rest.ErrorHandler;
+import com.caribou.company.service.CompanyService;
+import com.caribou.company.service.NotFound;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.rest.dto.LeaveDto;
 import com.caribou.holiday.rest.dto.ListDto;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
@@ -35,6 +39,9 @@ public class LeaveController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CompanyService companyService;
 
     @Autowired
     private LeaveService leaveService;
@@ -60,8 +67,10 @@ public class LeaveController {
     @RequestMapping(method = RequestMethod.GET)
     public Single<ListDto<LeaveDto>> getList(@PathVariable("userUid") Long userUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userService
-                .findByEmail(userDetails.getUsername())
+        return companyService.getEmployeeByItsUid(userUid)
+                .filter(e -> e.getCompany().getUid().equals(userDetails.getCompanyId()))
+                .switchIfEmpty(Observable.error(new NotFound()))
+                .map(CompanyEmployee::getMember)
                 .flatMap(leaveService::findByUserAccount)
                 .map(this::convert)
                 .toList()

@@ -28,6 +28,13 @@ public interface CompanyRepository extends CrudRepository<Company, Long> {
             "WHERE u.email = :email")
     Optional<CompanyEmployee> findEmployeeByEmail(@Param("email") String email);
 
+    @Query("select e " +
+            "from Company c " +
+            "join c.employees e " +
+            "join e.member u " +
+            "WHERE u.uid = :uid")
+    Optional<CompanyEmployee> findByEmployeeByUid(@Param("uid") Long uid);
+
     @Query("select c " +
             "from Company c " +
             "join c.employees e " +
