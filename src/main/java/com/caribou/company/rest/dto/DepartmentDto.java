@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 public class DepartmentDto extends ResourceSupport {
 
-    private Long uid;
+    private String uid;
 
     @NotBlank
     @Size(max = 255)
@@ -47,11 +47,11 @@ public class DepartmentDto extends ResourceSupport {
     }
 
     @JsonProperty
-    public Long getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(Long uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 

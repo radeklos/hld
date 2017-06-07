@@ -39,7 +39,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                 .authorities(authorities);
         Integer companyId = claimsBody.<Integer>get(JwtClaims.COMPANY, Integer.class);
         if (companyId != null) {
-            contextBuilder.companyId(Long.valueOf(claimsBody.<Integer>get(JwtClaims.COMPANY, Integer.class)));
+            contextBuilder.companyId(claimsBody.get(JwtClaims.COMPANY, String.class));
         }
         String roleInCompany = claimsBody.get(JwtClaims.ROLE_IN_COMPANY, String.class);
         if (companyId != null) {

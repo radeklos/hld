@@ -65,7 +65,7 @@ public class LeaveController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public Single<ListDto<LeaveDto>> getList(@PathVariable("userUid") Long userUid) {
+    public Single<ListDto<LeaveDto>> getList(@PathVariable("userUid") String userUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getEmployeeByItsUid(userUid)
                 .filter(e -> e.getCompany().getUid().equals(userDetails.getCompanyId()))

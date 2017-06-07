@@ -68,7 +68,7 @@ public class CompanyRestController {
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-    public Single<CompanyDto> get(@PathVariable("uid") Long uid) {
+    public Single<CompanyDto> get(@PathVariable("uid") String uid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
                 .map(c -> convert(c.getCompany()))
@@ -98,7 +98,7 @@ public class CompanyRestController {
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
-    public Single<CompanyDto> update(@PathVariable("uid") Long uid, @Valid @RequestBody CompanyDto companyDto) {
+    public Single<CompanyDto> update(@PathVariable("uid") String uid, @Valid @RequestBody CompanyDto companyDto) {
         // TODO some acl
         Company company = convert(companyDto);
         return companyService.update(uid, company)
@@ -107,7 +107,7 @@ public class CompanyRestController {
     }
 
     @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
-    public Single<ResponseEntity<Object>> update(@PathVariable("uid") Long uid, @RequestParam("file") MultipartFile file) {
+    public Single<ResponseEntity<Object>> update(@PathVariable("uid") String uid, @RequestParam("file") MultipartFile file) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(uid, userDetails.getUsername())
                 .map(employee -> {

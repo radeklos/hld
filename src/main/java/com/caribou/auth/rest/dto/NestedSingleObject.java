@@ -15,7 +15,7 @@ import lombok.Setter;
 public class NestedSingleObject {
 
     @JsonProperty
-    private Long uid;
+    private String uid;
 
     @JsonProperty
     private String uri;

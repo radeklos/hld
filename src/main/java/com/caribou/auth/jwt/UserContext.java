@@ -13,7 +13,7 @@ public class UserContext {
     private final String username;
     private final List<GrantedAuthority> authorities;
 
-    private final Long companyId;
+    private final String companyId;
     private final Role roleInCompany;
 
     private UserContext(String username, List<GrantedAuthority> authorities) {
@@ -56,7 +56,7 @@ public class UserContext {
         return username;
     }
 
-    public Long getCompanyId() {
+    public String getCompanyId() {
         return companyId;
     }
 
@@ -71,7 +71,7 @@ public class UserContext {
     public static final class Builder {
         private String username;
         private List<GrantedAuthority> authorities;
-        private Long companyId;
+        private String companyId;
         private Role roleInCompany;
 
         private Builder() {
@@ -87,7 +87,7 @@ public class UserContext {
             return this;
         }
 
-        public Builder companyId(Long val) {
+        public Builder companyId(String val) {
             companyId = val;
             return this;
         }

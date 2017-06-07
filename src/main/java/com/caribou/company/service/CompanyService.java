@@ -11,12 +11,12 @@ import java.util.Optional;
 
 
 @Service
-public class CompanyService extends RxService.Imp<CompanyRepository, Company, Long> {
+public class CompanyService extends RxService.Imp<CompanyRepository, Company, String> {
 
     @Autowired
     private CompanyRepository companyRepository;
 
-    public Observable<CompanyEmployee> getByEmployeeEmail(Long uid, String email) {
+    public Observable<CompanyEmployee> getByEmployeeEmail(String uid, String email) {
         return Observable.create(subscriber -> {
             try {
                 Optional<CompanyEmployee> entity = companyRepository.findEmployeeByEmailForUid(email, uid);
@@ -31,7 +31,7 @@ public class CompanyService extends RxService.Imp<CompanyRepository, Company, Lo
         });
     }
 
-    public Observable<CompanyEmployee> getEmployeeByItsUid(Long uid) {
+    public Observable<CompanyEmployee> getEmployeeByItsUid(String uid) {
         return Observable.create(subscriber -> {
             try {
                 Optional<CompanyEmployee> entity = companyRepository.findByEmployeeByUid(uid);

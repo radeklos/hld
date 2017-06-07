@@ -89,14 +89,14 @@ public class DepartmentServiceTest extends IntegrationTests {
         Department department = Factory.department(company);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.update(0L, department).subscribe(testSubscriber);
+        departmentService.update("0", department).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
     @Test
     public void getNonExistingObject() throws Exception {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.get(0L).subscribe(testSubscriber);
+        departmentService.get("0").subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
