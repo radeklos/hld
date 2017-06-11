@@ -13,6 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -37,9 +38,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         UserContext.Builder contextBuilder = UserContext.builder()
                 .username(claimsBody.getSubject())
                 .authorities(authorities);
-        Integer companyId = claimsBody.<Integer>get(JwtClaims.COMPANY, Integer.class);
+        String companyId = claimsBody.get(JwtClaims.COMPANY, String.class);
         if (companyId != null) {
-            contextBuilder.companyId(claimsBody.get(JwtClaims.COMPANY, String.class));
+            contextBuilder.companyId(UUID.fromString(claimsBody.get(JwtClaims.COMPANY, String.class)));
         }
         String roleInCompany = claimsBody.get(JwtClaims.ROLE_IN_COMPANY, String.class);
         if (companyId != null) {

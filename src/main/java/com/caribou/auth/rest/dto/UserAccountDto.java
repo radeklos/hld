@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 public class UserAccountDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long uid;
+    private String uid;
 
     @NotEmpty
     @Size(max = 255)
@@ -51,11 +51,11 @@ public class UserAccountDto {
     }
 
     @JsonProperty
-    public Long getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(Long uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 

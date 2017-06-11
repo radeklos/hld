@@ -1,11 +1,9 @@
-package com.caribou.company.domain;
+package com.caribou;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
@@ -16,11 +14,10 @@ import java.util.UUID;
 
 
 @MappedSuperclass
-abstract class AbstractEntity implements Serializable {
+public abstract class AbstractEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(length = 36, columnDefinition = "UUID")
+    @Column(columnDefinition = "UUID")
     private UUID uid;
 
     @CreationTimestamp
@@ -59,7 +56,8 @@ abstract class AbstractEntity implements Serializable {
         this.uid = UUID.randomUUID();
     }
 
-    public String getUid() {
-        return uid.toString();
+    public UUID getUid() {
+        return uid;
     }
+
 }

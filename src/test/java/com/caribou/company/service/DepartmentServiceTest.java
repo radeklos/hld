@@ -19,9 +19,9 @@ import rx.Observable;
 import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -127,7 +127,7 @@ public class DepartmentServiceTest extends IntegrationTests {
         returned.subscribe(testSubscriber);
 
         department = departmentRepository.findOne(department.getUid());
-        List<DepartmentEmployee> employees = department.getEmployees().stream().collect(Collectors.toList());
+        List<DepartmentEmployee> employees = new ArrayList<>(department.getEmployees());
 
         assertThat(employees).hasSize(1);
         assertThat(employees.get(0).getRole()).isEqualTo(Role.Viewer);

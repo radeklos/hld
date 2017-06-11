@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,7 +66,7 @@ public class CompanyRepositoryTest extends IntegrationTests {
 
     @Test
     public void findEmployeeByEmailForUidNonExistingCompany() throws Exception {
-        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), "0");
+        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), UUID.randomUUID());
         assertThat(result).isNotPresent();
     }
 

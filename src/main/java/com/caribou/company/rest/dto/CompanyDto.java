@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 public class CompanyDto extends ResourceSupport {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long uid;
+    private String uid;
 
     @NotBlank
     @Size(max = 255)
@@ -69,11 +69,11 @@ public class CompanyDto extends ResourceSupport {
         return new Builder();
     }
 
-    public Long getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public CompanyDto setUid(Long uid) {
+    public CompanyDto setUid(String uid) {
         this.uid = uid;
         return this;
     }
@@ -160,7 +160,7 @@ public class CompanyDto extends ResourceSupport {
     }
 
     public static final class Builder {
-        private Long uid;
+        private String uid;
         private String name;
         private Integer defaultDaysOff;
         private String regNo;
@@ -174,7 +174,7 @@ public class CompanyDto extends ResourceSupport {
         private Builder() {
         }
 
-        public Builder uid(Long val) {
+        public Builder uid(String val) {
             uid = val;
             return this;
         }

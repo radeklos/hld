@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public class UserContext {
@@ -13,7 +14,7 @@ public class UserContext {
     private final String username;
     private final List<GrantedAuthority> authorities;
 
-    private final String companyId;
+    private final UUID companyId;
     private final Role roleInCompany;
 
     private UserContext(String username, List<GrantedAuthority> authorities) {
@@ -56,7 +57,7 @@ public class UserContext {
         return username;
     }
 
-    public String getCompanyId() {
+    public UUID getCompanyId() {
         return companyId;
     }
 
@@ -71,7 +72,7 @@ public class UserContext {
     public static final class Builder {
         private String username;
         private List<GrantedAuthority> authorities;
-        private String companyId;
+        private UUID companyId;
         private Role roleInCompany;
 
         private Builder() {
@@ -87,7 +88,7 @@ public class UserContext {
             return this;
         }
 
-        public Builder companyId(String val) {
+        public Builder companyId(UUID val) {
             companyId = val;
             return this;
         }

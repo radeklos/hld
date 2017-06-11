@@ -77,7 +77,7 @@ public class CompanyRestController {
 
     private CompanyDto convert(Company company) {
         CompanyDto companyDto = modelMapper.map(company, CompanyDto.class);
-        companyDto.add(linkTo(methodOn(DepartmentRestController.class).getList(company.getUid())).withRel("department"));
+        companyDto.add(linkTo(methodOn(DepartmentRestController.class).getList(company.getUid().toString())).withRel("department"));
         return companyDto;
     }
 

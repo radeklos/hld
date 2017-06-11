@@ -47,11 +47,11 @@ public class LeaveController {
     private LeaveService leaveService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public Single<ResponseEntity<LeaveDto>> create(@PathVariable("userUid") Long userUid, @Valid @RequestBody LeaveDto leaveDto) {
+    public Single<ResponseEntity<LeaveDto>> create(@PathVariable("userUid") String userUid, @Valid @RequestBody LeaveDto leaveDto) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService
                 .findByEmail(userDetails.getUsername())
-                .filter(userAccount -> userAccount.getUid().equals(userUid))
+                .filter(userAccount -> userAccount.getUid().toString().equals(userUid))
                 .map(userAccount -> {
                     Leave leave = convert(leaveDto);
                     leave.setUserAccount(userAccount);
@@ -77,7 +77,6 @@ public class LeaveController {
                 .map(l -> ListDto.<LeaveDto>builder().items(l).build())
                 .toSingle();
     }
-
 
     private Leave convert(LeaveDto dto) {
         return Leave.builder()

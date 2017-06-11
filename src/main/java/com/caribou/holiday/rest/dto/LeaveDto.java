@@ -30,6 +30,6 @@ public class LeaveDto {
     @JsonProperty
     private String reason;
 
-    private Long uid;
+    private String uid;
 
 }

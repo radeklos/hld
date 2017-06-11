@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import java.util.UUID;
+
 
 @Service
-public class LeaveService extends RxService.Imp<LeaveRepository, Leave, Long> {
+public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
 
     @Autowired
     private LeaveRepository leaveRepository;
