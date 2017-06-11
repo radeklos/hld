@@ -28,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -93,7 +94,7 @@ public class LeaveControllerTest extends IntegrationTests {
         assertThat(created.getFrom()).isEqualTo(leaveDto.getFrom());
         assertThat(created.getLeaveType()).isEqualTo(leaveDto.getLeaveType());
 
-        Leave leave = leaveRepository.findOne(created.getUid());
+        Leave leave = leaveRepository.findOne(UUID.fromString(created.getUid()));
         assertThat(leave.getUserAccount()).isEqualTo(userAccount);
     }
 

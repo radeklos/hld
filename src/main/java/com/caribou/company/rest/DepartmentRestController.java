@@ -49,7 +49,7 @@ public class DepartmentRestController {
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
     public Single<DepartmentDto> get(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid) {
         return departmentService.get(uid)
-                .filter(d -> d.getCompany().getUid().equals(companyUid))
+                .filter(d -> d.getCompany().getUid().toString().equals(companyUid))
                 .map(this::convert).toSingle();
     }
 
@@ -65,7 +65,7 @@ public class DepartmentRestController {
 
     private DepartmentDto convert(Department entity) {
         DepartmentDto departmentDto = modelMapper.map(entity, DepartmentDto.class);
-        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid(), entity.getUid())).withRel("employees"));
+        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid().toString(), entity.getUid().toString())).withRel("employees"));
         return departmentDto;
     }
 

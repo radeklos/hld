@@ -1,5 +1,6 @@
 package com.caribou.company.domain;
 
+import com.caribou.AbstractEntity;
 import com.caribou.auth.domain.UserAccount;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

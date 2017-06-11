@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
-public class DepartmentService extends RxService.Imp<DepartmentRepository, Department, String> {
+public class DepartmentService extends RxService.Imp<DepartmentRepository, Department, UUID> {
 
     private final CompanyRepository companyRepository;
 

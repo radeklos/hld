@@ -1,5 +1,7 @@
 package com.caribou.auth.domain;
 
+import com.caribou.AbstractEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;

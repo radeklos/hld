@@ -3,11 +3,13 @@ package com.caribou.company.rest.dto;
 import com.caribou.company.domain.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.UUID;
+
 
 public class EmployeeDto {
 
     @JsonProperty
-    private Long uid;
+    private UUID uid;
 
     @JsonProperty
     private String firstName;
@@ -24,11 +26,11 @@ public class EmployeeDto {
     public EmployeeDto() {
     }
 
-    public Long getUid() {
+    public UUID getUid() {
         return uid;
     }
 
-    public void setUid(Long uid) {
+    public void setUid(UUID uid) {
         this.uid = uid;
     }
 

@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -273,7 +274,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        Department department = departmentRepository.findOne(response.getBody().getUid());
+        Department department = departmentRepository.findOne(UUID.fromString(response.getBody().getUid()));
         assertThat(department.getCompany().getUid()).as("Department isn't saved into company").isEqualTo(company.getUid());
     }
 
@@ -296,7 +297,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        Department department = departmentRepository.findOne(response.getBody().getUid());
+        Department department = departmentRepository.findOne(UUID.fromString(response.getBody().getUid()));
         assertThat(department.getCompany().getUid()).isEqualTo(company.getUid());
     }
 
