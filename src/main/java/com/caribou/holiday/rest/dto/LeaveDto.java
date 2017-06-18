@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Size;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 
 
 @Data
@@ -21,10 +21,10 @@ public class LeaveDto {
     private LeaveType leaveType;
 
     @JsonProperty(required = true)
-    private ZonedDateTime from;
+    private LocalDate from;
 
     @JsonProperty(required = true)
-    private ZonedDateTime to;
+    private LocalDate to;
 
     @Size(max = 255)
     @JsonProperty

@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.validation.ConstraintViolation;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,8 +39,8 @@ public class LeaveDtoTest {
     @Test
     public void validLeaveDto() throws Exception {
         LeaveDto leaveDto = LeaveDto.builder()
-                .from(ZonedDateTime.now())
-                .to(ZonedDateTime.now())
+                .from(LocalDate.now())
+                .to(LocalDate.now())
                 .build();
         Set<ConstraintViolation<LeaveDto>> constraintViolations = localValidatorFactory.validate(leaveDto);
 

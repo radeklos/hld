@@ -11,6 +11,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +23,12 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
             "join e.member u " +
             "WHERE u.email = :email and e.company.uid = :uid")
     Optional<CompanyEmployee> findEmployeeByEmailForUid(@Param("email") String email, @Param("uid") UUID uid);
+
+    @Query("select e " +
+            "from CompanyEmployee e " +
+            "join e.member u " +
+            "WHERE e.company.uid = :uid")
+    List<CompanyEmployee> findEmployeesByCompanyUid(@Param("uid") UUID uid);
 
     @Query("select e " +
             "from CompanyEmployee e " +

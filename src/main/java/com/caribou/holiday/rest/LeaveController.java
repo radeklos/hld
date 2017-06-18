@@ -24,7 +24,7 @@ import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.time.ZoneId;
 
 
@@ -82,15 +82,15 @@ public class LeaveController {
         return Leave.builder()
                 .leaveType(dto.getLeaveType())
                 .reason(dto.getReason())
-                .from(Timestamp.valueOf(dto.getFrom().toLocalDateTime()))
-                .to(Timestamp.valueOf(dto.getTo().toLocalDateTime()))
+                .from(Date.valueOf(dto.getFrom()))
+                .to(Date.valueOf(dto.getTo()))
                 .build();
     }
 
     private LeaveDto convert(Leave entity) {
         LeaveDto dto = modelMapper.map(entity, LeaveDto.class);
-        dto.setFrom(entity.getFrom().toLocalDateTime().atZone(UTC));
-        dto.setTo(entity.getTo().toLocalDateTime().atZone(UTC));
+        dto.setFrom(entity.getFrom().toLocalDate());
+        dto.setTo(entity.getTo().toLocalDate());
         return dto;
     }
 

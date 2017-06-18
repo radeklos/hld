@@ -51,6 +51,4 @@ public class CompanyService extends RxService.Imp<CompanyRepository, Company, UU
         });
     }
 
-
-
 }
