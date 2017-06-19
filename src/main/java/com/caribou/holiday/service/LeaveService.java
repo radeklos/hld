@@ -15,6 +15,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -30,17 +31,20 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
         return Observable.from(leaveRepository.findByUserAccount(userAccount));
     }
 
-    public Observable<EmployeeLeaves> getEmployeeLeaves(String companyId, final LocalDate from, final LocalDate to) {
-        return Observable.from(companyRepository.findEmployeesByCompanyUid(UUID.fromString(companyId)))
+    public List<EmployeeLeaves> getEmployeeLeaves(String companyId, final LocalDate from, final LocalDate to) {
+        List<EmployeeLeaves> bla = companyRepository.findEmployeesByCompanyUid(UUID.fromString(companyId)).stream()
                 .map(e -> EmployeeLeaves.builder()
                         .userAccount(e.getMember())
                         .leaves(leaveRepository.findByUserAccount(e.getMember(), Date.valueOf(from), Date.valueOf(to)))
-                        .build());
+                        .build()
+                )
+                .collect(Collectors.toList());
+        return bla;
     }
 
     @Data
     @Builder
-    static class EmployeeLeaves {
+    public static class EmployeeLeaves {
         private final UserAccount userAccount;
         private final List<Leave> leaves;
     }

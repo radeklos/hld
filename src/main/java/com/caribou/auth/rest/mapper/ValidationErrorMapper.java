@@ -19,11 +19,11 @@ public class ValidationErrorMapper {
     }
 
     public static ErrorField map(FieldError fieldError) {
-        ErrorField validationError = new ErrorField();
-        validationError.setCode(fieldError.getCode());
-        validationError.setDefaultMessage(fieldError.getDefaultMessage());
-        validationError.setRejectedValue(fieldError.getRejectedValue());
-        return validationError;
+        return ErrorField.builder()
+                .code(fieldError.getCode())
+                .defaultMessage(fieldError.getDefaultMessage())
+                .rejectedValue(fieldError.getRejectedValue())
+                .build();
     }
 
 }

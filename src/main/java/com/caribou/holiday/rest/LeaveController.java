@@ -88,10 +88,7 @@ public class LeaveController {
     }
 
     private LeaveDto convert(Leave entity) {
-        LeaveDto dto = modelMapper.map(entity, LeaveDto.class);
-        dto.setFrom(entity.getFrom().toLocalDate());
-        dto.setTo(entity.getTo().toLocalDate());
-        return dto;
+        return modelMapper.map(entity, LeaveDto.class);
     }
 
 }

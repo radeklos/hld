@@ -81,11 +81,28 @@ public class LeaveServiceTest extends IntegrationTests {
 
         LocalDate from = LocalDate.of(2017, 5, 1);
         LocalDate to = LocalDate.of(2017, 5, 31);
-        List<LeaveService.EmployeeLeaves> leaves = leaveService.getEmployeeLeaves(company.getUid().toString(), from, to).toList().toBlocking().first();
+        List<LeaveService.EmployeeLeaves> leaves = leaveService.getEmployeeLeaves(company.getUid().toString(), from, to);
 
         assertThat(leaves).hasSize(2);
         assertThat(leaves.get(0).getLeaves()).hasSize(1);
         assertThat(leaves.get(1).getLeaves()).hasSize(1);
+    }
+
+
+    @Test
+    public void getAllEmployeesEvenThoughtHeDoesNotHaveAnyLeaves() throws Exception {
+        UserAccount emp1 = userRepository.save(Factory.userAccount());
+        companyRepository.addEmployee(company, emp1, Role.Viewer);
+        leaveService.create(Factory.leave(emp1, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14))).subscribe(new TestSubscriber<>());
+
+        UserAccount emp2 = userRepository.save(Factory.userAccount());
+        companyRepository.addEmployee(company, emp2, Role.Viewer);
+
+        LocalDate from = LocalDate.of(2017, 5, 1);
+        LocalDate to = LocalDate.of(2017, 5, 31);
+        List<LeaveService.EmployeeLeaves> leaves = leaveService.getEmployeeLeaves(company.getUid().toString(), from, to);
+
+        assertThat(leaves).hasSize(2);
     }
 
 }

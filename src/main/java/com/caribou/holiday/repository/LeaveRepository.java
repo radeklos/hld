@@ -14,10 +14,9 @@ public interface LeaveRepository extends CrudRepository<Leave, UUID> {
 
     List<Leave> findByUserAccount(UserAccount userAccount);
 
-    @Query(
-            "select l " +
-                    "from Leave l " +
-                    "where l.userAccount = ?1 and l.to >= ?2 and l.from <= ?3")
+    @Query("select l " +
+            "from Leave l " +
+            "where l.userAccount = ?1 and l.to >= ?2 and l.from <= ?3")
     List<Leave> findByUserAccount(UserAccount member, Date from, Date to);
 
 }

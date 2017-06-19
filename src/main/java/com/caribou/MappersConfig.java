@@ -1,6 +1,7 @@
 package com.caribou;
 
 import com.caribou.company.rest.map.EmployeeMap;
+import com.caribou.holiday.rest.map.LeaveMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.modelmapper.ModelMapper;
@@ -19,6 +20,7 @@ public class MappersConfig {
     public ModelMapper modelMapper() throws IOException {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.addMappings(new EmployeeMap());
+        modelMapper.addMappings(new LeaveMap());
         return modelMapper;
     }
 
