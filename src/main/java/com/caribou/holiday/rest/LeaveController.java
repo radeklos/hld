@@ -10,7 +10,7 @@ import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.rest.dto.LeaveDto;
 import com.caribou.holiday.rest.dto.ListDto;
 import com.caribou.holiday.service.LeaveService;
-import org.modelmapper.ModelMapper;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,6 @@ import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
-import java.sql.Date;
 import java.time.ZoneId;
 
 
@@ -35,7 +34,7 @@ public class LeaveController {
     private static final ZoneId UTC = ZoneId.of("UTC");
 
     @Autowired
-    private ModelMapper modelMapper;
+    private MapperFacade modelMapper;
 
     @Autowired
     private UserService userService;
@@ -64,6 +63,14 @@ public class LeaveController {
                 .toSingle();
     }
 
+    private Leave convert(LeaveDto dto) {
+        return modelMapper.map(dto, Leave.class);
+    }
+
+    private LeaveDto convert(Leave entity) {
+        return modelMapper.map(entity, LeaveDto.class);
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     public Single<ListDto<LeaveDto>> getList(@PathVariable("userUid") String userUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -76,19 +83,6 @@ public class LeaveController {
                 .toList()
                 .map(l -> ListDto.<LeaveDto>builder().items(l).build())
                 .toSingle();
-    }
-
-    private Leave convert(LeaveDto dto) {
-        return Leave.builder()
-                .leaveType(dto.getLeaveType())
-                .reason(dto.getReason())
-                .from(Date.valueOf(dto.getFrom()))
-                .to(Date.valueOf(dto.getTo()))
-                .build();
-    }
-
-    private LeaveDto convert(Leave entity) {
-        return modelMapper.map(entity, LeaveDto.class);
     }
 
 }

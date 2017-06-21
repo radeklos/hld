@@ -62,8 +62,8 @@ public class LeaveServiceTest extends IntegrationTests {
 
         Leave created = testSubscriber.getOnNextEvents().get(0);
         assertThat(created.getUid()).isNotNull();
-        assertThat(created.getTo()).isEqualTo(leave.getTo());
-        assertThat(created.getFrom()).isEqualTo(leave.getFrom());
+        assertThat(created.getEnding()).isEqualTo(leave.getEnding());
+        assertThat(created.getStarting()).isEqualTo(leave.getStarting());
         assertThat(created.getLeaveType()).isEqualTo(leave.getLeaveType());
         assertThat(created.getUserAccount()).isEqualTo(userAccount);
     }

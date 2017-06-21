@@ -21,10 +21,10 @@ public class LeaveDto {
     private LeaveType leaveType;
 
     @JsonProperty(required = true)
-    private LocalDate from;
+    private LocalDate starting;
 
     @JsonProperty(required = true)
-    private LocalDate to;
+    private LocalDate ending;
 
     @Size(max = 255)
     @JsonProperty

@@ -20,8 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rx.observers.TestSubscriber;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,8 +73,8 @@ public class LeaveControllerTest extends IntegrationTests {
     public void create() throws Exception {
         LocalDate now = LocalDate.of(2017, 1, 1);
         LeaveDto leaveDto = LeaveDto.builder()
-                .from(now)
-                .to(now.plus(7, ChronoUnit.DAYS))
+                .starting(now)
+                .ending(now.plus(7, ChronoUnit.DAYS))
                 .build();
         String url = String.format("/v1/users/%s/leaves", userAccount.getUid());
         ResponseEntity<LeaveDto> response = post(
@@ -88,8 +89,8 @@ public class LeaveControllerTest extends IntegrationTests {
 
         LeaveDto created = response.getBody();
         assertThat(created.getUid()).isNotNull();
-        assertThat(created.getTo()).isEqualTo(leaveDto.getTo());
-        assertThat(created.getFrom()).isEqualTo(leaveDto.getFrom());
+        assertThat(created.getStarting()).isEqualTo(leaveDto.getStarting());
+        assertThat(created.getEnding()).isEqualTo(leaveDto.getEnding());
         assertThat(created.getLeaveType()).isEqualTo(leaveDto.getLeaveType());
 
         Leave leave = leaveRepository.findOne(UUID.fromString(created.getUid()));
@@ -100,8 +101,8 @@ public class LeaveControllerTest extends IntegrationTests {
     public void returns404ForNonExistingUser() throws Exception {
         LocalDate now = LocalDate.of(2017, 1, 1);
         LeaveDto leaveDto = LeaveDto.builder()
-                .from(now)
-                .to(now.plus(7, ChronoUnit.DAYS))
+                .starting(now)
+                .ending(now.plus(7, ChronoUnit.DAYS))
                 .build();
         String url = String.format("/v1/users/%s/leaves", 0);
         ResponseEntity<LeaveDto> response = post(
@@ -120,8 +121,8 @@ public class LeaveControllerTest extends IntegrationTests {
         UserAccount anotherUser = userService.create(Factory.userAccount()).toBlocking().first();
         LocalDate now = LocalDate.of(2017, 1, 1);
         LeaveDto leaveDto = LeaveDto.builder()
-                .from(now)
-                .to(now.plus(7, ChronoUnit.DAYS))
+                .starting(now)
+                .ending(now.plus(7, ChronoUnit.DAYS))
                 .build();
         String url = String.format("/v1/users/%s/leaves", anotherUser.getUid());
         ResponseEntity<LeaveDto> response = post(
@@ -137,17 +138,17 @@ public class LeaveControllerTest extends IntegrationTests {
 
     @Test
     public void geListOfLeavesForUser() throws Exception {
-        LocalDate now = LocalDate.of(2017, 1, 1);
+        LocalDateTime now = LocalDateTime.of(2017, 1, 1, 0, 0, 0);
         Leave leave1 = Leave.builder()
                 .userAccount(userAccount)
                 .reason("Holiday")
-                .from(Date.valueOf(now))
-                .to(Date.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .starting(Timestamp.valueOf(now))
+                .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(userAccount)
-                .from(Date.valueOf(now.plus(3, ChronoUnit.DAYS)))
-                .to(Date.valueOf(now.plus(5, ChronoUnit.DAYS)))
+                .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
+                .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
                 .leaveType(leaveType).build();
         leaveRepository.save(Arrays.asList(leave1, leave2));
 
@@ -163,8 +164,8 @@ public class LeaveControllerTest extends IntegrationTests {
         HashMap body = response.getBody();
         List<HashMap> items = (List<HashMap>) body.get("items");
         assertThat(items).hasSize(2);
-        assertThat(items.get(0).get("from")).isEqualTo("2017-01-01");
-        assertThat(items.get(0).get("to")).isEqualTo("2017-01-02");
+        assertThat(items.get(0).get("starting")).isEqualTo("2017-01-01");
+        assertThat(items.get(0).get("ending")).isEqualTo("2017-01-02");
         assertThat(items.get(0).get("reason")).isEqualTo("Holiday");
     }
 
@@ -176,17 +177,17 @@ public class LeaveControllerTest extends IntegrationTests {
         companyRepository.save(company);
         companyRepository.addEmployee(company, colleague, Role.Viewer);
 
-        LocalDate now = LocalDate.of(2017, 1, 1);
+        LocalDateTime now = LocalDateTime.of(2017, 1, 1, 0, 0, 0);
         Leave leave1 = Leave.builder()
                 .userAccount(userAccount)
                 .reason("Holiday")
-                .from(Date.valueOf(now))
-                .to(Date.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .starting(Timestamp.valueOf(now))
+                .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(colleague)
-                .from(Date.valueOf(now.plus(3, ChronoUnit.DAYS)))
-                .to(Date.valueOf(now.plus(5, ChronoUnit.DAYS)))
+                .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
+                .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
                 .leaveType(leaveType).build();
         leaveRepository.save(Arrays.asList(leave1, leave2));
 
@@ -202,8 +203,8 @@ public class LeaveControllerTest extends IntegrationTests {
         HashMap body = response.getBody();
         List<HashMap> items = (List<HashMap>) body.get("items");
         assertThat(items).hasSize(1);
-        assertThat(items.get(0).get("from")).isEqualTo("2017-01-04");
-        assertThat(items.get(0).get("to")).isEqualTo("2017-01-06");
+        assertThat(items.get(0).get("starting")).isEqualTo("2017-01-04");
+        assertThat(items.get(0).get("ending")).isEqualTo("2017-01-06");
         assertThat(items.get(0).get("reason")).isNull();
     }
 

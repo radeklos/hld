@@ -47,6 +47,8 @@ dependencies {
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.7.0'
     compile 'com.sun.mail:javax.mail'
 
+    compile 'net.rakugakibox.spring.boot:orika-spring-boot-starter:1.4.0'
+
     // auth
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile 'io.jsonwebtoken:jjwt:0.7.0'

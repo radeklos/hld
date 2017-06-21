@@ -28,15 +28,12 @@ import org.springframework.web.client.RestTemplate;
 public abstract class IntegrationTests {
 
     protected Faker faker = new Faker();
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Value("${local.server.port}")
-    private int port = 0;
-
     @MockBean
     protected EmailSender emailSender;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Value("${local.server.port}")
+    private int port = 0;
 
     protected <T> ResponseEntity<T> get(String path, Class<T> responseType, String username, String password) throws JsonProcessingException {
         return exchange(path, HttpMethod.GET, null, responseType, username, password);

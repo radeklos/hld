@@ -7,7 +7,7 @@ import com.caribou.holiday.rest.dto.EmployeeLeavesDto;
 import com.caribou.holiday.rest.dto.LeaveDto;
 import com.caribou.holiday.rest.dto.ListDto;
 import com.caribou.holiday.service.LeaveService;
-import org.modelmapper.ModelMapper;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class CompanyLeaveController {
 
     @Autowired
-    private ModelMapper modelMapper;
+    private MapperFacade modelMapper;
 
     @Autowired
     private LeaveService leaveService;
@@ -54,7 +54,8 @@ public class CompanyLeaveController {
 
     private List<LeaveDto> map(List<Leave> leaves, Class<LeaveDto> userAccountDtoClass) {
         return leaves.stream()
-                .map(l -> modelMapper.map(l, userAccountDtoClass)).collect(Collectors.toList());
+                .map(l -> modelMapper.map(l, userAccountDtoClass))
+                .collect(Collectors.toList());
     }
 
 

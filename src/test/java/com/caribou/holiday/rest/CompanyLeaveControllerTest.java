@@ -93,8 +93,8 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
         assertThat(employeeDto.get("email")).isEqualTo(emp1.getEmail());
 
         List<LinkedHashMap> leavesDto = (List<LinkedHashMap>) employeeLeavesDto.get("leaves");
-        assertThat(leavesDto.get(0).get("from")).isEqualTo("2017-04-25");
-        assertThat(leavesDto.get(0).get("to")).isEqualTo("2017-05-14");
+        assertThat(leavesDto.get(0).get("starting")).isEqualTo("2017-04-25");
+        assertThat(leavesDto.get(0).get("ending")).isEqualTo("2017-05-14");
     }
 
     @Test

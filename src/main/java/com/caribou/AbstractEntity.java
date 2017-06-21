@@ -28,6 +28,10 @@ public abstract class AbstractEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
+    public AbstractEntity() {
+        this.uid = UUID.randomUUID();
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -50,10 +54,6 @@ public abstract class AbstractEntity implements Serializable {
 
         return !(getUid() != null ? !getUid().equals(that.getUid()) : that.getUid() != null);
 
-    }
-
-    public AbstractEntity() {
-        this.uid = UUID.randomUUID();
     }
 
     public UUID getUid() {

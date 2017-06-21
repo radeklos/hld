@@ -10,6 +10,7 @@ import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
 import com.github.javafaker.Faker;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -90,8 +91,8 @@ public class Factory {
         return Leave.builder()
                 .userAccount(userAccount)
                 .leaveType(leaveType)
-                .from(java.sql.Date.valueOf(from))
-                .to(java.sql.Date.valueOf(to))
+                .starting(Timestamp.valueOf(from.atStartOfDay()))
+                .ending(Timestamp.valueOf(to.atStartOfDay()))
                 .build();
     }
 

@@ -39,8 +39,8 @@ public class LeaveDtoTest {
     @Test
     public void validLeaveDto() throws Exception {
         LeaveDto leaveDto = LeaveDto.builder()
-                .from(LocalDate.now())
-                .to(LocalDate.now())
+                .starting(LocalDate.now())
+                .ending(LocalDate.now())
                 .build();
         Set<ConstraintViolation<LeaveDto>> constraintViolations = localValidatorFactory.validate(leaveDto);
 

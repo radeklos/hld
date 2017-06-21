@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -32,14 +32,17 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     }
 
     public List<EmployeeLeaves> getEmployeeLeaves(String companyId, final LocalDate from, final LocalDate to) {
-        List<EmployeeLeaves> bla = companyRepository.findEmployeesByCompanyUid(UUID.fromString(companyId)).stream()
+        return companyRepository.findEmployeesByCompanyUid(UUID.fromString(companyId)).stream()
                 .map(e -> EmployeeLeaves.builder()
                         .userAccount(e.getMember())
-                        .leaves(leaveRepository.findByUserAccount(e.getMember(), Date.valueOf(from), Date.valueOf(to)))
+                        .leaves(leaveRepository.findByUserAccount(
+                                e.getMember(),
+                                Timestamp.valueOf(from.atStartOfDay()),
+                                Timestamp.valueOf(to.atStartOfDay()))
+                        )
                         .build()
                 )
                 .collect(Collectors.toList());
-        return bla;
     }
 
     @Data

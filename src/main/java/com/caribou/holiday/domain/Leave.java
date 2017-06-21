@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 
 @Data
@@ -26,11 +26,11 @@ public class Leave extends AbstractEntity {
     @ManyToOne(optional = false)
     UserAccount userAccount;
 
-    @Column(nullable = false, name = "_from")
-    Date from;
+    @Column(nullable = false, name = "starting")
+    Timestamp starting;
 
-    @Column(nullable = false, name = "_to")
-    Date to;
+    @Column(nullable = false, name = "ending")
+    Timestamp ending;
 
     String reason;
 

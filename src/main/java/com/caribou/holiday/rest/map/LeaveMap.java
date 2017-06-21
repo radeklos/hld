@@ -6,11 +6,12 @@ import org.modelmapper.PropertyMap;
 
 
 public class LeaveMap extends PropertyMap<Leave, LeaveDto> {
+
     @Override
     protected void configure() {
         map().setReason(source.getReason());
         map().setLeaveType(source.getLeaveType());
-        map().setFrom(source.getFrom().toLocalDate());
-        map().setTo(source.getTo().toLocalDate());
+        map().setStarting(source.getStarting().toLocalDateTime().toLocalDate());
+        map().setEnding(source.getEnding().toLocalDateTime().toLocalDate());
     }
 }

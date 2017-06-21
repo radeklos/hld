@@ -48,6 +48,14 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    private void sendInvitationEmail(UserAccount userAccount) {
+        Email email = Email.builder()
+                .to(userAccount)
+                .template(Welcome.builder().user(userAccount).build())
+                .build();
+        emailSender.send(email);
+    }
+
     public Observable<UserAccount> findByEmail(String email) {
         return Observable.create(subscriber -> {
             try {
@@ -78,13 +86,5 @@ public class UserService implements UserDetailsService {
 
     public Optional<UserAccount> getByUsername(String username) {
         return this.userRepository.findByEmail(username);
-    }
-
-    private void sendInvitationEmail(UserAccount userAccount) {
-        Email email = Email.builder()
-                .to(userAccount)
-                .template(Welcome.builder().user(userAccount).build())
-                .build();
-        emailSender.send(email);
     }
 }
