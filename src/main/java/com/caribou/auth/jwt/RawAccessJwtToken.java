@@ -17,17 +17,19 @@ public class RawAccessJwtToken implements JwtToken {
 
     private String token;
 
-    public RawAccessJwtToken(String token) {
+    RawAccessJwtToken(String token) {
         this.token = token;
     }
 
     /**
      * Parses and validates JWT Token signature.
      *
-     * @throws BadCredentialsException
-     * @throws JwtExpiredTokenException
+     * @param signingKey configurable signing key
+     * @return List fo Claims
+     * @throws BadCredentialsException username or password are incorrect
+     * @throws JwtExpiredTokenException token expired
      */
-    public Jws<Claims> parseClaims(String signingKey) throws BadCredentialsException, JwtExpiredTokenException {
+    Jws<Claims> parseClaims(String signingKey) throws BadCredentialsException, JwtExpiredTokenException {
         try {
             return Jwts.parser().setSigningKey(signingKey).parseClaimsJws(this.token);
         } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException | SignatureException ex) {

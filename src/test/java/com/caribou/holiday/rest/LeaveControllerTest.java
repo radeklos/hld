@@ -75,6 +75,8 @@ public class LeaveControllerTest extends IntegrationTests {
         LeaveDto leaveDto = LeaveDto.builder()
                 .starting(now)
                 .ending(now.plus(7, ChronoUnit.DAYS))
+                .startingAt(LeaveDto.AMPM.PM)
+                .endingAt(LeaveDto.AMPM.PM)
                 .build();
         String url = String.format("/v1/users/%s/leaves", userAccount.getUid());
         ResponseEntity<LeaveDto> response = post(
@@ -103,6 +105,8 @@ public class LeaveControllerTest extends IntegrationTests {
         LeaveDto leaveDto = LeaveDto.builder()
                 .starting(now)
                 .ending(now.plus(7, ChronoUnit.DAYS))
+                .startingAt(LeaveDto.AMPM.PM)
+                .endingAt(LeaveDto.AMPM.PM)
                 .build();
         String url = String.format("/v1/users/%s/leaves", 0);
         ResponseEntity<LeaveDto> response = post(
@@ -123,6 +127,8 @@ public class LeaveControllerTest extends IntegrationTests {
         LeaveDto leaveDto = LeaveDto.builder()
                 .starting(now)
                 .ending(now.plus(7, ChronoUnit.DAYS))
+                .startingAt(LeaveDto.AMPM.PM)
+                .endingAt(LeaveDto.AMPM.PM)
                 .build();
         String url = String.format("/v1/users/%s/leaves", anotherUser.getUid());
         ResponseEntity<LeaveDto> response = post(
