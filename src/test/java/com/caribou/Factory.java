@@ -6,7 +6,15 @@ import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.holiday.domain.Leave;
+import com.caribou.holiday.domain.LeaveType;
 import com.github.javafaker.Faker;
+
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 public class Factory {
@@ -62,9 +70,30 @@ public class Factory {
     }
 
     public static DepartmentDto departmentDto() {
-        return DepartmentDto.newBuilder()
+        return DepartmentDto.builder()
                 .name(faker.commerce().department())
                 .daysOff(10)
                 .build();
     }
+
+    public static Leave leave(UserAccount userAccount, LeaveType leaveType) {
+        Date _from = faker.date().future(20, TimeUnit.DAYS);
+        LocalDate from = LocalDate.from(toLocalDate(_from));
+        LocalDate to = LocalDate.from(toLocalDate(faker.date().future(20, TimeUnit.DAYS, _from)));
+        return leave(userAccount, leaveType, from, to);
+    }
+
+    private static LocalDate toLocalDate(Date date) {
+        return date.toInstant().atZone(ZoneOffset.UTC).toLocalDate();
+    }
+
+    public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDate from, LocalDate to) {
+        return Leave.builder()
+                .userAccount(userAccount)
+                .leaveType(leaveType)
+                .starting(Timestamp.valueOf(from.atStartOfDay()))
+                .ending(Timestamp.valueOf(to.atStartOfDay()))
+                .build();
+    }
+
 }

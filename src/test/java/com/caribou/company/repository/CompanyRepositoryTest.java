@@ -12,8 +12,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.ArrayList;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,7 +66,7 @@ public class CompanyRepositoryTest extends IntegrationTests {
 
     @Test
     public void findEmployeeByEmailForUidNonExistingCompany() throws Exception {
-        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), 0L);
+        Optional<CompanyEmployee> result = companyRepository.findEmployeeByEmailForUid(userAccount.getEmail(), UUID.randomUUID());
         assertThat(result).isNotPresent();
     }
 
@@ -82,7 +83,7 @@ public class CompanyRepositoryTest extends IntegrationTests {
         userRepository.save(anotherUserAccount);
         companyRepository.addEmployee(company, anotherUserAccount, Role.Admin);
 
-        Optional<CompanyEmployee> employee = companyRepository.findOne(company.getUid()).getEmployees().stream().collect(Collectors.toList()).stream()
+        Optional<CompanyEmployee> employee = new ArrayList<>(companyRepository.findOne(company.getUid()).getEmployees()).stream()
                 .filter(e -> e.getMember().getEmail().equals(anotherUserAccount.getEmail()))
                 .findFirst();
 

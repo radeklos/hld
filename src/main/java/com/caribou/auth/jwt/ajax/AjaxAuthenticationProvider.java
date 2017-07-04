@@ -3,6 +3,8 @@ package com.caribou.auth.jwt.ajax;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
+import com.caribou.company.domain.CompanyEmployee;
+import com.caribou.company.repository.CompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -25,12 +28,16 @@ import java.util.stream.Collectors;
 public class AjaxAuthenticationProvider implements AuthenticationProvider {
 
     private final BCryptPasswordEncoder encoder;
+
     private final UserService userService;
 
+    private final CompanyRepository companyRepository;
+
     @Autowired
-    public AjaxAuthenticationProvider(final UserService userService, final BCryptPasswordEncoder encoder) {
+    public AjaxAuthenticationProvider(final UserService userService, final BCryptPasswordEncoder encoder, CompanyRepository companyRepository) {
         this.userService = userService;
         this.encoder = encoder;
+        this.companyRepository = companyRepository;
     }
 
     @Override
@@ -42,11 +49,21 @@ public class AjaxAuthenticationProvider implements AuthenticationProvider {
         if (!encoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Authentication Failed. Username or Password not valid.");
         }
-        if (user.getRoles() == null) throw new InsufficientAuthenticationException("User has no roles assigned");
+        if (user.getRoles() == null) {
+            throw new InsufficientAuthenticationException("User has no roles assigned");
+        }
+        return buildAuthenticationToken(user);
+    }
+
+    private UsernamePasswordAuthenticationToken buildAuthenticationToken(UserAccount user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getRole().authority()))
                 .collect(Collectors.toList());
-        UserContext userContext = UserContext.create(user.getEmail(), authorities);
+
+        Optional<CompanyEmployee> employee = companyRepository.findEmployeeByEmail(user.getEmail());
+        UserContext userContext = employee
+                .map(companyEmployee -> UserContext.create(companyEmployee, authorities))
+                .orElseGet(() -> UserContext.create(user.getEmail(), authorities));
         return new UsernamePasswordAuthenticationToken(userContext, null, userContext.getAuthorities());
     }
 

@@ -249,7 +249,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
         String file =
                 "first name,last name,email,department,reaming holiday\n" +
-                faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
+                        faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n" +
                         faker.name().firstName() + "," + faker.name().lastName() + "," + faker.internet().emailAddress() + ",HR,21\n";
         File myFoo = File.createTempFile("employees", ".csv");
         FileOutputStream fooStream = new FileOutputStream(myFoo, false);

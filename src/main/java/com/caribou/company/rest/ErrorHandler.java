@@ -35,11 +35,11 @@ public class ErrorHandler {
 
     private static Error parseError(DataIntegrityViolationException e) {
         List<String> matches = parseException(e.getCause().getCause());
-        ErrorField errorField = new ErrorField();
-        errorField.setCode("must be unique");
-        errorField.setDefaultMessage("Email is already taken");
-        errorField.setRejectedValue(matches.get(1));
-
+        ErrorField errorField = ErrorField.builder()
+                .code("must be unique")
+                .defaultMessage("Email is already taken")
+                .rejectedValue(matches.get(1))
+                .build();
         Error error = new Error(HttpStatus.CONFLICT);
         error.setValidationErrors(new HashMap<String, ErrorField>() {{
             put(matches.get(0), errorField);

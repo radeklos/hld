@@ -47,14 +47,14 @@ public class DepartmentRestController {
     private UserService userService;
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-    public Single<DepartmentDto> get(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid) {
+    public Single<DepartmentDto> get(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid) {
         return departmentService.get(uid)
-                .filter(d -> d.getCompany().getUid().equals(companyUid))
+                .filter(d -> d.getCompany().getUid().toString().equals(companyUid))
                 .map(this::convert).toSingle();
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public Observable<DepartmentDto> getList(@PathVariable("companyUid") Long companyUid) {
+    public Observable<DepartmentDto> getList(@PathVariable("companyUid") String companyUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .flatMap(d -> Observable.create(subscriber -> {
@@ -65,12 +65,12 @@ public class DepartmentRestController {
 
     private DepartmentDto convert(Department entity) {
         DepartmentDto departmentDto = modelMapper.map(entity, DepartmentDto.class);
-        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid(), entity.getUid())).withRel("employees"));
+        departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid().toString(), entity.getUid().toString())).withRel("employees"));
         return departmentDto;
     }
 
     @RequestMapping(value = "/{departmentUid}/employees")
-    public Observable<EmployeeDto> employee(@PathVariable("companyUid") Long companyUid, @PathVariable("departmentUid") Long departmentUid) {
+    public Observable<EmployeeDto> employee(@PathVariable("companyUid") String companyUid, @PathVariable("departmentUid") String departmentUid) {
         // TODO acl
         return departmentService.get(departmentUid)
                 .flatMap(department -> Observable.from(department.getEmployees()))
@@ -78,7 +78,7 @@ public class DepartmentRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") Long companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
+    public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") String companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
@@ -104,7 +104,7 @@ public class DepartmentRestController {
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
-    public Single<DepartmentDto> update(@PathVariable("companyUid") Long companyUid, @PathVariable("uid") Long uid, @Valid @RequestBody DepartmentDto departmentDto) {
+    public Single<DepartmentDto> update(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid, @Valid @RequestBody DepartmentDto departmentDto) {
         // TODO acl
         return companyService.get(companyUid)
                 .flatMap(company -> {

@@ -1,5 +1,6 @@
 package com.caribou.company.domain;
 
+import com.caribou.AbstractEntity;
 import com.caribou.auth.domain.UserAccount;
 
 import javax.persistence.CascadeType;
@@ -43,13 +44,11 @@ public class Company extends AbstractEntity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER)
     private Set<CompanyEmployee> employees;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "company", fetch = FetchType.EAGER)
     private Set<Department> departments;
 
-    public Company() {
-    }
-
     private Company(Builder builder) {
+        this();
         setName(builder.name);
         setDefaultDaysOff(builder.defaultDaysOff);
         setRegNo(builder.regNo);
@@ -61,6 +60,10 @@ public class Company extends AbstractEntity {
         setPostCode(builder.postCode);
         setEmployees(builder.employees);
         setDepartments(builder.departments);
+    }
+
+    public Company() {
+        super();
     }
 
     public static Builder newBuilder() {

@@ -65,14 +65,14 @@ public class CompanyServiceTest extends IntegrationTests {
     @Test
     public void updateNonExistingObject() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.update(0L, Factory.company()).subscribe(testSubscriber);
+        companyService.update("0", Factory.company()).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
     @Test
     public void getNonExistingObject() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.get(0L).subscribe(testSubscriber);
+        companyService.get("0").subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
@@ -98,7 +98,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<CompanyEmployee> testSubscriber = new TestSubscriber<>();
-        companyService.getByEmployeeEmail(company.getUid(), user.getEmail()).subscribe(testSubscriber);
+        companyService.getByEmployeeEmail(company.getUid().toString(), user.getEmail()).subscribe(testSubscriber);
 
         testSubscriber.assertNoErrors();
         CompanyEmployee got = testSubscriber.getOnNextEvents().get(0);
@@ -115,7 +115,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<CompanyEmployee> testSubscriber = new TestSubscriber<>();
-        companyService.getByEmployeeEmail(company.getUid(), "non.existing@email.com").subscribe(testSubscriber);
+        companyService.getByEmployeeEmail(company.getUid().toString(), "non.existing@email.com").subscribe(testSubscriber);
 
         testSubscriber.assertError(NotFound.class);
     }
@@ -130,7 +130,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<CompanyEmployee> testSubscriber = new TestSubscriber<>();
-        companyService.getByEmployeeEmail(0L, user.getEmail()).subscribe(testSubscriber);
+        companyService.getByEmployeeEmail("0", user.getEmail()).subscribe(testSubscriber);
 
         testSubscriber.assertError(NotFound.class);
     }

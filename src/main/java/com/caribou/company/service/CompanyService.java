@@ -8,23 +8,43 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
-public class CompanyService extends RxService.Imp<CompanyRepository, Company, Long> {
+public class CompanyService extends RxService.Imp<CompanyRepository, Company, UUID> {
 
     @Autowired
     private CompanyRepository companyRepository;
 
-    public Observable<CompanyEmployee> getByEmployeeEmail(Long uid, String email) {
+    public Observable<CompanyEmployee> getByEmployeeEmail(String uid, String email) {
         return Observable.create(subscriber -> {
             try {
-                Optional<CompanyEmployee> entity = companyRepository.findEmployeeByEmailForUid(email, uid);
+                Optional<CompanyEmployee> entity = companyRepository.findEmployeeByEmailForUid(email, UUID.fromString(uid));
                 if (!entity.isPresent()) {
                     throw new NotFound();
                 }
                 subscriber.onNext(entity.get());
                 subscriber.onCompleted();
+            } catch (IllegalArgumentException e) {
+                throw new NotFound();
+            } catch (Exception e) {
+                subscriber.onError(e);
+            }
+        });
+    }
+
+    public Observable<CompanyEmployee> getEmployeeByItsUid(String uid) {
+        return Observable.create(subscriber -> {
+            try {
+                Optional<CompanyEmployee> entity = companyRepository.findByEmployeeByUid(UUID.fromString(uid));
+                if (!entity.isPresent()) {
+                    throw new NotFound();
+                }
+                subscriber.onNext(entity.get());
+                subscriber.onCompleted();
+            } catch (IllegalArgumentException e) {
+                throw new NotFound();
             } catch (Exception e) {
                 subscriber.onError(e);
             }

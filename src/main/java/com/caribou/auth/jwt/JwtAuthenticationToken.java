@@ -18,13 +18,6 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
         this.setAuthenticated(false);
     }
 
-    public JwtAuthenticationToken(UserContext userContext, Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.eraseCredentials();
-        this.userContext = userContext;
-        super.setAuthenticated(true);
-    }
-
     @Override
     public void setAuthenticated(boolean authenticated) {
         if (authenticated) {
@@ -38,6 +31,13 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public void eraseCredentials() {
         super.eraseCredentials();
         this.rawAccessToken = null;
+    }
+
+    public JwtAuthenticationToken(UserContext userContext, Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
+        this.eraseCredentials();
+        this.userContext = userContext;
+        super.setAuthenticated(true);
     }
 
     @Override

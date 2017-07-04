@@ -19,9 +19,9 @@ import rx.Observable;
 import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -89,14 +89,14 @@ public class DepartmentServiceTest extends IntegrationTests {
         Department department = Factory.department(company);
 
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.update(0L, department).subscribe(testSubscriber);
+        departmentService.update("0", department).subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
     @Test
     public void getNonExistingObject() throws Exception {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
-        departmentService.get(0L).subscribe(testSubscriber);
+        departmentService.get("0").subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
@@ -127,7 +127,7 @@ public class DepartmentServiceTest extends IntegrationTests {
         returned.subscribe(testSubscriber);
 
         department = departmentRepository.findOne(department.getUid());
-        List<DepartmentEmployee> employees = department.getEmployees().stream().collect(Collectors.toList());
+        List<DepartmentEmployee> employees = new ArrayList<>(department.getEmployees());
 
         assertThat(employees).hasSize(1);
         assertThat(employees.get(0).getRole()).isEqualTo(Role.Viewer);

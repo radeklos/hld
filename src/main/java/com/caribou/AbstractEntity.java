@@ -1,30 +1,35 @@
-package com.caribou.holiday.domain;
+package com.caribou;
 
-import javax.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 
 @MappedSuperclass
-abstract class AbstractEntity implements Serializable {
+public abstract class AbstractEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(length = 36)
-    private Long uid;
+    @Column(columnDefinition = "UUID")
+    private UUID uid;
 
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @PrePersist
-    void createdAt() {
-        this.createdAt = this.updatedAt = new Date();
-    }
-
-    @PreUpdate
-    void updatedAt() {
-        this.updatedAt = new Date();
+    public AbstractEntity() {
+        this.uid = UUID.randomUUID();
     }
 
     public Date getCreatedAt() {
@@ -51,7 +56,8 @@ abstract class AbstractEntity implements Serializable {
 
     }
 
-    public Long getUid() {
+    public UUID getUid() {
         return uid;
     }
+
 }

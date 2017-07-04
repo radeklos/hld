@@ -24,7 +24,7 @@ public class DepartmentDtoTest {
 
     @Test
     public void daysOffShouldBePositive() {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder()
+        DepartmentDto departmentDto = DepartmentDto.builder()
                 .name("name")
                 .daysOff(-10)
                 .build();
@@ -38,7 +38,7 @@ public class DepartmentDtoTest {
 
     @Test
     public void daysOffMayNotBeNull() {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder()
+        DepartmentDto departmentDto = DepartmentDto.builder()
                 .name("name")
                 .build();
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
@@ -51,7 +51,7 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameMayNotBeEmpty() {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder()
+        DepartmentDto departmentDto = DepartmentDto.builder()
                 .daysOff(10)
                 .build();
         Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
@@ -64,7 +64,7 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameMayNotBeNull() {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder()
+        DepartmentDto departmentDto = DepartmentDto.builder()
                 .daysOff(10)
                 .name(null)
                 .build();
@@ -78,7 +78,7 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameShouldntBeLongerThan255() {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder()
+        DepartmentDto departmentDto = DepartmentDto.builder()
                 .name(new String(new char[256]).replace('\0', 'A'))
                 .daysOff(10)
                 .build();
@@ -92,7 +92,7 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameTrimsWhiteSpaces() {
-        DepartmentDto departmentDto = DepartmentDto.newBuilder()
+        DepartmentDto departmentDto = DepartmentDto.builder()
                 .name(" name ")
                 .daysOff(10)
                 .build();

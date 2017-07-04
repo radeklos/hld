@@ -161,7 +161,7 @@ public class UserRestControllerTest extends IntegrationTests {
         UserAccountDto user = response.getBody();
         assertThat(user.getCompany()).isNotNull();
         assertThat(user.getCompany().getHref()).isNotEmpty();
-        assertThat(user.getCompany().getUid()).isEqualTo(company.getUid());
+        assertThat(user.getCompany().getUid()).isEqualTo(company.getUid().toString());
     }
 
 }

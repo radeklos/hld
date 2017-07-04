@@ -32,7 +32,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/v1/users")
 public class UserRestController {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private UserService userService;
@@ -74,9 +75,9 @@ public class UserRestController {
 
     private NestedSingleObject nested(Company company) {
         return NestedSingleObject.builder()
-                .href(linkTo(methodOn(CompanyRestController.class).get(company.getUid())).toString())
+                .href(linkTo(methodOn(CompanyRestController.class).get(company.getUid().toString())).toString())
                 .uri("chll:company:" + company.getUid())
-                .uid(company.getUid())
+                .uid(company.getUid().toString())
                 .build();
     }
 

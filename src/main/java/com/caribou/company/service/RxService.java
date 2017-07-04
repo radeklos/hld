@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import rx.Observable;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 
 public interface RxService<E, ID extends Serializable> {
@@ -14,7 +15,11 @@ public interface RxService<E, ID extends Serializable> {
 
     Observable<E> update(ID id, E e);
 
+    Observable<E> update(String uid, E company);
+
     Observable<E> get(ID id);
+
+    Observable<E> get(String id);
 
     abstract class Imp<R extends CrudRepository<E, ID>, E, ID extends Serializable> implements RxService<E, ID> {
 
@@ -55,6 +60,15 @@ public interface RxService<E, ID extends Serializable> {
         }
 
         @Override
+        public Observable<E> update(String uid, E company) {
+            try {
+                return update((ID) UUID.fromString(uid), company);
+            } catch (IllegalArgumentException e) {
+                return Observable.error(new NotFound());
+            }
+        }
+
+        @Override
         public Observable<E> get(ID uid) {
             return Observable.create(subscriber -> {
                 try {
@@ -68,6 +82,15 @@ public interface RxService<E, ID extends Serializable> {
                     subscriber.onError(e);
                 }
             });
+        }
+
+        @Override
+        public Observable<E> get(String uid) {
+            try {
+                return get((ID) UUID.fromString(uid));
+            } catch (IllegalArgumentException e) {
+                return Observable.error(new NotFound());
+            }
         }
     }
 

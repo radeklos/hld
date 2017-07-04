@@ -1,8 +1,20 @@
 package com.caribou.company.domain;
 
+import com.caribou.AbstractEntity;
 import com.caribou.auth.domain.UserAccount;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+import java.util.Date;
 
 
 @Table(
@@ -10,6 +22,14 @@ import javax.persistence.*;
 )
 @Entity
 public class CompanyEmployee extends AbstractEntity {
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
 
     @ManyToOne(optional = false)
     private Company company;
@@ -22,6 +42,7 @@ public class CompanyEmployee extends AbstractEntity {
     private Role role;
 
     public CompanyEmployee() {
+        super();
     }
 
     CompanyEmployee(Company company, UserAccount member, Role role) {
@@ -50,4 +71,11 @@ public class CompanyEmployee extends AbstractEntity {
         return member;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
 }

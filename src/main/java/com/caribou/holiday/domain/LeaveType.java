@@ -1,5 +1,6 @@
 package com.caribou.holiday.domain;
 
+import com.caribou.AbstractEntity;
 import com.caribou.company.domain.Company;
 
 import javax.persistence.Column;

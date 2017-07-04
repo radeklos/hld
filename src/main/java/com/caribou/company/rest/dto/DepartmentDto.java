@@ -1,6 +1,8 @@
 package com.caribou.company.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -9,9 +11,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
+@Builder
+@AllArgsConstructor
 public class DepartmentDto extends ResourceSupport {
 
-    private Long uid;
+    private String uid;
 
     @NotBlank
     @Size(max = 255)
@@ -23,16 +27,7 @@ public class DepartmentDto extends ResourceSupport {
     @JsonProperty
     private Integer daysOff;
 
-    private DepartmentDto(Builder builder) {
-        name = builder.name;
-        daysOff = builder.daysOff;
-    }
-
     public DepartmentDto() {
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 
     public Integer getDaysOff() {
@@ -52,35 +47,12 @@ public class DepartmentDto extends ResourceSupport {
     }
 
     @JsonProperty
-    public Long getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(Long uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 
-    public static final class Builder {
-
-        private String name;
-
-        private Integer daysOff;
-
-        private Builder() {
-        }
-
-        public Builder name(String val) {
-            name = val;
-            return this;
-        }
-
-        public Builder daysOff(Integer val) {
-            daysOff = val;
-            return this;
-        }
-
-        public DepartmentDto build() {
-            return new DepartmentDto(this);
-        }
-    }
 }
