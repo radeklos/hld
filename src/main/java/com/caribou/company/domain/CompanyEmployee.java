@@ -2,6 +2,7 @@ package com.caribou.company.domain;
 
 import com.caribou.AbstractEntity;
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.holiday.domain.BankHoliday;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -45,6 +46,9 @@ public class CompanyEmployee extends AbstractEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private BankHoliday.Country countryCalendar;
 
     public CompanyEmployee() {
         super();
