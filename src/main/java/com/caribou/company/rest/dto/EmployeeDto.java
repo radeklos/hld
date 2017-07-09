@@ -2,10 +2,14 @@ package com.caribou.company.rest.dto;
 
 import com.caribou.company.domain.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.util.UUID;
 
 
+@Builder
+@AllArgsConstructor
 public class EmployeeDto {
 
     @JsonProperty

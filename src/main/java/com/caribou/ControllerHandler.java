@@ -3,6 +3,7 @@ package com.caribou;
 import com.caribou.auth.rest.dto.Error;
 import com.caribou.auth.rest.dto.ErrorField;
 import com.caribou.auth.rest.mapper.ErrorMapper;
+import com.caribou.company.service.NotFound;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -43,11 +44,18 @@ public class ControllerHandler {
         return error;
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(NotFound.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public Error entityNotFound(Exception ex) {
+    public Error notFound(Exception ex) {
         return new Error(HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public Error unhandleredException(Exception ex) {
+        return new Error(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

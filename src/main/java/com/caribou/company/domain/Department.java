@@ -2,14 +2,9 @@ package com.caribou.company.domain;
 
 import com.caribou.AbstractEntity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import java.util.Collections;
-import java.util.Set;
 
 
 @Entity
@@ -24,9 +19,6 @@ public class Department extends AbstractEntity {
     @ManyToOne(optional = false)
     private Company company;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "department", fetch = FetchType.EAGER)
-    private Set<DepartmentEmployee> employees;
-
     public Department() {
     }
 
@@ -38,10 +30,6 @@ public class Department extends AbstractEntity {
 
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    public Set<DepartmentEmployee> getEmployees() {
-        return Collections.unmodifiableSet(employees);
     }
 
     public String getName() {

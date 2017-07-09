@@ -1,6 +1,7 @@
 package com.caribou.holiday.service;
 
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.service.RxService;
 import com.caribou.holiday.domain.Leave;
@@ -34,7 +35,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     public List<EmployeeLeaves> getEmployeeLeaves(String companyId, final LocalDate from, final LocalDate to) {
         return companyRepository.findEmployeesByCompanyUid(UUID.fromString(companyId)).stream()
                 .map(e -> EmployeeLeaves.builder()
-                        .userAccount(e.getMember())
+                        .employee(e)
                         .leaves(leaveRepository.findByUserAccount(
                                 e.getMember(),
                                 Timestamp.valueOf(from.atStartOfDay()),
@@ -48,7 +49,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     @Data
     @Builder
     public static class EmployeeLeaves {
-        private final UserAccount userAccount;
+        private final CompanyEmployee employee;
         private final List<Leave> leaves;
     }
 

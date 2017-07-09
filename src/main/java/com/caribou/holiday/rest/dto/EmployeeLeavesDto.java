@@ -1,5 +1,6 @@
 package com.caribou.holiday.rest.dto;
 
+import com.caribou.auth.rest.dto.NestedSingleObject;
 import com.caribou.auth.rest.dto.UserAccountDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,9 @@ public class EmployeeLeavesDto {
 
     @JsonProperty
     private UserAccountDto employee;
+
+    @JsonProperty
+    private NestedSingleObject department;
 
     @JsonProperty(required = true)
     private List<LeaveDto> leaves;
