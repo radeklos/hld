@@ -54,4 +54,5 @@ public class OrikaMapper implements OrikaMapperFactoryConfigurer {
             throw new NotImplementedException();
         }
     }
+
 }

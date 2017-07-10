@@ -23,17 +23,20 @@ import java.sql.Timestamp;
 public class Leave extends AbstractEntity {
 
     @ManyToOne
-    LeaveType leaveType;
+    private LeaveType leaveType;
 
     @ManyToOne(optional = false)
-    UserAccount userAccount;
+    private UserAccount userAccount;
 
     @Column(nullable = false, name = "starting")
-    Timestamp starting;
+    private Timestamp starting;
 
     @Column(nullable = false, name = "ending")
-    Timestamp ending;
+    private Timestamp ending;
 
-    String reason;
+    @Column(nullable = false)
+    private Double numberOfDays;
+
+    private String reason;
 
 }

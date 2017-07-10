@@ -45,6 +45,12 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
         return Observable.from(leaveRepository.findByUserAccount(userAccount));
     }
 
+    @Override
+    public Observable<Leave> create(Leave entity) {
+        entity.setNumberOfDays(numberOfBookedDays(entity, BankHoliday.Country.CZ).doubleValue());
+        return super.create(entity);
+    }
+
     public List<EmployeeLeaves> getEmployeeLeaves(String companyId, final LocalDate from, final LocalDate to) {
         return companyRepository.findEmployeesByCompanyUid(UUID.fromString(companyId)).stream()
                 .map(e -> EmployeeLeaves.builder()
@@ -60,9 +66,6 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     }
 
     public BigDecimal numberOfBookedDays(Leave leave, BankHoliday.Country country) {
-        LocalDateTime starting = leave.getStarting().toLocalDateTime();
-        LocalDateTime ending = leave.getEnding().toLocalDateTime();
-
         BigDecimal days = BigDecimal.ZERO;
         for (LocalDateTime day = leave.getStarting().toLocalDateTime();
              day.isBefore(leave.getEnding().toLocalDateTime());

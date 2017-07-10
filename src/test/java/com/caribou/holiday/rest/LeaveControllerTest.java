@@ -150,11 +150,13 @@ public class LeaveControllerTest extends IntegrationTests {
                 .reason("Holiday")
                 .starting(Timestamp.valueOf(now))
                 .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .numberOfDays(1d)
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(userAccount)
                 .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
                 .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
+                .numberOfDays(2d)
                 .leaveType(leaveType).build();
         leaveRepository.save(Arrays.asList(leave1, leave2));
 
@@ -189,11 +191,13 @@ public class LeaveControllerTest extends IntegrationTests {
                 .reason("Holiday")
                 .starting(Timestamp.valueOf(now))
                 .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .numberOfDays(1d)
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(colleague)
                 .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
                 .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
+                .numberOfDays(2d)
                 .leaveType(leaveType).build();
         leaveRepository.save(Arrays.asList(leave1, leave2));
 
