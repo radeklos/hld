@@ -11,6 +11,7 @@ import com.caribou.holiday.domain.LeaveType;
 import com.github.javafaker.Faker;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -88,11 +89,14 @@ public class Factory {
     }
 
     public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDate from, LocalDate to) {
+        Duration between = Duration.between(from.atStartOfDay(), to.atStartOfDay());
         return Leave.builder()
                 .userAccount(userAccount)
                 .leaveType(leaveType)
                 .starting(Timestamp.valueOf(from.atStartOfDay()))
                 .ending(Timestamp.valueOf(to.atStartOfDay()))
+                .numberOfDays((double) between.toDays())
+                .status(Leave.Status.CONFIRMED)
                 .build();
     }
 

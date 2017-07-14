@@ -12,4 +12,6 @@ public @interface ICalField {
 
     String value();
 
+    boolean extra() default false;
+
 }

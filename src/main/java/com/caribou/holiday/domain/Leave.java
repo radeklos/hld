@@ -10,6 +10,8 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import java.sql.Timestamp;
 
@@ -37,6 +39,16 @@ public class Leave extends AbstractEntity {
     @Column(nullable = false)
     private Double numberOfDays;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.PENDING;
+
     private String reason;
+
+    public enum Status {
+        CONFIRMED,
+        DECLINED,
+        PENDING
+    }
 
 }

@@ -2,8 +2,9 @@ package com.caribou.holiday.service.ical;
 
 import lombok.Builder;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 
 @Builder
@@ -16,8 +17,14 @@ public class VEvent extends ICal {
     @ICalField("DTEND;VALUE=DATE")  // 20061225
     protected LocalDate dtEndValueDate;
 
+    @ICalField(value = "DTSTART", extra = true)  // 20061224
+    protected ZonedDateTime dtStart;
+
+    @ICalField(value = "DTEND", extra = true)  // 20061225
+    protected ZonedDateTime dtEnd;
+
     @ICalField("DTSTAMP")  // 20170711T200723Z
-    protected LocalDateTime dtstamp;
+    protected Instant dtstamp;
 
     @ICalField("UID")  // r0somb3deuokerbf6bj6vncft4@google.com
     protected String uid;
@@ -26,10 +33,10 @@ public class VEvent extends ICal {
     protected String description;
 
     @ICalField("CREATED")  // 20060413T165951Z
-    protected LocalDateTime created;
+    protected Instant created;
 
     @ICalField("LAST-MODIFIED")  // 20150706T163939Z
-    protected LocalDateTime lastModified;
+    protected Instant lastModified;
 
     @ICalField("LOCATION")  //
     protected String location;

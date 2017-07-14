@@ -1,8 +1,11 @@
 package com.caribou.holiday.service.ical;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 
@@ -21,7 +24,11 @@ public abstract class ICal {
             ICalField[] fieldAnn = field.getAnnotationsByType(ICalField.class);
             if (fieldAnn.length == 1 && field.get(this) != null) {
                 ICalField ann = fieldAnn[0];
-                builder.append(ann.value()).append(":").append(simpleTransformer(field.get(this))).append("\n");
+                builder.append(ann.value());
+                if (!ann.extra()) {
+                    builder.append(":");
+                }
+                builder.append(simpleTransformer(field.get(this))).append("\n");
             }
             ICalNested[] nestedAnn = field.getAnnotationsByType(ICalNested.class);
             if (nestedAnn.length == 1 && field.get(this) != null) {
@@ -46,6 +53,11 @@ public abstract class ICal {
             return ((LocalDate) obj).format(DateTimeFormatter.ofPattern("YYYYMMdd"));
         } else if (obj instanceof LocalDateTime) {
             return ((LocalDateTime) obj).format(DateTimeFormatter.ofPattern("YYYYMMdd'T'HHmmss'Z'"));
+        } else if (obj instanceof Instant) {
+            return ((Instant) obj).atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("YYYYMMdd'T'HHmmss'Z'"));
+        } else if (obj instanceof ZonedDateTime) {
+            ZonedDateTime time = (ZonedDateTime) obj;
+            return ";TZID=" + time.getZone() + ":" + time.toLocalDateTime().format(DateTimeFormatter.ofPattern("YYYYMMdd'T'HHmmss"));
         }
         return obj.toString();
     }
