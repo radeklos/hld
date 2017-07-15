@@ -39,7 +39,7 @@ public abstract class IntegrationTests {
         return exchange(path, HttpMethod.GET, null, responseType, username, password);
     }
 
-    protected <T> ResponseEntity<T> exchange(String path, HttpMethod method, Object requestBody, Class<T> responseType, String username, String password) throws JsonProcessingException {
+    private <T> ResponseEntity<T> exchange(String path, HttpMethod method, Object requestBody, Class<T> responseType, String username, String password) throws JsonProcessingException {
         return testRestTemplate().exchange(
                 path(path),
                 method,
@@ -73,7 +73,7 @@ public abstract class IntegrationTests {
         return headers;
     }
 
-    protected HttpHeaders getTokenHeader(String token) {
+    private HttpHeaders getTokenHeader(String token) {
         HttpHeaders headers = jsonHeader();
         headers.set("X-Authorization", String.format("Bearer %s", token));
         return headers;
