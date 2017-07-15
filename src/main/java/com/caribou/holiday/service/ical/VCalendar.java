@@ -23,6 +23,9 @@ public class VCalendar extends ICal {
     @ICalField("METHOD") //  PUBLISH
     protected String method;
 
+    @ICalField("X-PUBLISHED-TTL")
+    protected String xPublishedTTL;
+
     @ICalField("X-WR-CALNAME") //  České svátky
     protected String xWrCalName;
 

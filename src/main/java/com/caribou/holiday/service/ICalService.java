@@ -35,6 +35,7 @@ public class ICalService {
         return VCalendar.builder()
                 .prodid("-//chll//leaves//EN")
                 .xWrCalName("Chll - " + name(userAccount))
+                .xPublishedTTL("PT1H")
                 .xWrTimeZone(ZONE_ID.toString());
     }
 
