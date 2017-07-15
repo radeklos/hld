@@ -1,5 +1,6 @@
 package com.caribou.company.service;
 
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Role;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,4 +49,13 @@ public class DepartmentService extends RxService.Imp<DepartmentRepository, Depar
         }
         throw new NotFound("Can't find department employee");
     }
+
+    public List<CompanyEmployee> getEmployees(String department) {
+        return companyRepository.findEmployeesByDepartmentUid(UUID.fromString(department));
+    }
+
+    public List<Department> getDepartments(String companyUid) {
+        return repository.findByCompanyUid(UUID.fromString(companyUid));
+    }
+
 }

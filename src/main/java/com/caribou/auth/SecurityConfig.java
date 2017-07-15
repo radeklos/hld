@@ -89,6 +89,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, USER_REGISTRATION).permitAll()  // User registration
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .antMatchers(V1_COMPANIES_EXAMPLES_EMPLOYEES).permitAll()
+                .antMatchers("/cal/**").permitAll()
 
                 .and()
                 .authorizeRequests()

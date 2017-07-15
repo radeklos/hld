@@ -24,14 +24,11 @@ import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
-import java.time.ZoneId;
 
 
 @RestController
 @RequestMapping("/v1/users/{userUid}/leaves")
 public class LeaveController {
-
-    private static final ZoneId UTC = ZoneId.of("UTC");
 
     @Autowired
     private MapperFacade modelMapper;

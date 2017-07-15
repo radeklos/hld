@@ -2,20 +2,22 @@ package com.caribou.holiday.domain;
 
 import com.caribou.AbstractEntity;
 import com.caribou.company.domain.Company;
+import lombok.Getter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
 
+@Getter
 @Entity
 public class LeaveType extends AbstractEntity {
 
     @Column(nullable = false)
-    String name;
+    private String name;
 
     @ManyToOne(optional = false)
-    Company company;
+    private Company company;
 
     public LeaveType() {
     }

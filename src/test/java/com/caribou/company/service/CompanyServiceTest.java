@@ -72,7 +72,7 @@ public class CompanyServiceTest extends IntegrationTests {
     @Test
     public void getNonExistingObject() throws Exception {
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.get("0").subscribe(testSubscriber);
+        companyService.getRx("0").subscribe(testSubscriber);
         testSubscriber.assertError(NotFound.class);
     }
 
@@ -82,7 +82,7 @@ public class CompanyServiceTest extends IntegrationTests {
         companyRepository.save(company);
 
         TestSubscriber<Company> testSubscriber = new TestSubscriber<>();
-        companyService.get(company.getUid()).subscribe(testSubscriber);
+        companyService.getRx(company.getUid()).subscribe(testSubscriber);
 
         Company got = testSubscriber.getOnNextEvents().get(0);
         assertThat(got.getUid()).isEqualTo(company.getUid());

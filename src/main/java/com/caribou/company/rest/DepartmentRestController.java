@@ -10,6 +10,9 @@ import com.caribou.company.rest.dto.DepartmentDto;
 import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.DepartmentService;
+import com.caribou.company.service.NotFound;
+import com.caribou.holiday.rest.dto.ListDto;
+import ma.glasnost.orika.MapperFacade;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,10 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -38,6 +42,9 @@ public class DepartmentRestController {
     private ModelMapper modelMapper;
 
     @Autowired
+    private MapperFacade mapperFacade;
+
+    @Autowired
     private CompanyService companyService;
 
     @Autowired
@@ -47,20 +54,12 @@ public class DepartmentRestController {
     private UserService userService;
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-    public Single<DepartmentDto> get(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid) {
-        return departmentService.get(uid)
-                .filter(d -> d.getCompany().getUid().toString().equals(companyUid))
-                .map(this::convert).toSingle();
-    }
-
-    @RequestMapping(method = RequestMethod.GET)
-    public Observable<DepartmentDto> getList(@PathVariable("companyUid") String companyUid) {
+    public DepartmentDto get(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
-                .flatMap(d -> Observable.create(subscriber -> {
-                    d.getCompany().getDepartments().forEach(subscriber::onNext);
-                    subscriber.onCompleted();
-                })).map(m -> this.convert((Department) m));
+        if (!companyUid.equals(userDetails.getCompanyId().toString())) {
+            throw new NotFound();
+        }
+        return convert(departmentService.get(uid));
     }
 
     private DepartmentDto convert(Department entity) {
@@ -70,11 +69,22 @@ public class DepartmentRestController {
     }
 
     @RequestMapping(value = "/{departmentUid}/employees")
-    public Observable<EmployeeDto> employee(@PathVariable("companyUid") String companyUid, @PathVariable("departmentUid") String departmentUid) {
-        // TODO acl
-        return departmentService.get(departmentUid)
-                .flatMap(department -> Observable.from(department.getEmployees()))
-                .map(entity -> modelMapper.map(entity, EmployeeDto.class));
+    public ListDto<EmployeeDto> employee(@PathVariable("companyUid") String companyUid, @PathVariable("departmentUid") String departmentUid) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!userDetails.getCompanyId().toString().equals(companyUid)) {
+            throw new NotFound();
+        }
+        Department department = departmentService.get(departmentUid);
+        if (!department.getCompany().getUid().toString().equals(companyUid)) {
+            throw new NotFound();
+        }
+        List<EmployeeDto> employee = departmentService.getEmployees(departmentUid).stream()
+                .map(e -> mapperFacade.map(e, EmployeeDto.class))
+                .collect(Collectors.toList());
+        return ListDto.<EmployeeDto>builder()
+                .total(employee.size())
+                .items(employee)
+                .build();
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -99,14 +109,27 @@ public class DepartmentRestController {
                 .toSingle();
     }
 
-    private Department convert(DepartmentDto dto) {
-        return modelMapper.map(dto, Department.class);
+    @RequestMapping(method = RequestMethod.GET)
+    public ListDto<DepartmentDto> getList(@PathVariable("companyUid") String companyUid) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!companyUid.equals(userDetails.getCompanyId().toString())) {
+            throw new NotFound();
+        }
+        List<Department> departments = departmentService.getDepartments(companyUid);
+        return ListDto.<DepartmentDto>builder()
+                .total(departments.size())
+                .items(convert(departments))
+                .build();
+    }
+
+    private List<DepartmentDto> convert(List<Department> dtos) {
+        return dtos.stream().map(this::convert).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
     public Single<DepartmentDto> update(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid, @Valid @RequestBody DepartmentDto departmentDto) {
         // TODO acl
-        return companyService.get(companyUid)
+        return companyService.getRx(companyUid)
                 .flatMap(company -> {
                     Department entity = convert(departmentDto);
                     entity.setCompany(company);
@@ -116,6 +139,10 @@ public class DepartmentRestController {
                     modelMapper.map(d, departmentDto);
                     return departmentDto;
                 }).toSingle();
+    }
+
+    private Department convert(DepartmentDto dto) {
+        return modelMapper.map(dto, Department.class);
     }
 
 }

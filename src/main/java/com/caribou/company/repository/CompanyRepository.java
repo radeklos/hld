@@ -4,6 +4,7 @@ package com.caribou.company.repository;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.CompanyEmployee;
+import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -33,6 +34,12 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
     @Query("select e " +
             "from CompanyEmployee e " +
             "join e.member u " +
+            "WHERE e.department.uid = :uid")
+    List<CompanyEmployee> findEmployeesByDepartmentUid(@Param("uid") UUID uid);
+
+    @Query("select e " +
+            "from CompanyEmployee e " +
+            "join e.member u " +
             "WHERE u.email = :email")
     Optional<CompanyEmployee> findEmployeeByEmail(@Param("email") String email);
 
@@ -53,6 +60,15 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
     default void addEmployee(@Param("company") Company company, @Param("member") UserAccount userAccount, @Param("role") Role role) {
         addEmployee(UUID.randomUUID(), company, userAccount, role);
     }
+
+    default void addEmployee(@Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("role") Role role) {
+        addEmployee(UUID.randomUUID(), company, department, userAccount, role);
+    }
+
+    @Modifying
+    @Transactional
+    @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, role, created_at, updated_at) values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#role.name}, now(), now())", nativeQuery = true)
+    void addEmployee(@Param("uuid") UUID uuid, @Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("role") Role role);
 
     @Modifying
     @Transactional

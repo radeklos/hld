@@ -11,7 +11,7 @@ import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.DepartmentDto;
-import com.caribou.company.rest.dto.EmployeeDto;
+import com.caribou.holiday.rest.dto.ListDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rx.observers.TestObserver;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,10 +44,9 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     private UserService userService;
 
     private UserAccount userAccount;
-
     private Company company;
-
     private String userPassword;
+    private Department department;
 
     @Before
     public void before() throws Exception {
@@ -59,8 +57,10 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         company = Factory.company();
         companyRepository.save(company);
 
-        company.addEmployee(userAccount, Role.Admin);
-        companyRepository.save(company);
+        department = Factory.department(company);
+        departmentRepository.save(department);
+
+        companyRepository.addEmployee(company, department, userAccount, Role.Admin);
         company = companyRepository.findOne(company.getUid());
     }
 
@@ -108,28 +108,27 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         departmentRepository.save(Arrays.asList(hr, account));
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto[]> response = get(url, DepartmentDto[].class, userAccount.getEmail(), userPassword);
+        ResponseEntity<ListDto> response = get(url, ListDto.class, userAccount.getEmail(), userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        DepartmentDto[] departments = response.getBody();
-        assertThat(departments.length).isEqualTo(2);
+        ListDto departments = response.getBody();
+        assertThat(departments.getTotal()).isEqualTo(3);
     }
 
     @Test
     public void getListOfDepartmentsInEmployeesCompanyOnly() throws Exception {
-        Department hr = Factory.department(company);
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
         Department account = Factory.department(anotherCompany);
-        departmentRepository.save(Arrays.asList(hr, account));
+        departmentRepository.save(account);
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto[]> response = get(url, DepartmentDto[].class, userAccount.getEmail(), userPassword);
+        ResponseEntity<ListDto> response = get(url, ListDto.class, userAccount.getEmail(), userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        DepartmentDto[] departments = response.getBody();
-        assertThat(departments.length).isEqualTo(1);
-        assertThat(departments[0].getName()).isEqualTo(hr.getName());
+        ListDto departments = response.getBody();
+        assertThat(departments.getTotal()).isEqualTo(1);
+        assertThat(((HashMap) departments.getItems().get(0)).get("name")).isEqualTo(department.getName());
     }
 
     @Test
@@ -305,32 +304,61 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void getDepartmentEmployees() throws Exception {
         UserAccount anotherUserAccount = Factory.userAccount();
 
-        userRepository.save(anotherUserAccount);
-        companyRepository.save(company);
-        companyRepository.addEmployee(company, anotherUserAccount, Role.Viewer);
-
-        Department department = Factory.department(company);
         Department anotherDepartment = Factory.department(company);
-        departmentRepository.save(Arrays.asList(department, anotherDepartment));
+        departmentRepository.save(anotherDepartment);
 
-        departmentRepository.addEmployee(anotherDepartment, anotherUserAccount, BigDecimal.TEN, Role.Editor);
-        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
+        userRepository.save(anotherUserAccount);
+        companyRepository.addEmployee(company, anotherDepartment, anotherUserAccount, Role.Viewer);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
-        ResponseEntity<EmployeeDto[]> response = get(
+        ResponseEntity<ListDto> response = get(
                 url,
-                EmployeeDto[].class,
+                ListDto.class,
                 userAccount.getEmail(),
                 userPassword
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().length).isEqualTo(1);
-        EmployeeDto employee = response.getBody()[0];
-        assertThat(employee.getEmail()).isEqualTo(userAccount.getEmail());
-        assertThat(employee.getFirstName()).isEqualTo(userAccount.getFirstName());
-        assertThat(employee.getLastName()).isEqualTo(userAccount.getLastName());
-        assertThat(employee.getRole()).isEqualTo(Role.Admin);
-        assertThat(employee.getUid()).isEqualTo(userAccount.getUid());
+        assertThat(response.getBody().getTotal()).isEqualTo(1);
+        HashMap employee = (HashMap) response.getBody().getItems().get(0);
+        assertThat(employee.get("email")).isEqualTo(userAccount.getEmail());
+        assertThat(employee.get("firstName")).isEqualTo(userAccount.getFirstName());
+        assertThat(employee.get("lastName")).isEqualTo(userAccount.getLastName());
+        assertThat(employee.get("role")).isEqualTo(Role.Admin.toString());
+        assertThat(employee.get("uid")).isEqualTo(userAccount.getUid().toString());
+    }
+
+    @Test
+    public void getListOfEmployeesFromAnotherCompany() throws Exception {
+        Company anotherCompany = Factory.company();
+        companyRepository.save(anotherCompany);
+        Department anotherDepartment = Factory.department(anotherCompany);
+        departmentRepository.save(anotherDepartment);
+
+        String url = String.format("/v1/companies/%s/departments/%s/employees", anotherCompany.getUid(), department.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void getListOfEmployeesFromDepartmentWhichIsNotInCompany() throws Exception {
+        Company anotherCompany = Factory.company();
+        companyRepository.save(anotherCompany);
+        Department anotherDepartment = Factory.department(anotherCompany);
+        departmentRepository.save(anotherDepartment);
+
+        String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), anotherDepartment.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
 }

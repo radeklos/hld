@@ -2,6 +2,8 @@ package com.caribou.company.domain;
 
 import com.caribou.AbstractEntity;
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.holiday.domain.BankHoliday;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,6 +19,7 @@ import javax.persistence.UniqueConstraint;
 import java.util.Date;
 
 
+@Data
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"company_uid", "member_uid"})
 )
@@ -34,12 +37,18 @@ public class CompanyEmployee extends AbstractEntity {
     @ManyToOne(optional = false)
     private Company company;
 
+    @ManyToOne // (optional = false)
+    private Department department;
+
     @ManyToOne(optional = false)
     private UserAccount member;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private BankHoliday.Country countryCalendar;
 
     public CompanyEmployee() {
         super();
@@ -51,31 +60,4 @@ public class CompanyEmployee extends AbstractEntity {
         this.role = role;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public UserAccount getMember() {
-        return member;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
 }

@@ -6,8 +6,10 @@ import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.service.CompanyService;
 import com.caribou.holiday.domain.LeaveType;
 import com.caribou.holiday.repository.LeaveTypeRepository;
@@ -43,6 +45,9 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     private CompanyRepository companyRepository;
 
     @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -58,22 +63,16 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void setUp() throws Exception {
         userAccount = Factory.userAccount();
         password = userAccount.getPassword();
+        userService.create(userAccount).subscribe(new TestSubscriber<>());
 
         company = companyRepository.save(Factory.company());
-        userService.create(userAccount).subscribe(new TestSubscriber<>());
+        companyRepository.addEmployee(company, userAccount, Role.Admin);
         leaveType = leaveTypeRepository.save(LeaveType.newBuilder().company(company).name("Holiday").build());
     }
 
     @Test
     public void getList() throws Exception {
-        UserAccount emp1 = userRepository.save(Factory.userAccount());
-        companyRepository.addEmployee(company, emp1, Role.Viewer);
-        leaveService.create(Factory.leave(emp1, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14))).subscribe(new TestSubscriber<>());
-
-        UserAccount emp2 = userRepository.save(Factory.userAccount());
-        companyRepository.addEmployee(company, emp2, Role.Viewer);
-        leaveService.create(Factory.leave(emp2, leaveType, LocalDate.of(2017, 5, 25), LocalDate.of(2017, 6, 14))).subscribe(new TestSubscriber<>());
-        leaveService.create(Factory.leave(emp2, leaveType, LocalDate.of(2017, 6, 1), LocalDate.of(2017, 6, 14))).subscribe(new TestSubscriber<>());
+        leaveService.create(Factory.leave(userAccount, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14))).subscribe(new TestSubscriber<>());
 
         String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", company.getUid());
         ResponseEntity<ListDto> response = get(
@@ -82,19 +81,83 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
                 userAccount.getEmail(),
                 password
         );
-
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         ListDto body = response.getBody();
-        assertThat(body.getTotal()).isEqualTo(2);
+        assertThat(body.getTotal()).isEqualTo(1);
 
         LinkedHashMap employeeLeavesDto = (LinkedHashMap) body.getItems().get(0);
         LinkedHashMap employeeDto = (LinkedHashMap) employeeLeavesDto.get("employee");
-        assertThat(employeeDto.get("email")).isEqualTo(emp1.getEmail());
+        assertThat(employeeDto.get("email")).isEqualTo(userAccount.getEmail());
 
         List<LinkedHashMap> leavesDto = (List<LinkedHashMap>) employeeLeavesDto.get("leaves");
         assertThat(leavesDto.get(0).get("starting")).isEqualTo("2017-04-25");
         assertThat(leavesDto.get(0).get("ending")).isEqualTo("2017-05-14");
+
+        assertThat(employeeLeavesDto.get("department")).isNull();
+    }
+
+    @Test
+    public void shouldHaveDepartmentIfEmployeeHasAny() throws Exception {
+        UserAccount anotherUserAccount = Factory.userAccount();
+        String anotherUserPassword = anotherUserAccount.getPassword();
+        userService.create(anotherUserAccount).subscribe(new TestSubscriber<>());
+        Company anotherCompany = companyRepository.save(Factory.company());
+        Department department = departmentRepository.save(Factory.department(anotherCompany));
+        companyRepository.addEmployee(anotherCompany, department, anotherUserAccount, Role.Admin);
+
+        String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", anotherCompany.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                anotherUserAccount.getEmail(),
+                anotherUserPassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ListDto body = response.getBody();
+        LinkedHashMap employeeLeavesDto = (LinkedHashMap) body.getItems().get(0);
+        LinkedHashMap departmentDto = (LinkedHashMap) employeeLeavesDto.get("department");
+        assertThat(departmentDto.get("name")).isEqualTo(department.getName());
+        assertThat(departmentDto.get("uid")).isEqualTo(department.getUid().toString());
+        assertThat(departmentDto.get("href")).isNotNull();
+    }
+
+    @Test
+    public void shouldNotGetLeavesFromAnotherCompany() throws Exception {
+        UserAccount anotherUserAccount = Factory.userAccount();
+        userRepository.save(anotherUserAccount);
+        Company anotherCompany = companyRepository.save(Factory.company());
+        companyRepository.addEmployee(anotherCompany, anotherUserAccount, Role.Admin);
+
+        String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", company.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                userAccount.getEmail(),
+                password
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ListDto body = response.getBody();
+        assertThat(body.getTotal()).isEqualTo(1);
+    }
+
+    @Test
+    public void canNotGetLeavesFromAnotherCompany() throws Exception {
+        UserAccount anotherUserAccount = Factory.userAccount();
+        userRepository.save(anotherUserAccount);
+        Company anotherCompany = companyRepository.save(Factory.company());
+        companyRepository.addEmployee(anotherCompany, anotherUserAccount, Role.Admin);
+
+        String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", anotherCompany.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                userAccount.getEmail(),
+                password
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

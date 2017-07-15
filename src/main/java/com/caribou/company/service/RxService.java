@@ -17,11 +17,15 @@ public interface RxService<E, ID extends Serializable> {
 
     Observable<E> update(String uid, E company);
 
-    Observable<E> get(ID id);
+    Observable<E> getRx(ID id);
 
-    Observable<E> get(String id);
+    Observable<E> getRx(String id);
 
-    abstract class Imp<R extends CrudRepository<E, ID>, E, ID extends Serializable> implements RxService<E, ID> {
+    E get(ID uid);
+
+    E get(String uid);
+
+    class Imp<R extends CrudRepository<E, ID>, E, ID extends Serializable> implements RxService<E, ID> {
 
         @Autowired
         R repository;
@@ -69,7 +73,7 @@ public interface RxService<E, ID extends Serializable> {
         }
 
         @Override
-        public Observable<E> get(ID uid) {
+        public Observable<E> getRx(ID uid) {
             return Observable.create(subscriber -> {
                 try {
                     E entity = repository.findOne(uid);
@@ -85,13 +89,28 @@ public interface RxService<E, ID extends Serializable> {
         }
 
         @Override
-        public Observable<E> get(String uid) {
+        public Observable<E> getRx(String uid) {
             try {
-                return get((ID) UUID.fromString(uid));
+                return getRx((ID) UUID.fromString(uid));
             } catch (IllegalArgumentException e) {
                 return Observable.error(new NotFound());
             }
         }
+
+        @Override
+        public E get(ID uid) {
+            E entity = repository.findOne(uid);
+            if (entity != null) {
+                return entity;
+            }
+            throw new NotFound();
+        }
+
+        @Override
+        public E get(String uid) {
+            return get((ID) UUID.fromString(uid));
+        }
+
     }
 
 }
