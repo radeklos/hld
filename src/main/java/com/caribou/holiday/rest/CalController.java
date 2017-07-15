@@ -7,6 +7,8 @@ import com.caribou.company.service.NotFound;
 import com.caribou.holiday.service.ICalService;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +33,7 @@ public class CalController {
     private ICalService iCalService;
 
     @RequestMapping("/{userUid}")
-    public String getIcal(@PathVariable("userUid") String userUid) throws IllegalAccessException, IllegalArgumentException {
+    public ResponseEntity<String> getIcal(@PathVariable("userUid") String userUid) throws IllegalAccessException, IllegalArgumentException {
         UserAccount user;
         try {
             user = userRepository.findOne(UUID.fromString(userUid));
@@ -41,7 +43,16 @@ public class CalController {
         if (user == null) {
             throw new NotFound();
         }
-        return iCalService.getCalendarForUser(user).toICal();
+        HttpHeaders bla = new HttpHeaders();
+        bla.set("Content-Type", "text/calendar");
+        bla.set("Content-Disposition", "attachment;filename=" + slugify(user) + ".ics");
+        return ResponseEntity.ok().headers(bla).body(iCalService.getCalendarForUser(user).toICal());
+    }
+
+    private static String slugify(UserAccount user) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(user.getFirstName()).append(" ").append(user.getLastName()).append(" ").append(user.getUid());
+        return builder.toString().trim().toLowerCase().replaceAll("[^A-Za-z0-9]", "-");
     }
 
 }

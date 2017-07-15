@@ -75,4 +75,16 @@ public class CalControllerTest extends IntegrationTests {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).contains("VCALENDAR");
     }
+
+    @Test
+    public void hasContentHeaders() throws Exception {
+        UserAccount user = userRepository.save(Factory.userAccount());
+        leaveRepository.save(Factory.leave(user, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
+
+        ResponseEntity<String> response = get("/cal/" + user.getUid().toString(), String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().get("Content-Type").get(0)).isEqualTo("text/calendar");
+        assertThat(response.getHeaders().get("Content-Disposition").get(0)).startsWith("attachment;filename=").endsWith(".ics");
+    }
+
 }
