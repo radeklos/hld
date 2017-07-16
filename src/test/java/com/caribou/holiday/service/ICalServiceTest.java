@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,4 +59,31 @@ public class ICalServiceTest extends IntegrationTests {
         assertThat(ical.getVEvents()).hasSize(1);
     }
 
+    @Test
+    public void wholeDayLeavesAreConvertedAsDate() throws Exception {
+        UserAccount user = userRepository.save(Factory.userAccount());
+        leaveRepository.save(Factory.leave(
+                user,
+                leaveType,
+                LocalDateTime.of(2017, 5, 12, 0, 0, 0),
+                LocalDateTime.of(2017, 5, 14, 0, 0, 0))
+        );
+
+        VCalendar ical = iCalService.getCalendarForUser(user);
+        assertThat(ical.toICal()).contains("VALUE=DATE:20170512").contains("VALUE=DATE:20170514");
+    }
+
+    @Test
+    public void partialDayLeavesAreConvertedAsZonedDateTime() throws Exception {
+        UserAccount user = userRepository.save(Factory.userAccount());
+        leaveRepository.save(Factory.leave(
+                user,
+                leaveType,
+                LocalDateTime.of(2017, 5, 12, 12, 0, 0),
+                LocalDateTime.of(2017, 5, 14, 12, 0, 0))
+        );
+
+        VCalendar ical = iCalService.getCalendarForUser(user);
+        assertThat(ical.toICal()).contains("TZID=Europe/Prague:20170512T120000").contains("TZID=Europe/Prague:20170514T120000");
+    }
 }

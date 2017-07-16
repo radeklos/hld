@@ -40,16 +40,25 @@ public class ICalService {
     }
 
     private VEvent map(UserAccount userAccount, Leave leave) {
-        return VEvent.builder()
+        VEvent.VEventBuilder builder = VEvent.builder()
                 .uid(leave.getUid() + "@chll.cz")
                 .created(leave.getCreatedAt().toInstant())
                 .lastModified(leave.getUpdatedAt().toInstant())
-                .dtStart(leave.getStarting().toLocalDateTime().atZone(ZONE_ID))
-                .dtEnd(leave.getEnding().toLocalDateTime().atZone(ZONE_ID))
                 .dtstamp(Instant.now())
                 .summary(name(userAccount) + ": " + (leave.getLeaveType() == null ? "Holiday" : leave.getLeaveType().getName()))
-                .status(mapStatus(leave.getStatus()))
-                .build();
+                .description(leave.getReason())
+                .status(mapStatus(leave.getStatus()));
+        if (leave.getStarting().toLocalDateTime().getHour() == 0) {
+            builder.dtStartValueDate(leave.getStarting().toLocalDateTime().toLocalDate());
+        } else {
+            builder.dtStart(leave.getStarting().toLocalDateTime().atZone(ZONE_ID));
+        }
+        if (leave.getEnding().toLocalDateTime().getHour() == 0) {
+            builder.dtEndValueDate(leave.getEnding().toLocalDateTime().toLocalDate());
+        } else {
+            builder.dtEnd(leave.getEnding().toLocalDateTime().atZone(ZONE_ID));
+        }
+        return builder.build();
     }
 
     private String name(UserAccount userAccount) {

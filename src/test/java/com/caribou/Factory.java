@@ -13,6 +13,7 @@ import com.github.javafaker.Faker;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -89,12 +90,16 @@ public class Factory {
     }
 
     public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDate from, LocalDate to) {
-        Duration between = Duration.between(from.atStartOfDay(), to.atStartOfDay());
+        return leave(userAccount, leaveType, from.atStartOfDay(), to.atStartOfDay());
+    }
+
+    public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDateTime from, LocalDateTime to) {
+        Duration between = Duration.between(from, to);
         return Leave.builder()
                 .userAccount(userAccount)
                 .leaveType(leaveType)
-                .starting(Timestamp.valueOf(from.atStartOfDay()))
-                .ending(Timestamp.valueOf(to.atStartOfDay()))
+                .starting(Timestamp.valueOf(from))
+                .ending(Timestamp.valueOf(to))
                 .numberOfDays((double) between.toDays())
                 .status(Leave.Status.CONFIRMED)
                 .build();
