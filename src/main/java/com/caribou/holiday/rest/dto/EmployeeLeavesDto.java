@@ -26,7 +26,7 @@ public class EmployeeLeavesDto {
     @JsonProperty
     private Double remaining;
 
-    @JsonProperty(required = true)
+    @JsonProperty
     private List<LeaveDto> leaves;
 
 }

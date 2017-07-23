@@ -38,7 +38,7 @@ public class CompanyEmployee extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private BankHoliday.Country location;
 
-    @Column // (nullable = false)
+    @Column(nullable = false, columnDefinition = "Decimal(5,2) default '0.0'")
     private BigDecimal remainingDaysOff;
 
     public CompanyEmployee() {

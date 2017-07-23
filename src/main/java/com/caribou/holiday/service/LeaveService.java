@@ -60,6 +60,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
                                 Timestamp.valueOf(from.atStartOfDay()),
                                 Timestamp.valueOf(to.atStartOfDay()))
                         )
+                        .remaining(e.getRemainingDaysOff().doubleValue())
                         .build()
                 )
                 .collect(Collectors.toList());
@@ -95,6 +96,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     public static class EmployeeLeaves {
         private final CompanyEmployee employee;
         private final List<Leave> leaves;
+        private final double remaining;
     }
 
 }

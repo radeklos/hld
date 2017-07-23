@@ -63,14 +63,19 @@ public class CompanyLeaveController {
             ControllerLinkBuilder linkToDepartment = linkTo(methodOn(DepartmentRestController.class).get(department.getCompany().getUid().toString(), department.getCompany().getUid().toString()));
             nestedDepartment = NestedSingleObject.builder()
                     .uid(department.getUid().toString())
-                    .name(department.getName())
+                    .label(department.getName())
                     .href(linkToDepartment.toString())
                     .build();
+        }
+        Double remaining = null;
+        if (isMeOrDepartmentBoss(employeeLeaves)) {
+            remaining = employeeLeaves.getRemaining();
         }
         return EmployeeLeavesDto.builder()
                 .employee(modelMapper.map(employeeLeaves.getEmployee().getMember(), UserAccountDto.class))
                 .department(nestedDepartment)
                 .leaves(map(employeeLeaves.getLeaves(), LeaveDto.class))
+                .remaining(remaining)
                 .build();
     }
 
@@ -80,5 +85,14 @@ public class CompanyLeaveController {
                 .collect(Collectors.toList());
     }
 
+    private boolean isMeOrDepartmentBoss(LeaveService.EmployeeLeaves employeeLeaves) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userDetails.getUid().equals(employeeLeaves.getEmployee().getMember().getUid())) {
+            return true;
+        } else if (employeeLeaves.getEmployee().getDepartment() != null && userDetails.getUid().equals(employeeLeaves.getEmployee().getDepartment().getBoss().getUid())) {
+            return true;
+        }
+        return false;
+    }
 
 }

@@ -25,16 +25,17 @@ import rx.observers.TestSubscriber;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 public class CompanyLeaveControllerTest extends IntegrationTests {
 
-    Company company;
+    private Company company;
 
-    UserAccount userAccount;
+    private UserAccount userAccount;
 
-    LeaveType leaveType;
+    private LeaveType leaveType;
 
     private String password;
 
@@ -118,9 +119,59 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
         ListDto body = response.getBody();
         LinkedHashMap employeeLeavesDto = (LinkedHashMap) body.getItems().get(0);
         LinkedHashMap departmentDto = (LinkedHashMap) employeeLeavesDto.get("department");
-        assertThat(departmentDto.get("name")).isEqualTo(department.getName());
+        assertThat(departmentDto.get("label")).isEqualTo(department.getName());
         assertThat(departmentDto.get("uid")).isEqualTo(department.getUid().toString());
         assertThat(departmentDto.get("href")).isNotNull();
+    }
+
+    @Test
+    public void iCanSeeOnlyMineRemainingDaysOff() throws Exception {
+        UserAccount me = Factory.userAccount();
+        String minePassword = me.getPassword();
+        me = userService.createUser(me);
+        Department department = departmentRepository.save(Factory.department(company, userAccount));
+        companyRepository.addEmployee(company, department, me, Role.Viewer);
+        departmentRepository.addEmployee(department, me);
+
+        String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", company.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                me.getEmail(),
+                minePassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ListDto body = response.getBody();
+        assertThat(findUser(body.getItems(), me).get("remaining")).isNotNull();
+    }
+
+    private LinkedHashMap findUser(List items, UserAccount me) {
+        Optional<LinkedHashMap> user = ((List<LinkedHashMap>) items).stream()
+                .filter(i -> ((LinkedHashMap) i.get("employee")).get("uid").toString().equals(me.getUid().toString()))
+                .findFirst();
+        return user.orElse(null);
+    }
+
+    @Test
+    public void iCanNotSeeRemainingDaysOffOfOthers() throws Exception {
+        UserAccount me = Factory.userAccount();
+        String minePassword = me.getPassword();
+        me = userService.createUser(me);
+        Department department = departmentRepository.save(Factory.department(company, userAccount));
+        companyRepository.addEmployee(company, department, me, Role.Viewer);
+
+        String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", company.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                me.getEmail(),
+                minePassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ListDto body = response.getBody();
+        assertThat(findUser(body.getItems(), userAccount).get("remaining")).isNull();
     }
 
     @Test
@@ -171,6 +222,27 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void bossCanSeeRemaningOfAllUsers() throws Exception {
+        UserAccount me = Factory.userAccount();
+        me = userService.createUser(me);
+        Department department = departmentRepository.save(Factory.department(company, userAccount));
+        companyRepository.addEmployee(company, department, me, Role.Viewer);
+
+        String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", company.getUid());
+        ResponseEntity<ListDto> response = get(
+                url,
+                ListDto.class,
+                userAccount.getEmail(),
+                password
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ListDto body = response.getBody();
+        assertThat(findUser(body.getItems(), userAccount).get("remaining")).isNotNull();
+        assertThat(findUser(body.getItems(), me).get("remaining")).isNotNull();
     }
 
 }

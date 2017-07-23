@@ -63,7 +63,7 @@ public class AjaxAuthenticationProvider implements AuthenticationProvider {
         Optional<CompanyEmployee> employee = companyRepository.findEmployeeByEmail(user.getEmail());
         UserContext userContext = employee
                 .map(companyEmployee -> UserContext.create(companyEmployee, authorities))
-                .orElseGet(() -> UserContext.create(user.getEmail(), authorities));
+                .orElseGet(() -> UserContext.create(user, authorities));
         return new UsernamePasswordAuthenticationToken(userContext, null, userContext.getAuthorities());
     }
 

@@ -49,6 +49,13 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    public UserAccount createUser(UserAccount userAccount) {
+        userAccount.setPassword(encoder.encode(userAccount.getPassword()));
+        UserAccount user = userRepository.save(userAccount);
+        sendInvitationEmail(user);
+        return userAccount;
+    }
+
     private void sendInvitationEmail(UserAccount userAccount) {
         Email email = Email.builder()
                 .to(userAccount)

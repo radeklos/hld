@@ -44,6 +44,7 @@ public class JwtTokenFactory {
         claims.put(JwtClaims.SCOPES, userContext.getAuthorities().stream().map(Object::toString).collect(Collectors.toList()));
         claims.put(JwtClaims.COMPANY, userContext.getCompanyId());
         claims.put(JwtClaims.ROLE_IN_COMPANY, userContext.getRoleInCompany());
+        claims.put(JwtClaims.USER_UID, userContext.getUid());
         Instant currentTime = Instant.now();
         String token = Jwts.builder()
                 .setClaims(claims)

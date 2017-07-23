@@ -46,6 +46,10 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         if (companyId != null) {
             contextBuilder.roleInCompany(Role.valueOf(roleInCompany));
         }
+        String userId = claimsBody.get(JwtClaims.USER_UID, String.class);
+        if (userId != null) {
+            contextBuilder.uid(UUID.fromString(userId));
+        }
         UserContext context = contextBuilder.build();
         return new JwtAuthenticationToken(context, context.getAuthorities());
     }

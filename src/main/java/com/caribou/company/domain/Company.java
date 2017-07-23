@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -153,11 +154,16 @@ public class Company extends AbstractEntity {
         this.defaultDaysOff = defaultDaysOff;
     }
 
+    /**
+     * Add employee should be in company repository
+     */
+    @Deprecated
     public void addEmployee(UserAccount userAccount, Role role) {
         if (employees == null) {
             employees = new HashSet<>();
         }
         CompanyEmployee companyEmployee = new CompanyEmployee(this, userAccount, role);
+        companyEmployee.setRemainingDaysOff(BigDecimal.ZERO);
         if (employees.contains(companyEmployee)) {
             for (CompanyEmployee f : employees) {
                 if (f.equals(companyEmployee)) {
@@ -168,13 +174,6 @@ public class Company extends AbstractEntity {
         } else {
             employees.add(companyEmployee);
         }
-    }
-
-    public void addDepartment(Department department) {
-        if (departments == null) {
-            departments = new HashSet<>();
-        }
-        departments.add(department);
     }
 
     public Set<CompanyEmployee> getEmployees() {

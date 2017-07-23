@@ -21,7 +21,7 @@ public class NestedSingleObject {
     private String uri;
 
     @JsonProperty
-    private String name;
+    private String label;
 
     @JsonProperty
     private String href;
