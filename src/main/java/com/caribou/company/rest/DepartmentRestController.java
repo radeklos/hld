@@ -28,6 +28,7 @@ import rx.Single;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -142,7 +143,13 @@ public class DepartmentRestController {
     }
 
     private Department convert(DepartmentDto dto) {
-        return modelMapper.map(dto, Department.class);
+        Department department = modelMapper.map(dto, Department.class);
+        Optional<CompanyEmployee> boss = companyService.findEmployeeByUid(dto.getBoss());
+        if (!boss.isPresent()) {
+            throw new NotFound();
+        }
+        department.setBoss(boss.get().getMember());
+        return department;
     }
 
 }

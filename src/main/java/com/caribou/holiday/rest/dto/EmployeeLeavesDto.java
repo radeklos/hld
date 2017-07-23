@@ -23,6 +23,9 @@ public class EmployeeLeavesDto {
     @JsonProperty
     private NestedSingleObject department;
 
+    @JsonProperty
+    private Double remaining;
+
     @JsonProperty(required = true)
     private List<LeaveDto> leaves;
 

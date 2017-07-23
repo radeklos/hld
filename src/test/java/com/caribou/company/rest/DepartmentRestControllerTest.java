@@ -57,7 +57,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         company = Factory.company();
         companyRepository.save(company);
 
-        department = Factory.department(company);
+        department = Factory.department(company, userAccount);
         departmentRepository.save(department);
 
         companyRepository.addEmployee(company, department, userAccount, Role.Admin);
@@ -66,7 +66,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void nonExistingCompanyReturn404() throws Exception {
-        Department department = Factory.department(company);
+        Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/0/departments/%s", department.getUid());
@@ -77,7 +77,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void getDepartment() throws Exception {
-        Department department = Factory.department(company);
+        Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
@@ -91,7 +91,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void departmentHasLinkToEmployee() throws Exception {
-        Department department = Factory.department(company);
+        Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
@@ -103,8 +103,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void getList() throws Exception {
-        Department hr = Factory.department(company);
-        Department account = Factory.department(company);
+        Department hr = Factory.department(company, userAccount);
+        Department account = Factory.department(company, userAccount);
         departmentRepository.save(Arrays.asList(hr, account));
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
@@ -119,7 +119,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void getListOfDepartmentsInEmployeesCompanyOnly() throws Exception {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
-        Department account = Factory.department(anotherCompany);
+        Department account = Factory.department(anotherCompany, userAccount);
         departmentRepository.save(account);
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
@@ -133,9 +133,9 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void updateDepartment() throws Exception {
-        Department department = Factory.department(company);
+        Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
-        DepartmentDto departmentDto = Factory.departmentDto();
+        DepartmentDto departmentDto = Factory.departmentDto(userAccount.getUid().toString());
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
         ResponseEntity<DepartmentDto> response = put(
@@ -158,7 +158,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void updateNonExistingDepartmentReturns404() throws Exception {
-        DepartmentDto departmentDto = Factory.departmentDto();
+        DepartmentDto departmentDto = Factory.departmentDto(userAccount.getUid().toString());
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), 0);
         ResponseEntity<DepartmentDto> response = put(url, departmentDto, DepartmentDto.class, userAccount.getEmail(), userPassword);
 
@@ -167,7 +167,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void getDepartmentAsGuestReturnUnauthorized() throws Exception {
-        Department department = Factory.department(company);
+        Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
@@ -188,7 +188,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
     @Test
     public void updateDepartmentAsGuestReturnUnauthorized() throws Exception {
-        Department department = Factory.department(company);
+        Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
         DepartmentDto departmentDto = DepartmentDto.builder().name("new name").daysOff(12).build();
 
@@ -214,7 +214,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().boss(userAccount.getUid().toString()).name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
         ResponseEntity<DepartmentDto> response = post(
@@ -229,13 +229,32 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     }
 
     @Test
+    public void createNewDepartmentWithoutBossReturns422() throws Exception {
+        Company anotherCompany = Factory.company();
+        companyRepository.save(anotherCompany);
+
+        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
+
+        String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
+        ResponseEntity<DepartmentDto> response = post(
+                url,
+                departmentDto,
+                DepartmentDto.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
     public void createNewDepartmentAsViewerReturns401() throws Exception {
         UserAccount viewer = Factory.userAccount();
         String viewPassword = viewer.getPassword();
         userService.create(viewer).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, viewer, Role.Viewer);
 
-        DepartmentDto departmentDto = Factory.departmentDto();
+        DepartmentDto departmentDto = Factory.departmentDto(viewer.getUid().toString());
         int size = Lists.from(departmentRepository.findAll().iterator()).size();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
@@ -261,7 +280,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(admin).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, admin, Role.Admin);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().boss(admin.getUid().toString()).name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = post(
@@ -274,7 +293,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Department department = departmentRepository.findOne(UUID.fromString(response.getBody().getUid()));
-        assertThat(department.getCompany().getUid()).as("Department isn't saved into company").isEqualTo(company.getUid());
+        assertThat(department.getCompany().getUid()).isEqualTo(company.getUid());
+        assertThat(department.getBoss()).isEqualTo(admin);
     }
 
     @Test
@@ -284,7 +304,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(editor).subscribe(new TestObserver<>());
         companyRepository.addEmployee(company, editor, Role.Editor);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
+        DepartmentDto departmentDto = DepartmentDto.builder().boss(editor.getUid().toString()).name("department").daysOff(10).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
         ResponseEntity<DepartmentDto> response = post(
@@ -304,7 +324,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void getDepartmentEmployees() throws Exception {
         UserAccount anotherUserAccount = Factory.userAccount();
 
-        Department anotherDepartment = Factory.department(company);
+        Department anotherDepartment = Factory.department(company, userAccount);
         departmentRepository.save(anotherDepartment);
 
         userRepository.save(anotherUserAccount);
@@ -331,7 +351,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void getListOfEmployeesFromAnotherCompany() throws Exception {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
-        Department anotherDepartment = Factory.department(anotherCompany);
+        Department anotherDepartment = Factory.department(anotherCompany, userAccount);
         departmentRepository.save(anotherDepartment);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", anotherCompany.getUid(), department.getUid());
@@ -348,7 +368,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void getListOfEmployeesFromDepartmentWhichIsNotInCompany() throws Exception {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
-        Department anotherDepartment = Factory.department(anotherCompany);
+        Department anotherDepartment = Factory.department(anotherCompany, userAccount);
         departmentRepository.save(anotherDepartment);
 
         String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), anotherDepartment.getUid());

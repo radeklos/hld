@@ -11,7 +11,6 @@ public class EmployeeMap extends PropertyMap<DepartmentEmployee, EmployeeDto> {
         map().setEmail(source.getMember().getEmail());
         map().setFirstName(source.getMember().getFirstName());
         map().setLastName(source.getMember().getLastName());
-        map().setRole(source.getRole());
         map().setUid(source.getMember().getUid());
     }
 

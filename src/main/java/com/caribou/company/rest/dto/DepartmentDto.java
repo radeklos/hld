@@ -3,6 +3,8 @@ package com.caribou.company.rest.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -11,7 +13,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
+@Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class DepartmentDto extends ResourceSupport {
 
@@ -27,32 +31,8 @@ public class DepartmentDto extends ResourceSupport {
     @JsonProperty
     private Integer daysOff;
 
-    public DepartmentDto() {
-    }
-
-    public Integer getDaysOff() {
-        return daysOff;
-    }
-
-    public void setDaysOff(Integer daysOff) {
-        this.daysOff = daysOff;
-    }
-
-    public String getName() {
-        return name.trim();
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    @NotBlank
     @JsonProperty
-    public String getUid() {
-        return uid;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
+    private String boss;
 
 }

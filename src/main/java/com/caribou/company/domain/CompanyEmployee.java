@@ -4,8 +4,6 @@ import com.caribou.AbstractEntity;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.holiday.domain.BankHoliday;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,10 +11,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import java.util.Date;
+import java.math.BigDecimal;
 
 
 @Data
@@ -25,14 +21,6 @@ import java.util.Date;
 )
 @Entity
 public class CompanyEmployee extends AbstractEntity {
-
-    @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
-
-    @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
 
     @ManyToOne(optional = false)
     private Company company;
@@ -48,7 +36,10 @@ public class CompanyEmployee extends AbstractEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private BankHoliday.Country countryCalendar;
+    private BankHoliday.Country location;
+
+    @Column // (nullable = false)
+    private BigDecimal remainingDaysOff;
 
     public CompanyEmployee() {
         super();

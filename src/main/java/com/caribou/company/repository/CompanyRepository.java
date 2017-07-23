@@ -48,7 +48,7 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
             "join c.employees e " +
             "join e.member u " +
             "WHERE u.uid = :uid")
-    Optional<CompanyEmployee> findByEmployeeByUid(@Param("uid") UUID uid);
+    Optional<CompanyEmployee> findEmployeeByUid(@Param("uid") UUID uid);
 
     @Query("select c " +
             "from Company c " +

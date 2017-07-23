@@ -8,7 +8,6 @@ import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Invitation;
-import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
@@ -23,7 +22,6 @@ import rx.Observable;
 import rx.exceptions.Exceptions;
 
 import javax.mail.MessagingException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -91,13 +89,13 @@ public class EmployeeService {
                 .filter(d -> d.getName().equals(row.getDepartment()))
                 .findFirst();
         Department department = departmentOpt.orElseGet(() -> departmentRepository.save(
-                Department.newBuilder()
+                Department.builder()
                         .company(company)
                         .name(row.getDepartment())
                         .daysOff(company.getDefaultDaysOff())
                         .build()
         ));
-        return new DepartmentEmployee(department, userAccount, BigDecimal.valueOf(row.getReamingHoliday()), Role.Viewer);
+        return new DepartmentEmployee(department, userAccount);
     }
 
     public Pair<Boolean, Invitation> sendInvitationEmail(DepartmentEmployee departmentEmployee) {

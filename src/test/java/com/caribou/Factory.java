@@ -63,17 +63,19 @@ public class Factory {
                 .build();
     }
 
-    public static Department department(Company company) {
-        return Department.newBuilder()
+    public static Department department(Company company, UserAccount boss) {
+        return Department.builder()
                 .company(company)
                 .name(faker.commerce().department())
                 .daysOff(10)
+                .boss(boss)
                 .build();
     }
 
-    public static DepartmentDto departmentDto() {
+    public static DepartmentDto departmentDto(String boss) {
         return DepartmentDto.builder()
                 .name(faker.commerce().department())
+                .boss(boss)
                 .daysOff(10)
                 .build();
     }

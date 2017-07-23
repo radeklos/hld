@@ -37,7 +37,7 @@ public class CompanyService extends RxService.Imp<CompanyRepository, Company, UU
     public Observable<CompanyEmployee> getEmployeeByItsUid(String uid) {
         return Observable.create(subscriber -> {
             try {
-                Optional<CompanyEmployee> entity = companyRepository.findByEmployeeByUid(UUID.fromString(uid));
+                Optional<CompanyEmployee> entity = companyRepository.findEmployeeByUid(UUID.fromString(uid));
                 if (!entity.isPresent()) {
                     throw new NotFound();
                 }
@@ -49,6 +49,10 @@ public class CompanyService extends RxService.Imp<CompanyRepository, Company, UU
                 subscriber.onError(e);
             }
         });
+    }
+
+    public Optional<CompanyEmployee> findEmployeeByUid(String uid) {
+        return companyRepository.findEmployeeByUid(UUID.fromString(uid));
     }
 
 }

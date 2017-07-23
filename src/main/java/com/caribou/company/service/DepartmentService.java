@@ -38,9 +38,7 @@ public class DepartmentService extends RxService.Imp<DepartmentRepository, Depar
 
     public DepartmentEmployee addEmployee(DepartmentEmployee departmentEmployee) throws NotFound {
         if (repository.getEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember()).isPresent()) {
-            repository.updateEmployee(departmentEmployee.getMember(), departmentEmployee.getRole());
-        } else {
-            repository.addEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember(), departmentEmployee.getRemainingDaysOff(), departmentEmployee.getRole());
+            repository.addEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember());
             companyRepository.addEmployee(departmentEmployee.getDepartment().getCompany(), departmentEmployee.getMember(), Role.Viewer);
         }
         Optional<DepartmentEmployee> de = repository.getEmployee(departmentEmployee.getDepartment(), departmentEmployee.getMember());

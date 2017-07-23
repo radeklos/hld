@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DepartmentRepositoryTest extends IntegrationTests {
 
     @Autowired
-    CompanyRepository companyRepository;
+    private CompanyRepository companyRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    DepartmentRepository departmentRepository;
+    private DepartmentRepository departmentRepository;
 
     private UserAccount userAccount;
 
@@ -48,48 +47,20 @@ public class DepartmentRepositoryTest extends IntegrationTests {
 
         company = companyRepository.findOne(company.getUid());
 
-        department = Factory.department(company);
+        department = Factory.department(company, userAccount);
         departmentRepository.save(department);
 
         department = departmentRepository.findOne(department.getUid());
     }
 
-//    @Test
-//    public void addEmployee() throws Exception {
-//        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
-//
-//        List<DepartmentEmployee> employees = departmentRepository.findOne(department.getUid()).getEmployees().stream().collect(Collectors.toList());
-//
-//        assertThat(employees).isNotEmpty();
-//        assertThat(employees.get(0).getRole()).isEqualTo(Role.Admin);
-//        assertThat(employees.get(0).getDepartment()).isEqualTo(department);
-//        assertThat(employees.get(0).getMember()).isEqualTo(userAccount);
-//        assertThat(employees.get(0).getCreatedAt()).isNotNull();
-//        assertThat(employees.get(0).getUpdatedAt()).isNotNull();
-//    }
-//
-//    @Test
-//    public void updateEmployeeRole() throws Exception {
-//        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Admin);
-//        departmentRepository.save(department);
-//
-//        departmentRepository.updateEmployee(userAccount, Role.Viewer);
-//
-//        List<DepartmentEmployee> employees = departmentRepository.findOne(department.getUid()).getEmployees().stream().collect(Collectors.toList());
-//        assertThat(employees.get(0).getRole()).isEqualTo(Role.Viewer);
-//        assertThat(employees.get(0).getDepartment()).isEqualTo(department);
-//        assertThat(employees.get(0).getMember()).isEqualTo(userAccount);
-//    }
-
     @Test
     public void getEmployee() throws Exception {
-        departmentRepository.addEmployee(department, userAccount, BigDecimal.TEN, Role.Owner);
+        departmentRepository.addEmployee(department, userAccount);
         departmentRepository.save(department);
 
         Optional<DepartmentEmployee> departmentEmployee = departmentRepository.getEmployee(department, userAccount);
 
         assertThat(departmentEmployee).isPresent();
-        assertThat(departmentEmployee.get().getRole()).isEqualTo(Role.Owner);
         assertThat(departmentEmployee.get().getDepartment()).isEqualTo(department);
         assertThat(departmentEmployee.get().getMember()).isEqualTo(userAccount);
     }

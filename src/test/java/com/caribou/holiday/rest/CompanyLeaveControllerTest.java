@@ -103,7 +103,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
         String anotherUserPassword = anotherUserAccount.getPassword();
         userService.create(anotherUserAccount).subscribe(new TestSubscriber<>());
         Company anotherCompany = companyRepository.save(Factory.company());
-        Department department = departmentRepository.save(Factory.department(anotherCompany));
+        Department department = departmentRepository.save(Factory.department(anotherCompany, userAccount));
         companyRepository.addEmployee(anotherCompany, department, anotherUserAccount, Role.Admin);
 
         String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", anotherCompany.getUid());
