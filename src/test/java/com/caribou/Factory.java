@@ -84,27 +84,32 @@ public class Factory {
         Date _from = faker.date().future(20, TimeUnit.DAYS);
         LocalDate from = LocalDate.from(toLocalDate(_from));
         LocalDate to = LocalDate.from(toLocalDate(faker.date().future(20, TimeUnit.DAYS, _from)));
-        return leave(userAccount, leaveType, from, to);
+        return leave(userAccount, null, leaveType, from, to);
     }
 
     private static LocalDate toLocalDate(Date date) {
         return date.toInstant().atZone(ZoneOffset.UTC).toLocalDate();
     }
 
-    public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDate from, LocalDate to) {
-        return leave(userAccount, leaveType, from.atStartOfDay(), to.atStartOfDay());
+    public static Leave leave(UserAccount userAccount, UserAccount approver, LeaveType leaveType, LocalDate from, LocalDate to) {
+        return leave(userAccount, approver, leaveType, from.atStartOfDay(), to.atStartOfDay());
     }
 
-    public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDateTime from, LocalDateTime to) {
+    public static Leave leave(UserAccount userAccount, UserAccount approver, LeaveType leaveType, LocalDateTime from, LocalDateTime to) {
         Duration between = Duration.between(from, to);
         return Leave.builder()
                 .userAccount(userAccount)
+                .approver(approver)
                 .leaveType(leaveType)
                 .starting(Timestamp.valueOf(from))
                 .ending(Timestamp.valueOf(to))
                 .numberOfDays((double) between.toDays())
                 .status(Leave.Status.CONFIRMED)
                 .build();
+    }
+
+    public static Leave leave(UserAccount userAccount, LeaveType leaveType, LocalDate from, LocalDate to) {
+        return leave(userAccount, null, leaveType, from.atStartOfDay(), to.atStartOfDay());
     }
 
 }

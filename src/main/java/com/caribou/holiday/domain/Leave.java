@@ -40,6 +40,9 @@ public class Leave extends AbstractEntity {
     private Double numberOfDays;
 
     @Column(nullable = false)
+    private UserAccount approver;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
 

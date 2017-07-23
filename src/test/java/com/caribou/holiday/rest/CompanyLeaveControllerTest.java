@@ -12,6 +12,7 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.service.CompanyService;
 import com.caribou.holiday.domain.LeaveType;
+import com.caribou.holiday.repository.LeaveRepository;
 import com.caribou.holiday.repository.LeaveTypeRepository;
 import com.caribou.holiday.rest.dto.ListDto;
 import com.caribou.holiday.service.LeaveService;
@@ -58,7 +59,11 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     private LeaveService leaveService;
 
     @Autowired
+    private LeaveRepository leaveRepository;
+
+    @Autowired
     private UserService userService;
+    private UserAccount approver;
 
     @Before
     public void setUp() throws Exception {
@@ -69,11 +74,13 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
         company = companyRepository.save(Factory.company());
         companyRepository.addEmployee(company, userAccount, Role.Admin);
         leaveType = leaveTypeRepository.save(LeaveType.newBuilder().company(company).name("Holiday").build());
+
+        approver = userRepository.save(Factory.userAccount());
     }
 
     @Test
     public void getList() throws Exception {
-        leaveService.create(Factory.leave(userAccount, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14))).subscribe(new TestSubscriber<>());
+        leaveRepository.save(Factory.leave(userAccount, approver, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
 
         String url = String.format("/v1/company/%s/leaves?from=2017-05-01&to=2017-05-31", company.getUid());
         ResponseEntity<ListDto> response = get(
@@ -245,4 +252,13 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
         assertThat(findUser(body.getItems(), me).get("remaining")).isNotNull();
     }
 
+    @Test
+    public void leaveCanBeConfirmedOnlyByBoss() throws Exception {
+
+    }
+
+    @Test
+    public void leaveConfirmBy() throws Exception {
+
+    }
 }

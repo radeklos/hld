@@ -82,4 +82,15 @@ public class LeaveController {
                 .toSingle();
     }
 
+    @RequestMapping(value = "/{leaveUid}", method = RequestMethod.POST)
+    public ResponseEntity confirmLeave(@PathVariable("userUid") String userUid, @PathVariable("leaveUid") String leaveUid) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.accepted().build();
+    }
+
+    @RequestMapping(value = "/{leaveUid}", method = RequestMethod.DELETE)
+    public ResponseEntity declineLeave(@PathVariable("userUid") String userUid, @PathVariable("leaveUid") String leaveUid) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.accepted().build();
+    }
 }

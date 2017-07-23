@@ -5,6 +5,7 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
@@ -66,7 +67,9 @@ public class LeaveControllerTest extends IntegrationTests {
         companyRepository.save(company);
         leaveTypeRepository.save(leaveType);
 
-        companyRepository.addEmployee(company, userAccount, Role.Viewer);
+        UserAccount approver = userService.createUser(Factory.userAccount());
+        Department department = departmentRepository.save(Factory.department(company, approver));
+        companyRepository.addEmployee(company, department, userAccount, approver, Role.Viewer);
     }
 
     @Test
@@ -147,6 +150,7 @@ public class LeaveControllerTest extends IntegrationTests {
         LocalDateTime now = LocalDateTime.of(2017, 1, 1, 0, 0, 0);
         Leave leave1 = Leave.builder()
                 .userAccount(userAccount)
+                .approver(userAccount)
                 .reason("Holiday")
                 .starting(Timestamp.valueOf(now))
                 .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
@@ -155,6 +159,7 @@ public class LeaveControllerTest extends IntegrationTests {
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(userAccount)
+                .approver(userAccount)
                 .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
                 .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
                 .numberOfDays(2d)
@@ -190,6 +195,7 @@ public class LeaveControllerTest extends IntegrationTests {
         LocalDateTime now = LocalDateTime.of(2017, 1, 1, 0, 0, 0);
         Leave leave1 = Leave.builder()
                 .userAccount(userAccount)
+                .approver(userAccount)
                 .reason("Holiday")
                 .starting(Timestamp.valueOf(now))
                 .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
@@ -198,6 +204,7 @@ public class LeaveControllerTest extends IntegrationTests {
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(colleague)
+                .approver(userAccount)
                 .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
                 .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
                 .numberOfDays(2d)

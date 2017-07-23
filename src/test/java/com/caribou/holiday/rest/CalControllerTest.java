@@ -38,17 +38,19 @@ public class CalControllerTest extends IntegrationTests {
     private Company company = Factory.company();
 
     private LeaveType leaveType = LeaveType.newBuilder().company(company).name("Holiday").build();
+    private UserAccount approver;
 
     @Before
     public void setUp() throws Exception {
         companyRepository.save(company);
         leaveTypeRepository.save(leaveType);
+        approver = userRepository.save(Factory.userAccount());
     }
 
     @Test
     public void isPublic() throws Exception {
         UserAccount user = userRepository.save(Factory.userAccount());
-        leaveRepository.save(Factory.leave(user, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
+        leaveRepository.save(Factory.leave(user, approver, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
 
         ResponseEntity<String> response = get("/cal/" + user.getUid(), String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -69,7 +71,7 @@ public class CalControllerTest extends IntegrationTests {
     @Test
     public void hasVCalendarString() throws Exception {
         UserAccount user = userRepository.save(Factory.userAccount());
-        leaveRepository.save(Factory.leave(user, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
+        leaveRepository.save(Factory.leave(user, approver, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
 
         ResponseEntity<String> response = get("/cal/" + user.getUid().toString(), String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -79,7 +81,7 @@ public class CalControllerTest extends IntegrationTests {
     @Test
     public void hasContentHeaders() throws Exception {
         UserAccount user = userRepository.save(Factory.userAccount());
-        leaveRepository.save(Factory.leave(user, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
+        leaveRepository.save(Factory.leave(user, approver, leaveType, LocalDate.of(2017, 4, 25), LocalDate.of(2017, 5, 14)));
 
         ResponseEntity<String> response = get("/cal/" + user.getUid().toString(), String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

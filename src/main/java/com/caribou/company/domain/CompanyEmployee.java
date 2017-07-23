@@ -31,6 +31,9 @@ public class CompanyEmployee extends AbstractEntity {
     @ManyToOne(optional = false)
     private UserAccount member;
 
+    @ManyToOne // when it's null approver is department boss
+    private UserAccount approver;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;

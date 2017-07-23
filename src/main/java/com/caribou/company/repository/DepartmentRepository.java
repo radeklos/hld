@@ -24,6 +24,7 @@ public interface DepartmentRepository extends CrudRepository<Department, UUID> {
 
     List<Department> findByCompanyUid(UUID uuid);
 
+    @Deprecated
     default void addEmployee(@Param("department") Department department, @Param("member") UserAccount userAccount) {
         addEmployee(UUID.randomUUID(), department, userAccount);
     }

@@ -65,10 +65,20 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
         addEmployee(UUID.randomUUID(), company, department, userAccount, role);
     }
 
+    default void addEmployee(Company company, Department department, UserAccount userAccount, UserAccount approver, Role role) {
+        addEmployee(UUID.randomUUID(), company, department, userAccount, approver, role);
+    }
+
     @Modifying
     @Transactional
     @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, role, created_at, updated_at) values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#role.name}, now(), now())", nativeQuery = true)
     void addEmployee(@Param("uuid") UUID uuid, @Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("role") Role role);
+
+    @Modifying
+    @Transactional
+    @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, approver_uid, role, created_at, updated_at) values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#approver.uid}, :#{#role.name}, now(), now())", nativeQuery = true)
+    void addEmployee(@Param("uuid") UUID uuid, @Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("approver") UserAccount approver, @Param("role") Role role);
+
 
     @Modifying
     @Transactional

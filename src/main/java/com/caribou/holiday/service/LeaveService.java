@@ -3,6 +3,7 @@ package com.caribou.holiday.service;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.repository.CompanyRepository;
+import com.caribou.company.service.NotFound;
 import com.caribou.company.service.RxService;
 import com.caribou.holiday.domain.BankHoliday;
 import com.caribou.holiday.domain.Leave;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -47,8 +49,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
 
     @Override
     public Observable<Leave> create(Leave entity) {
-        entity.setNumberOfDays(numberOfBookedDays(entity, BankHoliday.Country.CZ).doubleValue());
-        return super.create(entity);
+        return super.create(createLeave(entity));
     }
 
     public List<EmployeeLeaves> getEmployeeLeaves(String companyId, final LocalDate from, final LocalDate to) {
@@ -66,7 +67,13 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
                 .collect(Collectors.toList());
     }
 
-    public BigDecimal numberOfBookedDays(Leave leave, BankHoliday.Country country) {
+    private Leave createLeave(Leave entity) {
+        entity.setNumberOfDays(numberOfBookedDays(entity, BankHoliday.Country.CZ).doubleValue());
+        entity.setApprover(findUserApprover(entity.getUserAccount()));
+        return entity;
+    }
+
+    BigDecimal numberOfBookedDays(Leave leave, BankHoliday.Country country) {
         BigDecimal days = BigDecimal.ZERO;
         for (LocalDateTime day = leave.getStarting().toLocalDateTime();
              day.isBefore(leave.getEnding().toLocalDateTime());
@@ -84,6 +91,27 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
             days = days.add(BigDecimal.valueOf(duration.toHours()).divide(BigDecimal.valueOf(24), 1, BigDecimal.ROUND_HALF_UP));
         }
         return days;
+    }
+
+    /**
+     * Find user approver if any
+     *
+     * @param userAccount
+     * @return
+     */
+    UserAccount findUserApprover(UserAccount userAccount) {
+        Optional<CompanyEmployee> employee = companyRepository.findEmployeeByUserAccount(userAccount);
+        if (!employee.isPresent()) {
+            throw new NotFound();
+        }
+        if (employee.get().getApprover() != null) {
+            return employee.get().getApprover();
+        }
+        return employee.get().getDepartment().getBoss();
+    }
+
+    public void approve(Leave leave, UserAccount userAccount) {
+
     }
 
     private boolean isWeekend(LocalDate localDate) {
