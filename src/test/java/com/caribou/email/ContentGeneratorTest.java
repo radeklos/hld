@@ -3,6 +3,8 @@ package com.caribou.email;
 import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.email.templates.Invite;
+import com.caribou.email.templates.LeaveApproved;
+import com.caribou.holiday.domain.Leave;
 import com.github.javafaker.Faker;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +36,13 @@ public class ContentGeneratorTest extends IntegrationTests {
         assertThat(contentGenerator.generate(emailTemplate, Locale.UK).getHtml())
                 .contains(emailTemplate.getToken())
                 .contains(emailTemplate.getUser().getFirstName());
+    }
+
+    @Test
+    public void leaveApproved() throws Exception {
+        Leave leave = Factory.leave(Factory.userAccount(), Factory.leaveType(Factory.company()));
+        String content = contentGenerator.generate(LeaveApproved.builder().leave(leave).build(), Locale.UK).getHtml();
+        assertThat(content).contains("Time off booked");
     }
 
 }

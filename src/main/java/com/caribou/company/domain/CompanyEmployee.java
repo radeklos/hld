@@ -42,7 +42,7 @@ public class CompanyEmployee extends AbstractEntity {
     private BankHoliday.Country location;
 
     @Column(nullable = false, columnDefinition = "Decimal(5,2) default '0.0'")
-    private BigDecimal remainingDaysOff;
+    private BigDecimal remainingAllowance;
 
     public CompanyEmployee() {
         super();

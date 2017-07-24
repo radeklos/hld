@@ -163,7 +163,7 @@ public class Company extends AbstractEntity {
             employees = new HashSet<>();
         }
         CompanyEmployee companyEmployee = new CompanyEmployee(this, userAccount, role);
-        companyEmployee.setRemainingDaysOff(BigDecimal.ZERO);
+        companyEmployee.setRemainingAllowance(BigDecimal.ZERO);
         if (employees.contains(companyEmployee)) {
             for (CompanyEmployee f : employees) {
                 if (f.equals(companyEmployee)) {

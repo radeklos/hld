@@ -41,7 +41,7 @@ public class VEvent extends ICal {
     @ICalField("LOCATION")  //
     protected String location;
 
-    @ICalField("STATUS")  // CONFIRMED
+    @ICalField("STATUS")  // APPROVED
     protected Status status;
 
     @ICalField("SUMMARY")  // Štědrý den

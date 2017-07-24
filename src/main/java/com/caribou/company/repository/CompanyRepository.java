@@ -12,6 +12,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,6 +58,11 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
             "WHERE u.email = :email")
     Optional<Company> findByEmployeeEmail(@Param("email") String email);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE CompanyEmployee e SET e.remainingAllowance = :#{#remaining_allowance} WHERE e.uid = :#{#employee.uid}")
+    void updateRemainingAllowance(@Param("employee") CompanyEmployee companyEmployee, @Param("remaining_allowance") BigDecimal remainingAllowance);
+
     default void addEmployee(@Param("company") Company company, @Param("member") UserAccount userAccount, @Param("role") Role role) {
         addEmployee(UUID.randomUUID(), company, userAccount, role);
     }
@@ -78,7 +84,6 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
     @Transactional
     @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, approver_uid, role, created_at, updated_at) values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#approver.uid}, :#{#role.name}, now(), now())", nativeQuery = true)
     void addEmployee(@Param("uuid") UUID uuid, @Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("approver") UserAccount approver, @Param("role") Role role);
-
 
     @Modifying
     @Transactional

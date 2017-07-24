@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 
@@ -37,7 +38,7 @@ public class Leave extends AbstractEntity {
     private Timestamp ending;
 
     @Column(nullable = false)
-    private Double numberOfDays;
+    private BigDecimal numberOfDays;
 
     @Column(nullable = false)
     private UserAccount approver;
@@ -49,7 +50,7 @@ public class Leave extends AbstractEntity {
     private String reason;
 
     public enum Status {
-        CONFIRMED,
+        APPROVED,
         DECLINED,
         PENDING
     }

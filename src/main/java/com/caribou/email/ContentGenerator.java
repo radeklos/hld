@@ -1,7 +1,6 @@
 package com.caribou.email;
 
 import com.caribou.email.templates.EmailTemplate;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,8 +52,8 @@ public class ContentGenerator {
 
     @Getter
     @Builder
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Content {
 
         private String html;

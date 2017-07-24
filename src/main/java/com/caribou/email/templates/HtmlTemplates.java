@@ -3,7 +3,8 @@ package com.caribou.email.templates;
 public enum HtmlTemplates {
 
     Invite("employee_invitation"),
-    Welcome("welcome");
+    Welcome("welcome"),
+    LeaveApproved("leave_approved");
 
     private String template;
 

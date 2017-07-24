@@ -5,11 +5,14 @@ import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.service.CompanyService;
+import com.caribou.email.Email;
+import com.caribou.email.templates.LeaveApproved;
 import com.caribou.holiday.domain.BankHoliday;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
@@ -18,6 +21,7 @@ import com.caribou.holiday.repository.LeaveRepository;
 import com.caribou.holiday.repository.LeaveTypeRepository;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.observers.TestSubscriber;
 
@@ -28,8 +32,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 
 public class LeaveServiceTest extends IntegrationTests {
@@ -56,7 +62,7 @@ public class LeaveServiceTest extends IntegrationTests {
     private LeaveRepository leaveRepository;
 
     @Autowired
-    BankHolidayRepository bankHolidayRepository;
+    private BankHolidayRepository bankHolidayRepository;
 
     private UserAccount boss;
     private Company company;
@@ -241,5 +247,52 @@ public class LeaveServiceTest extends IntegrationTests {
         companyRepository.addEmployee(company, department, userAccount, approver, Role.Viewer);
 
         assertThat(leaveService.findUserApprover(userAccount)).isEqualTo(approver);
+    }
+
+    @Test
+    public void approveLeaveSubtractCompanyEmployeeRemainingAllowance() throws Exception {
+        Leave leave = leaveRepository.save(
+                Leave.builder()
+                        .userAccount(userAccount)
+                        .approver(boss)
+                        .leaveType(leaveType)
+                        .starting(Timestamp.valueOf(LocalDate.of(2017, 6, 1).atStartOfDay()))
+                        .ending(Timestamp.valueOf(LocalDate.of(2017, 6, 14).atStartOfDay()))
+                        .numberOfDays(BigDecimal.valueOf(14))
+                        .status(Leave.Status.PENDING)
+                        .build());
+        assertThat(leave.getStatus()).isEqualTo(Leave.Status.PENDING);
+        leaveService.approve(leave);
+
+        leave = leaveRepository.findOne(leave.getUid());
+        assertThat(leave.getStatus()).isEqualTo(Leave.Status.APPROVED);
+
+        Optional<CompanyEmployee> employee = companyRepository.findEmployeeByUserAccount(leave.getUserAccount());
+        assertThat(employee).isPresent();
+        assertThat(employee.get().getRemainingAllowance()).isEqualByComparingTo(BigDecimal.valueOf(-14));
+    }
+
+    @Test
+    public void approveLeaveSendNotificationEmailToEmployee() throws Exception {
+        Leave leave = leaveRepository.save(
+                Leave.builder()
+                        .userAccount(userAccount)
+                        .approver(boss)
+                        .leaveType(leaveType)
+                        .starting(Timestamp.valueOf(LocalDate.of(2017, 6, 1).atStartOfDay()))
+                        .ending(Timestamp.valueOf(LocalDate.of(2017, 6, 14).atStartOfDay()))
+                        .numberOfDays(BigDecimal.valueOf(14))
+                        .status(Leave.Status.PENDING)
+                        .build());
+        assertThat(leave.getStatus()).isEqualTo(Leave.Status.PENDING);
+        leaveService.approve(leave);
+
+        ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
+        verify(emailSender).send(emailCaptor.capture());
+
+        List<Email> args = emailCaptor.getAllValues();
+        assertThat(args).hasSize(1);
+        assertThat(args.get(0).getTo().getEmail()).isEqualTo(userAccount.getEmail());
+        assertThat(args.get(0).getTemplate()).isInstanceOf(LeaveApproved.class);
     }
 }

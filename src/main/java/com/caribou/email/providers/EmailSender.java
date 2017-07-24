@@ -7,7 +7,7 @@ import java.util.Locale;
 
 public interface EmailSender {
 
-    boolean send(Email email);
+    void send(Email email);
 
     void send(Email email, Locale locale) throws MessagingException;
 

@@ -10,6 +10,7 @@ import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
 import com.github.javafaker.Faker;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -80,6 +81,10 @@ public class Factory {
                 .build();
     }
 
+    public static LeaveType leaveType(Company company) {
+        return LeaveType.newBuilder().company(company).name(faker.crypto().sha512()).build();
+    }
+
     public static Leave leave(UserAccount userAccount, LeaveType leaveType) {
         Date _from = faker.date().future(20, TimeUnit.DAYS);
         LocalDate from = LocalDate.from(toLocalDate(_from));
@@ -103,8 +108,8 @@ public class Factory {
                 .leaveType(leaveType)
                 .starting(Timestamp.valueOf(from))
                 .ending(Timestamp.valueOf(to))
-                .numberOfDays((double) between.toDays())
-                .status(Leave.Status.CONFIRMED)
+                .numberOfDays(BigDecimal.valueOf(between.toDays()))
+                .status(Leave.Status.APPROVED)
                 .build();
     }
 

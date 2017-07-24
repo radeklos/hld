@@ -28,10 +28,13 @@ import org.springframework.web.client.RestTemplate;
 public abstract class IntegrationTests {
 
     protected Faker faker = new Faker();
+
     @MockBean
     protected EmailSender emailSender;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     @Value("${local.server.port}")
     private int port = 0;
 

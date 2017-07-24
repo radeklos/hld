@@ -5,6 +5,9 @@ import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.service.NotFound;
 import com.caribou.company.service.RxService;
+import com.caribou.email.Email;
+import com.caribou.email.providers.EmailSender;
+import com.caribou.email.templates.LeaveApproved;
 import com.caribou.holiday.domain.BankHoliday;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.repository.BankHolidayRepository;
@@ -43,6 +46,9 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     @Autowired
     private BankHolidayRepository bankHolidayRepository;
 
+    @Autowired
+    private EmailSender emailSender;
+
     public Observable<Leave> findByUserAccount(UserAccount userAccount) {
         return Observable.from(leaveRepository.findByUserAccount(userAccount));
     }
@@ -61,14 +67,14 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
                                 Timestamp.valueOf(from.atStartOfDay()),
                                 Timestamp.valueOf(to.atStartOfDay()))
                         )
-                        .remaining(e.getRemainingDaysOff().doubleValue())
+                        .remaining(e.getRemainingAllowance().doubleValue())
                         .build()
                 )
                 .collect(Collectors.toList());
     }
 
     private Leave createLeave(Leave entity) {
-        entity.setNumberOfDays(numberOfBookedDays(entity, BankHoliday.Country.CZ).doubleValue());
+        entity.setNumberOfDays(numberOfBookedDays(entity, BankHoliday.Country.CZ));
         entity.setApprover(findUserApprover(entity.getUserAccount()));
         return entity;
     }
@@ -110,8 +116,23 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
         return employee.get().getDepartment().getBoss();
     }
 
-    public void approve(Leave leave, UserAccount userAccount) {
+    public void approve(Leave leave) {
+        Optional<CompanyEmployee> employee0 = companyRepository.findEmployeeByUserAccount(leave.getUserAccount());
+        if (employee0.isPresent()) {
+            CompanyEmployee employee = employee0.get();
+            companyRepository.updateRemainingAllowance(employee, employee.getRemainingAllowance().subtract(leave.getNumberOfDays()));
+            leave.setStatus(Leave.Status.APPROVED);
+            leaveRepository.save(leave);
+            sentEmail(leave);
+        }
+    }
 
+    private void sentEmail(Leave leave) {
+        Email email = Email.builder()
+                .to(leave.getUserAccount())
+                .template(new LeaveApproved(leave))
+                .build();
+        emailSender.send(email);
     }
 
     private boolean isWeekend(LocalDate localDate) {

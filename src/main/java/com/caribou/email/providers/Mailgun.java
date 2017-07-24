@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -35,15 +36,14 @@ public class Mailgun implements EmailSender {
         this.defaultFrom = new Email.Contact(defaultFrom, defaultAlias);
     }
 
+    @Async
     @Override
-    public boolean send(Email email) {
+    public void send(Email email) {
         try {
             send(email, Locale.UK);
-            return true;
         } catch (MessagingException e) {
             log.error("Can not sent email {} to {}: {}", email.getTemplate(), email.getTo(), e);
         }
-        return false;
     }
 
     @Override

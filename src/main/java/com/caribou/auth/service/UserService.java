@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -62,10 +61,6 @@ public class UserService implements UserDetailsService {
                 .template(Welcome.builder().user(userAccount).build())
                 .build();
         emailSender.send(email);
-    }
-
-    public Optional<UserAccount> findByUid(String uid) {
-        return Optional.ofNullable(userRepository.findOne(UUID.fromString(uid)));
     }
 
     public Observable<UserAccount> findByEmail(String email) {

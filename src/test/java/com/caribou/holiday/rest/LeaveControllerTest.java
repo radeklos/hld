@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rx.observers.TestSubscriber;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -154,15 +155,15 @@ public class LeaveControllerTest extends IntegrationTests {
                 .reason("Holiday")
                 .starting(Timestamp.valueOf(now))
                 .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
-                .numberOfDays(1d)
-                .status(Leave.Status.CONFIRMED)
+                .numberOfDays(BigDecimal.ONE)
+                .status(Leave.Status.APPROVED)
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(userAccount)
                 .approver(userAccount)
                 .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
                 .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
-                .numberOfDays(2d)
+                .numberOfDays(BigDecimal.valueOf(2))
                 .status(Leave.Status.PENDING)
                 .leaveType(leaveType).build();
         leaveRepository.save(Arrays.asList(leave1, leave2));
@@ -199,15 +200,15 @@ public class LeaveControllerTest extends IntegrationTests {
                 .reason("Holiday")
                 .starting(Timestamp.valueOf(now))
                 .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
-                .numberOfDays(1d)
-                .status(Leave.Status.CONFIRMED)
+                .numberOfDays(BigDecimal.ONE)
+                .status(Leave.Status.APPROVED)
                 .leaveType(leaveType).build();
         Leave leave2 = Leave.builder()
                 .userAccount(colleague)
                 .approver(userAccount)
                 .starting(Timestamp.valueOf(now.plus(3, ChronoUnit.DAYS)))
                 .ending(Timestamp.valueOf(now.plus(5, ChronoUnit.DAYS)))
-                .numberOfDays(2d)
+                .numberOfDays(BigDecimal.valueOf(2))
                 .status(Leave.Status.PENDING)
                 .leaveType(leaveType).build();
         leaveRepository.save(Arrays.asList(leave1, leave2));

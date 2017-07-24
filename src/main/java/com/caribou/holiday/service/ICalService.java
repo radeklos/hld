@@ -69,7 +69,7 @@ public class ICalService {
         switch (status) {
             case PENDING:
                 return VEvent.Status.TENTATIVE;
-            case CONFIRMED:
+            case APPROVED:
                 return VEvent.Status.CONFIRMED;
             default:
                 return VEvent.Status.CANCELLED;
