@@ -15,7 +15,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import rx.observers.TestSubscriber;
 
 import java.util.HashMap;
 
@@ -34,7 +33,7 @@ public class LoginRestControllerTest extends IntegrationTests {
     public void authorizedWithValidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
         String userPassword = user.getPassword();
-        userService.create(user).subscribe(new TestSubscriber<>());
+        userService.create(user);
 
         LoginRequest loginRequest = new LoginRequest(user.getEmail(), userPassword);
         objectMapper.writeValueAsString(loginRequest);
@@ -57,7 +56,7 @@ public class LoginRestControllerTest extends IntegrationTests {
     @Test
     public void authorizedWithInvalidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
-        userService.create(user).subscribe(new TestSubscriber<>());
+        userService.create(user);
 
         LoginRequest loginRequest = new LoginRequest(user.getEmail(), "incorrect password");
         objectMapper.writeValueAsString(loginRequest);

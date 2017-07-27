@@ -3,7 +3,9 @@ package com.caribou;
 import com.caribou.auth.rest.dto.Error;
 import com.caribou.auth.rest.dto.ErrorField;
 import com.caribou.auth.rest.mapper.ErrorMapper;
+import com.caribou.company.rest.ErrorHandler;
 import com.caribou.company.service.NotFound;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -27,6 +29,13 @@ public class ControllerHandler {
         Error err = ErrorMapper.map(ex);
         err.setStatus(HttpStatus.UNPROCESSABLE_ENTITY);
         return err;
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public Error dataIntegrityViolationException(DataIntegrityViolationException ex) {
+        return ErrorHandler.parseError(ex);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)

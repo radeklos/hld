@@ -34,8 +34,8 @@ public class UserService implements UserDetailsService {
         this.emailSender = emailSender;
     }
 
-    public Observable<UserAccount> create(final UserAccount userAccount) {
-        return Observable.create(subscriber -> {
+    public UserAccount create(final UserAccount userAccount) {
+        return Observable.<UserAccount>create(subscriber -> {
             try {
                 userAccount.setPassword(encoder.encode(userAccount.getPassword()));
                 UserAccount user = userRepository.save(userAccount);
@@ -45,7 +45,7 @@ public class UserService implements UserDetailsService {
             } catch (Exception e) {
                 subscriber.onError(e);
             }
-        });
+        }).toBlocking().first();
     }
 
     public UserAccount createUser(UserAccount userAccount) {

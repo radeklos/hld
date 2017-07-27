@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -63,7 +62,7 @@ public class LeaveControllerTest extends IntegrationTests {
     public void before() throws Exception {
         userAccount = Factory.userAccount();
         password = userAccount.getPassword();
-        userService.create(userAccount).subscribe(new TestSubscriber<>());
+        userService.create(userAccount);
 
         companyRepository.save(company);
         leaveTypeRepository.save(leaveType);
@@ -126,7 +125,7 @@ public class LeaveControllerTest extends IntegrationTests {
 
     @Test
     public void updatingAnotherUserReturns404() throws Exception {
-        UserAccount anotherUser = userService.create(Factory.userAccount()).toBlocking().first();
+        UserAccount anotherUser = userService.create(Factory.userAccount());
         LocalDate now = LocalDate.of(2017, 1, 1);
         LeaveDto leaveDto = LeaveDto.builder()
                 .starting(now)
@@ -189,7 +188,7 @@ public class LeaveControllerTest extends IntegrationTests {
     @Test
     public void geListOfLeavesForColleague() throws Exception {
         UserAccount colleague = Factory.userAccount();
-        userService.create(colleague).subscribe(new TestSubscriber<>());
+        userService.create(colleague);
         companyRepository.save(company);
         companyRepository.addEmployee(company, colleague, Role.Viewer);
 
@@ -233,7 +232,7 @@ public class LeaveControllerTest extends IntegrationTests {
     @Test
     public void cannotGetUsersLeavesFromAnotherCompany() throws Exception {
         UserAccount anotherUser = Factory.userAccount();
-        userService.create(anotherUser).subscribe(new TestSubscriber<>());
+        userService.create(anotherUser);
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
         companyRepository.addEmployee(anotherCompany, anotherUser, Role.Viewer);

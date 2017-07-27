@@ -28,36 +28,27 @@ public class UserServiceTest extends IntegrationTests {
 
     @Test
     public void testCreate() throws Exception {
-        TestSubscriber<UserAccount> testSubscriber = new TestSubscriber<>();
-
-        userService.create(Factory.userAccount()).subscribe(testSubscriber);
-        testSubscriber.assertNoErrors();
-
-        UserAccount us = testSubscriber.getOnNextEvents().get(0);
-        assertThat(us.getUid()).isNotNull();
+        UserAccount userAccount = userService.create(Factory.userAccount());
+        assertThat(userAccount.getUid()).isNotNull();
     }
 
     @Test
     public void invitationEmailIsSentWhenUserIsCreated() throws Exception {
         TestSubscriber<UserAccount> testSubscriber = new TestSubscriber<>();
         UserAccount userAccount = Factory.userAccount();
-        userService.create(userAccount).subscribe(testSubscriber);
+        userService.create(userAccount);
 
         verify(emailSender, times(1)).send(any());
     }
 
     @Test
     public void userPasswordIsEncoded() throws Exception {
-        TestSubscriber<UserAccount> testSubscriber = new TestSubscriber<>();
         UserAccount userAccount = Factory.userAccount();
         String password = userAccount.getPassword();
-        userService.create(userAccount).subscribe(testSubscriber);
+        UserAccount saved = userService.create(userAccount);
 
-        UserAccount us = testSubscriber.getOnNextEvents().get(0);
-        UserAccount savedUser = userRepository.findOne(us.getUid());
-
-        assertThat(us.getPassword()).isNotEqualTo(password);
-        assertThat(encoder.matches(password, savedUser.getPassword())).isTrue();
+        assertThat(saved.getPassword()).isNotEqualTo(password);
+        assertThat(encoder.matches(password, saved.getPassword())).isTrue();
     }
 
 }

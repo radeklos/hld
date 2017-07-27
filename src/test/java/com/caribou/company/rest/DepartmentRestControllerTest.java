@@ -19,7 +19,6 @@ import org.modelmapper.internal.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rx.observers.TestObserver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +51,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void before() throws Exception {
         userAccount = Factory.userAccount();
         userPassword = userAccount.getPassword();
-        userService.create(userAccount).subscribe(new TestObserver<>());
+        userService.create(userAccount);
 
         company = Factory.company();
         companyRepository.save(company);
@@ -251,7 +250,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void createNewDepartmentAsViewerReturns401() throws Exception {
         UserAccount viewer = Factory.userAccount();
         String viewPassword = viewer.getPassword();
-        userService.create(viewer).subscribe(new TestObserver<>());
+        userService.create(viewer);
         companyRepository.addEmployee(company, viewer, Role.Viewer);
 
         DepartmentDto departmentDto = Factory.departmentDto(viewer.getUid().toString());
@@ -277,7 +276,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void createNewDepartmentAsAdmin() throws Exception {
         UserAccount admin = Factory.userAccount();
         String adminPassword = admin.getPassword();
-        userService.create(admin).subscribe(new TestObserver<>());
+        userService.create(admin);
         companyRepository.addEmployee(company, admin, Role.Admin);
 
         DepartmentDto departmentDto = DepartmentDto.builder().boss(admin.getUid().toString()).name("department").daysOff(10).build();
@@ -301,7 +300,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void createNewDepartmentAsEditor() throws Exception {
         UserAccount editor = Factory.userAccount();
         String editorPassword = editor.getPassword();
-        userService.create(editor).subscribe(new TestObserver<>());
+        userService.create(editor);
         companyRepository.addEmployee(company, editor, Role.Editor);
 
         DepartmentDto departmentDto = DepartmentDto.builder().boss(editor.getUid().toString()).name("department").daysOff(10).build();

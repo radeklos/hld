@@ -33,7 +33,7 @@ public class ErrorHandler {
         return new ResponseEntity(headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private static Error parseError(DataIntegrityViolationException e) {
+    public static Error parseError(DataIntegrityViolationException e) {
         List<String> matches = parseException(e.getCause().getCause());
         ErrorField errorField = ErrorField.builder()
                 .code("must be unique")

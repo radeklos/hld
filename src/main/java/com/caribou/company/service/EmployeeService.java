@@ -73,7 +73,7 @@ public class EmployeeService {
                         throw Exceptions.propagate(t);
                     }
                 })
-                .flatMap(e -> userService.create(e.getMember()).flatMap(u -> departmentService.addEmployeeRx(e)));
+                .flatMap(e -> Observable.just(userService.create(e.getMember())).flatMap(u -> departmentService.addEmployeeRx(e)));
     }
 
     DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws DepartmentNotFound {

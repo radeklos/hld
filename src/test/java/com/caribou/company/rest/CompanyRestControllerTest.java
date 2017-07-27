@@ -24,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import rx.observers.TestSubscriber;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,7 +60,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
     public void setup() throws Exception {
         userAccount = Factory.userAccount();
         userPassword = userAccount.getPassword();
-        userService.create(userAccount).subscribe(new TestSubscriber<>());
+        userService.create(userAccount);
     }
 
     @Test

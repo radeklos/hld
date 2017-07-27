@@ -123,7 +123,7 @@ public class UserRestControllerTest extends IntegrationTests {
     public void getMineUserDetail() throws Exception {
         UserAccount userAccount = Factory.userAccount();
         String userPassword = userAccount.getPassword();
-        userAccount = userService.create(userAccount).toBlocking().first();
+        userAccount = userService.create(userAccount);
 
         ResponseEntity<UserAccountDto> response = testRestTemplate().exchange(
                 path("/v1/users/me"),
@@ -144,7 +144,7 @@ public class UserRestControllerTest extends IntegrationTests {
     public void userHasLinkToHisCompany() throws Exception {
         UserAccount userAccount = Factory.userAccount();
         String userPassword = userAccount.getPassword();
-        userAccount = userService.create(userAccount).toBlocking().first();
+        userAccount = userService.create(userAccount);
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Owner);
         companyRepository.save(company);

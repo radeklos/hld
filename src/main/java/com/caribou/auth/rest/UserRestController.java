@@ -9,7 +9,6 @@ import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.rest.CompanyRestController;
-import com.caribou.company.rest.ErrorHandler;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,12 +50,9 @@ public class UserRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public Single<ResponseEntity<UserAccountDto>> create(@Valid @RequestBody UserAccountDto newUser) {
-        UserAccount user = convertToEntity(newUser);
-        return userService.create(user)
-                .map(d -> new ResponseEntity<>(convertToEntity(d), HttpStatus.CREATED))
-                .onErrorReturn(ErrorHandler::h)
-                .toSingle();
+    public ResponseEntity<UserAccountDto> create(@Valid @RequestBody UserAccountDto newUser) {
+        UserAccount user = userService.create(convertToEntity(newUser));
+        return new ResponseEntity<>(convertToEntity(user), HttpStatus.CREATED);
     }
 
     private UserAccount convertToEntity(UserAccountDto newUser) {

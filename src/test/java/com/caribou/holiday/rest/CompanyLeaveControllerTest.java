@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rx.observers.TestSubscriber;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -69,7 +68,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void setUp() throws Exception {
         userAccount = Factory.userAccount();
         password = userAccount.getPassword();
-        userService.create(userAccount).subscribe(new TestSubscriber<>());
+        userService.create(userAccount);
 
         company = companyRepository.save(Factory.company());
         companyRepository.addEmployee(company, userAccount, Role.Admin);
@@ -109,7 +108,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void shouldHaveDepartmentIfEmployeeHasAny() throws Exception {
         UserAccount anotherUserAccount = Factory.userAccount();
         String anotherUserPassword = anotherUserAccount.getPassword();
-        userService.create(anotherUserAccount).subscribe(new TestSubscriber<>());
+        userService.create(anotherUserAccount);
         Company anotherCompany = companyRepository.save(Factory.company());
         Department department = departmentRepository.save(Factory.department(anotherCompany, userAccount));
         companyRepository.addEmployee(anotherCompany, department, anotherUserAccount, Role.Admin);
