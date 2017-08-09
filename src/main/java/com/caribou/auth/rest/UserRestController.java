@@ -51,7 +51,7 @@ public class UserRestController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<UserAccountDto> create(@Valid @RequestBody UserAccountDto newUser) {
-        UserAccount user = userService.create(convertToEntity(newUser));
+        UserAccount user = userService.register(convertToEntity(newUser));
         return new ResponseEntity<>(convertToEntity(user), HttpStatus.CREATED);
     }
 

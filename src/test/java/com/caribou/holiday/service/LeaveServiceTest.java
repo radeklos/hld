@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
 
@@ -288,7 +289,7 @@ public class LeaveServiceTest extends IntegrationTests {
         leaveService.approve(leave);
 
         ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
-        verify(emailSender).send(emailCaptor.capture());
+        verify(emailSender).send(emailCaptor.capture(), any());
 
         List<Email> args = emailCaptor.getAllValues();
         assertThat(args).hasSize(1);

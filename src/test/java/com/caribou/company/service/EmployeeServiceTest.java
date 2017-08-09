@@ -4,8 +4,8 @@ import com.caribou.Factory;
 import com.caribou.IntegrationTests;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
-import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Invitation;
@@ -14,18 +14,26 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
 import com.caribou.company.service.parser.EmployeeCsvParser;
+import com.caribou.email.Email;
+import com.caribou.email.templates.Invite;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.observers.TestSubscriber;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.atMost;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 
@@ -202,7 +210,7 @@ public class EmployeeServiceTest extends IntegrationTests {
                 faker.number().randomDouble(2, 0, 30)
         );
 
-        TestSubscriber<Pair> testSubscriber = new TestSubscriber<>();
+        TestSubscriber<Boolean> testSubscriber = new TestSubscriber<>();
         employeeService.performImport(Collections.singletonList(employee), company).subscribe(testSubscriber);
 
         verify(emailSender, times(1)).send(any(), any());
@@ -211,4 +219,71 @@ public class EmployeeServiceTest extends IntegrationTests {
         assertThat(invitation).isPresent();
     }
 
+    @Test
+    public void createNewEmployeeAndSentEmail() throws Exception {
+        Department department = Factory.department(company, userAccount);
+        departmentRepository.save(department);
+
+        UserAccount user = Factory.userAccount();
+        employeeService.createEmployee(user, department, LocalDate.now().plus(6, ChronoUnit.MONTHS));
+
+        ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
+        verify(emailSender, atMost(1)).send(emailCaptor.capture(), any());
+        assertThat(emailCaptor.getValue().getTemplate()).isInstanceOf(Invite.class);
+
+        List<CompanyEmployee> employees = companyRepository.findEmployeesByDepartmentUid(department.getUid());
+
+        assertThat(employees).hasSize(1);
+        CompanyEmployee employee = employees.get(0);
+
+        assertThat(employee.getMember().getEmail()).isEqualTo(user.getEmail());
+
+        Optional<Invitation> invitation = invitationRepository.findByUserEmail(user.getEmail());
+        assertThat(invitation).isPresent();
+    }
+
+    @Test
+    public void calculateRemainingAllowanceForSixMonths() throws Exception {
+        Department department = Factory.department(company, userAccount);
+        departmentRepository.save(department);
+
+        UserAccount user = Factory.userAccount();
+        LocalDate startingDate = LocalDate.of(LocalDate.now().getYear(), 6, 1);
+        employeeService.createEmployee(user, department, startingDate);
+
+        List<CompanyEmployee> employees = companyRepository.findEmployeesByDepartmentUid(department.getUid());
+        CompanyEmployee employee = employees.get(0);
+
+        assertThat(employee.getRemainingAllowance()).isEqualByComparingTo(BigDecimal.valueOf(10));
+    }
+
+    @Test
+    public void calculateRemainingAllowanceForOneMonth() throws Exception {
+        Department department = Factory.department(company, userAccount);
+        departmentRepository.save(department);
+
+        UserAccount user = Factory.userAccount();
+        LocalDate startingDate = LocalDate.of(LocalDate.now().getYear(), 12, 1);
+        employeeService.createEmployee(user, department, startingDate);
+
+        List<CompanyEmployee> employees = companyRepository.findEmployeesByDepartmentUid(department.getUid());
+        CompanyEmployee employee = employees.get(0);
+
+        assertThat(employee.getRemainingAllowance()).isEqualByComparingTo(BigDecimal.valueOf(1.5));
+    }
+
+    @Test
+    public void calculateRemainingAllowanceForForthMonth() throws Exception {
+        Department department = Factory.department(company, userAccount);
+        departmentRepository.save(department);
+
+        UserAccount user = Factory.userAccount();
+        LocalDate startingDate = LocalDate.of(LocalDate.now().getYear(), 8, 1);
+        employeeService.createEmployee(user, department, startingDate);
+
+        List<CompanyEmployee> employees = companyRepository.findEmployeesByDepartmentUid(department.getUid());
+        CompanyEmployee employee = employees.get(0);
+
+        assertThat(employee.getRemainingAllowance()).isEqualByComparingTo(BigDecimal.valueOf(6.5));
+    }
 }

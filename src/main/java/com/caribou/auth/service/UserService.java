@@ -34,11 +34,10 @@ public class UserService implements UserDetailsService {
         this.emailSender = emailSender;
     }
 
-    public UserAccount create(final UserAccount userAccount) {
+    public UserAccount register(final UserAccount userAccount) {
         return Observable.<UserAccount>create(subscriber -> {
             try {
-                userAccount.setPassword(encoder.encode(userAccount.getPassword()));
-                UserAccount user = userRepository.save(userAccount);
+                UserAccount user = create(userAccount);
                 sendInvitationEmail(user);
                 subscriber.onNext(userAccount);
                 subscriber.onCompleted();
@@ -48,11 +47,9 @@ public class UserService implements UserDetailsService {
         }).toBlocking().first();
     }
 
-    public UserAccount createUser(UserAccount userAccount) {
+    public UserAccount create(final UserAccount userAccount) {
         userAccount.setPassword(encoder.encode(userAccount.getPassword()));
-        UserAccount user = userRepository.save(userAccount);
-        sendInvitationEmail(user);
-        return userAccount;
+        return userRepository.save(userAccount);
     }
 
     private void sendInvitationEmail(UserAccount userAccount) {
@@ -60,7 +57,7 @@ public class UserService implements UserDetailsService {
                 .to(userAccount)
                 .template(Welcome.builder().user(userAccount).build())
                 .build();
-        emailSender.send(email);
+        emailSender.send(email, userAccount.getLocale());
     }
 
     public Observable<UserAccount> findByEmail(String email) {

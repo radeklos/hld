@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.observers.TestSubscriber;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -59,7 +61,7 @@ public class DepartmentServiceTest extends IntegrationTests {
         Department departmentResult = testSubscriber.getOnNextEvents().get(0);
         assertThat(departmentResult.getUid()).isNotNull();
         assertThat(departmentResult.getName()).isEqualTo(department.getName());
-        assertThat(departmentResult.getDaysOff()).isEqualTo(10);
+        assertThat(departmentResult.getDaysOff()).isEqualTo(BigDecimal.valueOf(20));
         assertThat(departmentResult.getCompany().getName()).isEqualTo(department.getCompany().getName());
     }
 
@@ -71,7 +73,7 @@ public class DepartmentServiceTest extends IntegrationTests {
         TestSubscriber<Department> testSubscriber = new TestSubscriber<>();
 
         String newName = Factory.faker.commerce().department();
-        Department update = Department.builder().boss(userAccount).name(newName).daysOff(20).build();
+        Department update = Department.builder().boss(userAccount).name(newName).daysOff(BigDecimal.valueOf(20)).build();
         departmentService.update(department.getUid(), update).subscribe(testSubscriber);
         testSubscriber.assertNoErrors();
 

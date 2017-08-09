@@ -33,7 +33,7 @@ public class LoginRestControllerTest extends IntegrationTests {
     public void authorizedWithValidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
         String userPassword = user.getPassword();
-        userService.create(user);
+        userService.register(user);
 
         LoginRequest loginRequest = new LoginRequest(user.getEmail(), userPassword);
         objectMapper.writeValueAsString(loginRequest);
@@ -56,7 +56,7 @@ public class LoginRestControllerTest extends IntegrationTests {
     @Test
     public void authorizedWithInvalidUsernameAndPassword() throws Exception {
         UserAccount user = Factory.userAccount();
-        userService.create(user);
+        userService.register(user);
 
         LoginRequest loginRequest = new LoginRequest(user.getEmail(), "incorrect password");
         objectMapper.writeValueAsString(loginRequest);

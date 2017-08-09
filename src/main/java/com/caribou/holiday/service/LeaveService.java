@@ -132,7 +132,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
                 .to(leave.getUserAccount())
                 .template(new LeaveApproved(leave))
                 .build();
-        emailSender.send(email);
+        emailSender.send(email, leave.getUserAccount().getLocale());
     }
 
     private boolean isWeekend(LocalDate localDate) {

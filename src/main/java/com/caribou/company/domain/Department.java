@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import java.math.BigDecimal;
 
 
 @Data
@@ -23,7 +24,7 @@ public class Department extends AbstractEntity {
     private String name;
 
     @Column(nullable = false)
-    private Integer daysOff;
+    private BigDecimal daysOff;
 
     @ManyToOne(optional = false)
     private UserAccount boss;

@@ -67,7 +67,7 @@ public class LeaveControllerTest extends IntegrationTests {
         companyRepository.save(company);
         leaveTypeRepository.save(leaveType);
 
-        UserAccount approver = userService.createUser(Factory.userAccount());
+        UserAccount approver = userService.create(Factory.userAccount());
         Department department = departmentRepository.save(Factory.department(company, approver));
         companyRepository.addEmployee(company, department, userAccount, approver, Role.Viewer);
     }

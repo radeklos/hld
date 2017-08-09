@@ -1,6 +1,7 @@
 package com.caribou.auth.domain;
 
 import com.caribou.AbstractEntity;
+import lombok.Getter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +9,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 
 @Entity
@@ -25,6 +27,10 @@ public class UserAccount extends AbstractEntity {
 
     @Column
     private String lastName;
+
+    @Getter
+    @Column(nullable = false)
+    private final Locale locale = Locale.UK;
 
     public UserAccount() {
     }

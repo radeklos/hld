@@ -49,7 +49,7 @@ public class Factory {
                 .address1(faker.address().streetAddress())
                 .city(faker.address().city())
                 .postCode(faker.address().zipCode())
-                .defaultDaysOff(faker.number().numberBetween(1, 100))
+                .defaultDaysOff(BigDecimal.valueOf(20))
                 .build();
     }
 
@@ -68,7 +68,7 @@ public class Factory {
         return Department.builder()
                 .company(company)
                 .name(faker.commerce().department())
-                .daysOff(10)
+                .daysOff(company.getDefaultDaysOff())
                 .boss(boss)
                 .build();
     }

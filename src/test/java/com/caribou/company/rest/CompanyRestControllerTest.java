@@ -28,6 +28,7 @@ import org.springframework.util.MultiValueMap;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -94,7 +95,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         CompanyDto companyDto = response.getBody();
 //        assertThat(companyDto.getUid()).isEqualTo(company.getUid());
         assertThat(companyDto.getName()).isEqualTo(company.getName());
-        assertThat(companyDto.getDefaultDaysOff()).isEqualTo(company.getDefaultDaysOff());
+        assertThat(BigDecimal.valueOf(companyDto.getDefaultDaysOff())).isEqualByComparingTo(company.getDefaultDaysOff());
     }
 
     @Test
@@ -216,7 +217,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Editor);
         companyRepository.save(company);
-        departmentRepository.save(Department.builder().boss(userAccount).company(company).name("HR").daysOff(10).build());
+        departmentRepository.save(Department.builder().boss(userAccount).company(company).name("HR").daysOff(BigDecimal.valueOf(10)).build());
 
         File myFoo = File.createTempFile("employees", ".csv");
         FileOutputStream fooStream = new FileOutputStream(myFoo, false);
@@ -244,7 +245,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Editor);
         companyRepository.save(company);
-        departmentRepository.save(Department.builder().company(company).name("HR").daysOff(10).build());
+        departmentRepository.save(Department.builder().company(company).name("HR").daysOff(BigDecimal.valueOf(10)).build());
 
         String file =
                 "first name,last name,email,department,reaming holiday\n" +
@@ -277,7 +278,7 @@ public class CompanyRestControllerTest extends IntegrationTests {
         Company company = Factory.company();
         company.addEmployee(userAccount, Role.Editor);
         companyRepository.save(company);
-        departmentRepository.save(Department.builder().company(company).name("HR").daysOff(10).build());
+        departmentRepository.save(Department.builder().company(company).name("HR").daysOff(BigDecimal.valueOf(10)).build());
 
         String file =
                 "first name,last name,email,department,reaming holiday\n" +

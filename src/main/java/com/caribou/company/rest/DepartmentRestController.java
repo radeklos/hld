@@ -1,6 +1,7 @@
 package com.caribou.company.rest;
 
 
+import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.CompanyEmployee;
@@ -10,6 +11,7 @@ import com.caribou.company.rest.dto.DepartmentDto;
 import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.DepartmentService;
+import com.caribou.company.service.EmployeeService;
 import com.caribou.company.service.NotFound;
 import com.caribou.holiday.rest.dto.ListDto;
 import ma.glasnost.orika.MapperFacade;
@@ -52,6 +54,9 @@ public class DepartmentRestController {
     private DepartmentService departmentService;
 
     @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
     private UserService userService;
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
@@ -86,6 +91,13 @@ public class DepartmentRestController {
                 .total(employee.size())
                 .items(employee)
                 .build();
+    }
+
+    @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
+    public ResponseEntity createEmployee(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid, @Valid @RequestBody EmployeeDto employeeDto) {
+        isUserAdminInCompany(companyUid);
+        employeeService.createEmployee(convert(employeeDto), departmentService.get(uid), employeeDto.getStartedAt());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -150,6 +162,21 @@ public class DepartmentRestController {
         }
         department.setBoss(boss.get().getMember());
         return department;
+    }
+
+    private UserContext isUserAdminInCompany(String companyUid) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!companyUid.equals(userDetails.getCompanyId().toString())) {
+            throw new NotFound();
+        }
+        if (!Role.Admin.equals(userDetails.getRoleInCompany())) {
+            throw new NotFound();
+        }
+        return userDetails;
+    }
+
+    private UserAccount convert(EmployeeDto employeeDto) {
+        return mapperFacade.map(employeeDto, UserAccount.class);
     }
 
 }

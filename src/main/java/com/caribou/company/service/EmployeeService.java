@@ -3,11 +3,11 @@ package com.caribou.company.service;
 import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
-import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.DepartmentEmployee;
 import com.caribou.company.domain.Invitation;
+import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.repository.InvitationRepository;
@@ -21,11 +21,16 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.exceptions.Exceptions;
 
-import javax.mail.MessagingException;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 
 
 @Slf4j
@@ -46,8 +51,6 @@ public class EmployeeService {
 
     private final InvitationRepository invitationRepository;
 
-    private final Locale locale = Locale.UK;  // TODO should be dynamic based on company
-
     @Autowired
     public EmployeeService(DepartmentRepository departmentRepository, DepartmentService departmentService, UserService userService, EmailSender emailSender, InvitationRepository invitationRepository, UserRepository userRepository, CompanyRepository companyRepository) {
         this.departmentRepository = departmentRepository;
@@ -59,7 +62,7 @@ public class EmployeeService {
         this.companyRepository = companyRepository;
     }
 
-    public Observable<Pair<Boolean, Invitation>> performImport(List<EmployeeCsvParser.Row> rows, final Company company) {
+    public Observable<Boolean> performImport(List<EmployeeCsvParser.Row> rows, final Company company) {
         return importEmployee(rows, company).map(this::sendInvitationEmail);
     }
 
@@ -73,7 +76,7 @@ public class EmployeeService {
                         throw Exceptions.propagate(t);
                     }
                 })
-                .flatMap(e -> Observable.just(userService.create(e.getMember())).flatMap(u -> departmentService.addEmployeeRx(e)));
+                .flatMap(e -> Observable.just(userService.register(e.getMember())).flatMap(u -> departmentService.addEmployeeRx(e)));
     }
 
     DepartmentEmployee createDepartmentEmployee(EmployeeCsvParser.Row row, Company company) throws DepartmentNotFound {
@@ -98,29 +101,50 @@ public class EmployeeService {
         return new DepartmentEmployee(department, userAccount);
     }
 
-    public Pair<Boolean, Invitation> sendInvitationEmail(DepartmentEmployee departmentEmployee) {
-        boolean successful = true;
-        Invitation invite = invitationBuilder(departmentEmployee);
-        Email email = Email.builder()
-                .to(departmentEmployee.getMember())
-                .template(templateBuilder(invite))
-                .build();
-        try {
-            invitationRepository.save(invite);
-            emailSender.send(email, locale);
-        } catch (MessagingException e) {
-            log.error("Can not send invitation to user={} of department={}", departmentEmployee.getMember().getEmail(), departmentEmployee.getDepartment().getUid());
-            successful = false;
-        }
-        return new Pair<>(successful, invite);
+    public void createEmployee(@NotNull UserAccount userAccount, @NotNull Department department, @NotNull LocalDate employmentStartDate) {
+        userAccount.setPassword(UUID.randomUUID().toString());
+        userService.create(userAccount);
+        BigDecimal remainingAllowance = calculateRemainingAllowance(department, employmentStartDate);
+        log.info("Calculated remaining allowance for number of days off {} for user={} who's starting on {} is {}",
+                department.getDaysOff(), userAccount.getUid(), employmentStartDate, remainingAllowance);
+        companyRepository.addEmployee(department, userAccount, Role.Viewer, remainingAllowance);
+        sendInvitationEmail(userAccount, department);
     }
 
-    private static Invitation invitationBuilder(DepartmentEmployee departmentEmployee) {
+    private BigDecimal calculateRemainingAllowance(Department department, LocalDate start) {
+        LocalDate lastDay = LocalDate.now().with(lastDayOfYear());
+        BigDecimal daysOffPerMonth = department.getDaysOff().divide(BigDecimal.valueOf(12), 5, RoundingMode.HALF_UP);
+        BigDecimal numberOfMonths = BigDecimal.valueOf(Math.max(1, Period.between(start, lastDay).getMonths()));
+        return roundToNearestFive(daysOffPerMonth.multiply(numberOfMonths));
+    }
+
+    private void sendInvitationEmail(UserAccount userAccount, Department department) {
+        Invitation invite = invitationBuilder(userAccount, department);
+        Email email = Email.builder()
+                .to(userAccount)
+                .template(templateBuilder(invite))
+                .build();
+        invitationRepository.save(invite);
+        emailSender.send(email, userAccount.getLocale());
+    }
+
+    private static BigDecimal roundToNearestFive(BigDecimal value) {
+        BigDecimal increment = BigDecimal.valueOf(0.5);
+        BigDecimal divided = value.divide(increment, 0, RoundingMode.HALF_DOWN);
+        return divided.multiply(increment);
+    }
+
+    private static Invitation invitationBuilder(UserAccount userAccount, Department department) {
         return Invitation.builder()
                 .key(UUID.randomUUID().toString())
-                .department(departmentEmployee.getDepartment())
-                .company(departmentEmployee.getDepartment().getCompany())
-                .userAccount(departmentEmployee.getMember()).build();
+                .department(department)
+                .company(department.getCompany())
+                .userAccount(userAccount).build();
+    }
+
+    public boolean sendInvitationEmail(DepartmentEmployee departmentEmployee) {
+        sendInvitationEmail(departmentEmployee.getMember(), departmentEmployee.getDepartment());
+        return true;
     }
 
     private static Invite templateBuilder(Invitation invitation) {

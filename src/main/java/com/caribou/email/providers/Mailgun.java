@@ -38,27 +38,23 @@ public class Mailgun implements EmailSender {
 
     @Async
     @Override
-    public void send(Email email) {
-        try {
-            send(email, Locale.UK);
-        } catch (MessagingException e) {
-            log.error("Can not sent email {} to {}: {}", email.getTemplate(), email.getTo(), e);
-        }
-    }
-
-    @Override
-    public void send(Email email, Locale locale) throws MessagingException {
+    public void send(Email email, Locale locale) {
         final ContentGenerator.Content emailContent = contentGenerator.generate(email.getTemplate(), locale);
 
         final MimeMessage mimeMessage = this.sender.createMimeMessage();
-        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, ENCODING);
 
-        message.setFrom(toInternetAddress(email.getFrom() == null ? defaultFrom : email.getFrom()));
-        message.setTo(toInternetAddress(email.getTo()));
-        message.setSubject(emailContent.getSubject());
-        message.setText(emailContent.getPlain(), emailContent.getHtml());
+        try {
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, ENCODING);
 
-        sender.send(message.getMimeMessage());
+            message.setFrom(toInternetAddress(email.getFrom() == null ? defaultFrom : email.getFrom()));
+            message.setTo(toInternetAddress(email.getTo()));
+            message.setSubject(emailContent.getSubject());
+            message.setText(emailContent.getPlain(), emailContent.getHtml());
+
+            sender.send(message.getMimeMessage());
+        } catch (MessagingException e) {
+            log.error("Can not sent email {} to {}: {}", email.getTemplate(), email.getTo(), e);
+        }
     }
 
     private static InternetAddress toInternetAddress(Email.Contact contact) {

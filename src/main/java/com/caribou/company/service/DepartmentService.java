@@ -56,4 +56,8 @@ public class DepartmentService extends RxService.Imp<DepartmentRepository, Depar
         return repository.findByCompanyUid(UUID.fromString(companyUid));
     }
 
+    public Optional<Department> getDepartment(String departmentUid) {
+        return Optional.ofNullable(repository.findOne(UUID.fromString(departmentUid)));
+    }
+
 }

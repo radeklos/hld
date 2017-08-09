@@ -20,7 +20,7 @@ public class Company extends AbstractEntity {
     private String name;
 
     @Column(nullable = false)
-    private Integer defaultDaysOff;
+    private BigDecimal defaultDaysOff;
 
     @Column(nullable = false)
     private String regNo;
@@ -146,11 +146,11 @@ public class Company extends AbstractEntity {
         this.name = name;
     }
 
-    public Integer getDefaultDaysOff() {
+    public BigDecimal getDefaultDaysOff() {
         return defaultDaysOff;
     }
 
-    public void setDefaultDaysOff(Integer defaultDaysOff) {
+    public void setDefaultDaysOff(BigDecimal defaultDaysOff) {
         this.defaultDaysOff = defaultDaysOff;
     }
 
@@ -186,7 +186,7 @@ public class Company extends AbstractEntity {
 
     public static final class Builder {
         private String name;
-        private Integer defaultDaysOff;
+        private BigDecimal defaultDaysOff;
         private String regNo;
         private String vatId;
         private boolean paysVat;
@@ -205,7 +205,7 @@ public class Company extends AbstractEntity {
             return this;
         }
 
-        public Builder defaultDaysOff(Integer val) {
+        public Builder defaultDaysOff(BigDecimal val) {
             defaultDaysOff = val;
             return this;
         }

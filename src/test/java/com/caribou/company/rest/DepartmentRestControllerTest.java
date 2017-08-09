@@ -6,11 +6,13 @@ import com.caribou.auth.domain.UserAccount;
 import com.caribou.auth.repository.UserRepository;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.holiday.rest.dto.ListDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
@@ -20,9 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,7 +90,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         DepartmentDto body = response.getBody();
         assertThat(body.getName()).isEqualTo(department.getName());
-        assertThat(body.getDaysOff()).isEqualTo(new Integer(10));
+        assertThat(body.getDaysOff()).isEqualTo(new Integer(20));
     }
 
     @Test
@@ -152,7 +157,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
 
         department = departmentRepository.findOne(department.getUid());
         assertThat(department.getName()).isEqualTo(departmentDto.getName());
-        assertThat(department.getDaysOff()).isEqualTo(departmentDto.getDaysOff());
+        assertThat(department.getDaysOff()).isEqualByComparingTo(BigDecimal.valueOf(departmentDto.getDaysOff()));
     }
 
     @Test
@@ -378,6 +383,30 @@ public class DepartmentRestControllerTest extends IntegrationTests {
                 userPassword
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void createNewEmployee() throws Exception {
+        EmployeeDto employeeDto = EmployeeDto.builder()
+                .firstName(faker.name().firstName())
+                .lastName(faker.name().lastName())
+                .email(faker.internet().emailAddress())
+                .startedAt(LocalDate.now()).build();
+
+        String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
+        ResponseEntity<EmployeeDto> response = post(
+                url,
+                employeeDto,
+                EmployeeDto.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        Optional<CompanyEmployee> createdUser = companyRepository.findEmployeeByEmail(employeeDto.getEmail());
+        assertThat(createdUser).isPresent();
+        assertThat(createdUser.get().getCompany().getUid()).isEqualTo(company.getUid());
+        assertThat(createdUser.get().getDepartment().getUid()).isEqualTo(department.getUid());
     }
 
 }

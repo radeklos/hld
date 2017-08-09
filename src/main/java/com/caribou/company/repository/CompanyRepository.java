@@ -75,6 +75,14 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
         addEmployee(UUID.randomUUID(), company, department, userAccount, approver, role);
     }
 
+    default void addEmployee(Department department, UserAccount userAccount, Role role) {
+        addEmployee(UUID.randomUUID(), department.getCompany(), department, userAccount, role);
+    }
+
+    default void addEmployee(Department department, UserAccount userAccount, Role role, BigDecimal remainingAllowance) {
+        addEmployee(UUID.randomUUID(), department.getCompany(), department, userAccount, role, remainingAllowance);
+    }
+
     @Modifying
     @Transactional
     @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, role, created_at, updated_at) values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#role.name}, now(), now())", nativeQuery = true)
@@ -84,6 +92,12 @@ public interface CompanyRepository extends CrudRepository<Company, UUID> {
     @Transactional
     @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, approver_uid, role, created_at, updated_at) values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#approver.uid}, :#{#role.name}, now(), now())", nativeQuery = true)
     void addEmployee(@Param("uuid") UUID uuid, @Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("approver") UserAccount approver, @Param("role") Role role);
+
+    @Modifying
+    @Transactional
+    @Query(value = "insert into company_employee (uid, company_uid, department_uid, member_uid, role, remaining_allowance, created_at, updated_at) " +
+            "values(:#{#uuid}, :#{#company.uid}, :#{#department.uid}, :#{#member.uid}, :#{#role.name}, :#{#remaining_allowance}, now(), now())", nativeQuery = true)
+    void addEmployee(@Param("uuid") UUID uuid, @Param("company") Company company, @Param("department") Department department, @Param("member") UserAccount userAccount, @Param("role") Role role, @Param("remaining_allowance") BigDecimal remainingAllowance);
 
     @Modifying
     @Transactional

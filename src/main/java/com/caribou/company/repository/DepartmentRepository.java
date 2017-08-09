@@ -36,4 +36,5 @@ public interface DepartmentRepository extends CrudRepository<Department, UUID> {
 
     @Query("select e from DepartmentEmployee e where e.department = ?1 and e.member = ?2")
     Optional<DepartmentEmployee> getEmployee(Department department, UserAccount user);
+
 }

@@ -7,7 +7,6 @@ import com.caribou.auth.repository.UserRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import rx.observers.TestSubscriber;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -33,12 +32,19 @@ public class UserServiceTest extends IntegrationTests {
     }
 
     @Test
-    public void invitationEmailIsSentWhenUserIsCreated() throws Exception {
-        TestSubscriber<UserAccount> testSubscriber = new TestSubscriber<>();
+    public void invitationEmailIsSentWhenUserIsRegistered() throws Exception {
+        UserAccount userAccount = Factory.userAccount();
+        userService.register(userAccount);
+
+        verify(emailSender, times(1)).send(any(), any());
+    }
+
+    @Test
+    public void invitationEmailIsNotSentWhenUserIsCreated() throws Exception {
         UserAccount userAccount = Factory.userAccount();
         userService.create(userAccount);
 
-        verify(emailSender, times(1)).send(any());
+        verify(emailSender, times(0)).send(any(), any());
     }
 
     @Test

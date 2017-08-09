@@ -68,7 +68,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void setUp() throws Exception {
         userAccount = Factory.userAccount();
         password = userAccount.getPassword();
-        userService.create(userAccount);
+        userService.register(userAccount);
 
         company = companyRepository.save(Factory.company());
         companyRepository.addEmployee(company, userAccount, Role.Admin);
@@ -108,7 +108,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void shouldHaveDepartmentIfEmployeeHasAny() throws Exception {
         UserAccount anotherUserAccount = Factory.userAccount();
         String anotherUserPassword = anotherUserAccount.getPassword();
-        userService.create(anotherUserAccount);
+        userService.register(anotherUserAccount);
         Company anotherCompany = companyRepository.save(Factory.company());
         Department department = departmentRepository.save(Factory.department(anotherCompany, userAccount));
         companyRepository.addEmployee(anotherCompany, department, anotherUserAccount, Role.Admin);
@@ -134,7 +134,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void iCanSeeOnlyMineRemainingDaysOff() throws Exception {
         UserAccount me = Factory.userAccount();
         String minePassword = me.getPassword();
-        me = userService.createUser(me);
+        me = userService.create(me);
         Department department = departmentRepository.save(Factory.department(company, userAccount));
         companyRepository.addEmployee(company, department, me, Role.Viewer);
         departmentRepository.addEmployee(department, me);
@@ -163,7 +163,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     public void iCanNotSeeRemainingDaysOffOfOthers() throws Exception {
         UserAccount me = Factory.userAccount();
         String minePassword = me.getPassword();
-        me = userService.createUser(me);
+        me = userService.create(me);
         Department department = departmentRepository.save(Factory.department(company, userAccount));
         companyRepository.addEmployee(company, department, me, Role.Viewer);
 
@@ -233,7 +233,7 @@ public class CompanyLeaveControllerTest extends IntegrationTests {
     @Test
     public void bossCanSeeRemaningOfAllUsers() throws Exception {
         UserAccount me = Factory.userAccount();
-        me = userService.createUser(me);
+        me = userService.create(me);
         Department department = departmentRepository.save(Factory.department(company, userAccount));
         companyRepository.addEmployee(company, department, me, Role.Viewer);
 
