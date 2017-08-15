@@ -11,7 +11,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class UserAccountTest {
+public class UserAccountDtoTest {
 
     private LocalValidatorFactoryBean localValidatorFactory;
 
@@ -35,6 +35,17 @@ public class UserAccountTest {
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
         assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("email");
+    }
+
+    @Test
+    public void passwordIsOptionalForDefaultGroup() {
+        UserAccountDto userAccount = UserAccountDto.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@email.com")
+                .build();
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        assertThat(constraintViolations).isEmpty();
     }
 
     @Test
@@ -138,7 +149,7 @@ public class UserAccountTest {
                 .firstName("John")
                 .lastName("Doe")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);

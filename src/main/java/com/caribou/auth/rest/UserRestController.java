@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,6 +41,12 @@ public class UserRestController {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<UserAccountDto> create(@Validated(UserAccountDto.CreateGroup.class) @RequestBody UserAccountDto newUser) {
+        UserAccount user = userService.register(convertToEntity(newUser));
+        return new ResponseEntity<>(convertToEntity(user), HttpStatus.CREATED);
+    }
+
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public Single<UserAccountDto> me() {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -49,10 +56,11 @@ public class UserRestController {
                 .toSingle();
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<UserAccountDto> create(@Valid @RequestBody UserAccountDto newUser) {
-        UserAccount user = userService.register(convertToEntity(newUser));
-        return new ResponseEntity<>(convertToEntity(user), HttpStatus.CREATED);
+    @RequestMapping(path = "/me", method = RequestMethod.PUT)
+    public ResponseEntity<UserAccountDto> update(@Valid @RequestBody UserAccountDto newUser) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserAccount user = userService.update(userDetails.getUid(), convertToEntity(newUser));
+        return new ResponseEntity<>(convertToEntity(user), HttpStatus.OK);
     }
 
     private UserAccount convertToEntity(UserAccountDto newUser) {

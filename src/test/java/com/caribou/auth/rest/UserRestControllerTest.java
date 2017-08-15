@@ -76,6 +76,61 @@ public class UserRestControllerTest extends IntegrationTests {
     }
 
     @Test
+    public void createNewUserWithoutPasswordReturns422() throws Exception {
+        UserAccountDto userAccount = Factory.userAccountDto();
+        String json = "{" +
+                "\"firstName\":\"%s\"," +
+                "\"lastName\":\"%s\"," +
+                "\"email\":\"%s\"" +
+                "}";
+        json = String.format(json, userAccount.getFirstName(), userAccount.getLastName(), userAccount.getEmail());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<String> response = testRestTemplate().exchange(
+                path("/v1/users"),
+                HttpMethod.POST,
+                new HttpEntity<>(json, headers),
+                String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Test
+    public void updateUserDetails() throws Exception {
+        UserAccount user = Factory.userAccount();
+        String password = user.getPassword();
+        userService.create(user);
+
+        UserAccountDto userDto = Factory.userAccountDto();
+        ResponseEntity<String> response = put(
+                "/v1/users/me",
+                userDto,
+                String.class,
+                user.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void updateUserDetailsForUnauthorisedUserReturns401() throws Exception {
+        UserAccount user = Factory.userAccount();
+        userService.create(user);
+
+        UserAccountDto userDto = Factory.userAccountDto();
+        ResponseEntity<String> response = put(
+                "/v1/users/me",
+                userDto,
+                String.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
     public void cannotCreateUserWithSameEmailAddress() throws Exception {
         UserAccountDto userAccount = Factory.userAccountDto();
 

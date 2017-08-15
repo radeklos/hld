@@ -1,7 +1,9 @@
 package com.caribou.auth.domain;
 
 import com.caribou.AbstractEntity;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +16,8 @@ import java.util.Locale;
 
 @Entity
 @Table(indexes = {@Index(columnList = "email, password")})
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserAccount extends AbstractEntity {
 
     @Column(nullable = false, unique = true)
@@ -31,14 +35,6 @@ public class UserAccount extends AbstractEntity {
     @Getter
     @Column(nullable = false)
     private final Locale locale = Locale.UK;
-
-    public UserAccount() {
-    }
-
-    public UserAccount(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
 
     private UserAccount(Builder builder) {
         setEmail(builder.email);

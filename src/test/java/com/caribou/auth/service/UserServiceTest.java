@@ -57,4 +57,26 @@ public class UserServiceTest extends IntegrationTests {
         assertThat(encoder.matches(password, saved.getPassword())).isTrue();
     }
 
+    @Test
+    public void updateOnlyNotNullFields() throws Exception {
+        UserAccount userAccount = Factory.userAccount();
+        userAccount = userService.create(userAccount);
+
+        userService.update(userAccount.getUid(), UserAccount.newBuilder().firstName("New name").build());
+
+        UserAccount updatedUser = userRepository.findByEmail(userAccount.getEmail()).get();
+        assertThat(updatedUser.getFirstName()).isEqualTo("New name");
+        assertThat(updatedUser.getEmail()).isEqualTo(userAccount.getEmail());
+    }
+
+    @Test
+    public void updateUserPasswordIsEncrypted() throws Exception {
+        UserAccount userAccount = Factory.userAccount();
+        userAccount = userService.create(userAccount);
+
+        userService.update(userAccount.getUid(), UserAccount.newBuilder().password("secret").build());
+
+        UserAccount updatedUser = userRepository.findByEmail(userAccount.getEmail()).get();
+        assertThat(updatedUser.getFirstName()).isNotEqualTo("secret").isNotEqualTo(userAccount.getPassword());
+    }
 }

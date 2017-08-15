@@ -23,7 +23,7 @@ public class UserAccountDto {
     @JsonProperty
     private String lastName;
 
-    @NotNull
+    @NotNull(groups = {CreateGroup.class})
     @Size(min = 6, max = 255)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
@@ -137,4 +137,6 @@ public class UserAccountDto {
         }
     }
 
+    public interface CreateGroup {
+    }
 }
