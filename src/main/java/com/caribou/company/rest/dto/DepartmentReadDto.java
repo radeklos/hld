@@ -1,5 +1,6 @@
 package com.caribou.company.rest.dto;
 
+import com.caribou.auth.rest.dto.NestedSingleObject;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,13 +12,14 @@ import org.springframework.hateoas.ResourceSupport;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DepartmentDto extends ResourceSupport {
+public class DepartmentReadDto extends ResourceSupport {
 
     private String uid;
 
@@ -29,10 +31,10 @@ public class DepartmentDto extends ResourceSupport {
     @NotNull
     @Min(value = 0)
     @JsonProperty
-    private Integer daysOff;
+    private BigDecimal daysOff;
 
-    @NotBlank
+    @NotNull
     @JsonProperty
-    private String boss;
+    private NestedSingleObject boss;
 
 }

@@ -1,5 +1,7 @@
 package com.caribou;
 
+import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.rest.dto.NestedSingleObject;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.rest.dto.EmployeeDto;
 import ma.glasnost.orika.MapperFactory;
@@ -21,6 +23,7 @@ public class OrikaMapper implements OrikaMapperFactoryConfigurer {
     public void configure(MapperFactory orikaMapperFactory) {
         orikaMapperFactory.getConverterFactory().registerConverter(new Timestamp2LocalDate());
         orikaMapperFactory.getConverterFactory().registerConverter(new EmployeeConverter());
+        orikaMapperFactory.getConverterFactory().registerConverter(new UserAccountToSingleNested());
     }
 
     private class Timestamp2LocalDate extends BidirectionalConverter<Timestamp, LocalDate> {
@@ -51,6 +54,22 @@ public class OrikaMapper implements OrikaMapperFactoryConfigurer {
 
         @Override
         public CompanyEmployee convertFrom(EmployeeDto source, Type<CompanyEmployee> destinationType, MappingContext mappingContext) {
+            throw new NotImplementedException();
+        }
+    }
+
+    private class UserAccountToSingleNested extends BidirectionalConverter<UserAccount, NestedSingleObject> {
+
+        @Override
+        public NestedSingleObject convertTo(UserAccount source, Type<NestedSingleObject> destinationType, MappingContext mappingContext) {
+            return NestedSingleObject.builder()
+                    .uid(source.getUid().toString())
+                    .label(source.getFullName())
+                    .build();
+        }
+
+        @Override
+        public UserAccount convertFrom(NestedSingleObject source, Type<UserAccount> destinationType, MappingContext mappingContext) {
             throw new NotImplementedException();
         }
     }

@@ -36,6 +36,10 @@ public class UserAccount extends AbstractEntity {
     @Column(nullable = false)
     private final Locale locale = Locale.UK;
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     private UserAccount(Builder builder) {
         setEmail(builder.email);
         setPassword(builder.password);

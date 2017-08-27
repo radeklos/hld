@@ -5,7 +5,7 @@ import com.caribou.auth.rest.dto.UserAccountDto;
 import com.caribou.company.domain.Company;
 import com.caribou.company.domain.Department;
 import com.caribou.company.rest.dto.CompanyDto;
-import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.company.rest.dto.DepartmentWriteDto;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
 import com.github.javafaker.Faker;
@@ -73,11 +73,11 @@ public class Factory {
                 .build();
     }
 
-    public static DepartmentDto departmentDto(String boss) {
-        return DepartmentDto.builder()
+    public static DepartmentWriteDto departmentDto(String boss) {
+        return DepartmentWriteDto.builder()
                 .name(faker.commerce().department())
                 .boss(boss)
-                .daysOff(10)
+                .daysOff(BigDecimal.TEN)
                 .build();
     }
 

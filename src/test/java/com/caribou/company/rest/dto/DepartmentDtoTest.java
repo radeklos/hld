@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.validation.ConstraintViolation;
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,13 +26,13 @@ public class DepartmentDtoTest {
 
     @Test
     public void daysOffShouldBePositive() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
                 .name("name")
-                .daysOff(-10)
+                .daysOff(BigDecimal.TEN.negate())
                 .boss(UUID.randomUUID().toString())
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("must be greater than or equal to 0");
@@ -40,12 +41,12 @@ public class DepartmentDtoTest {
 
     @Test
     public void daysOffMayNotBeNull() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
                 .name("name")
                 .boss(UUID.randomUUID().toString())
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be null");
@@ -54,12 +55,12 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameMayNotBeEmpty() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
-                .daysOff(10)
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .daysOff(BigDecimal.TEN)
                 .boss(UUID.randomUUID().toString())
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
@@ -68,13 +69,13 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameMayNotBeNull() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
-                .daysOff(10)
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .daysOff(BigDecimal.TEN)
                 .name(null)
                 .boss(UUID.randomUUID().toString())
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
@@ -83,13 +84,13 @@ public class DepartmentDtoTest {
 
     @Test
     public void bossShouldNotBeEmpty() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
-                .daysOff(10)
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .daysOff(BigDecimal.TEN)
                 .name("Department name")
                 .boss("")
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
@@ -98,13 +99,13 @@ public class DepartmentDtoTest {
 
     @Test
     public void bossShouldNotBeNull() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
-                .daysOff(10)
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .daysOff(BigDecimal.TEN)
                 .name("department name")
                 .boss(null)
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("may not be empty");
@@ -113,13 +114,13 @@ public class DepartmentDtoTest {
 
     @Test
     public void nameShouldntBeLongerThan255() {
-        DepartmentDto departmentDto = DepartmentDto.builder()
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
                 .name(new String(new char[256]).replace('\0', 'A'))
-                .daysOff(10)
+                .daysOff(BigDecimal.TEN)
                 .boss(UUID.randomUUID().toString())
                 .build();
-        Set<ConstraintViolation<DepartmentDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
-        ConstraintViolation<DepartmentDto> constraintViolation = constraintViolations.iterator().next();
+        Set<ConstraintViolation<DepartmentWriteDto>> constraintViolations = localValidatorFactory.validate(departmentDto);
+        ConstraintViolation<DepartmentWriteDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
         assertThat(constraintViolation.getMessage()).isEqualTo("size must be between 0 and 255");

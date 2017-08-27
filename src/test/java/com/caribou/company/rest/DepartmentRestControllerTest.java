@@ -11,7 +11,8 @@ import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
-import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.company.rest.dto.DepartmentReadDto;
+import com.caribou.company.rest.dto.DepartmentWriteDto;
 import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.holiday.rest.dto.ListDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,7 +75,7 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/0/departments/%s", department.getUid());
-        ResponseEntity<DepartmentDto> response = get(url, DepartmentDto.class, userAccount.getEmail(), userPassword);
+        ResponseEntity<DepartmentWriteDto> response = get(url, DepartmentWriteDto.class, userAccount.getEmail(), userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -85,12 +86,14 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = get(url, DepartmentDto.class, userAccount.getEmail(), userPassword);
+        ResponseEntity<DepartmentReadDto> response = get(url, DepartmentReadDto.class, userAccount.getEmail(), userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        DepartmentDto body = response.getBody();
+        DepartmentReadDto body = response.getBody();
         assertThat(body.getName()).isEqualTo(department.getName());
-        assertThat(body.getDaysOff()).isEqualTo(new Integer(20));
+        assertThat(body.getDaysOff()).isEqualByComparingTo(BigDecimal.valueOf(20));
+        assertThat(body.getBoss().getUid()).isEqualTo(userAccount.getUid().toString());
+        assertThat(body.getBoss().getLabel()).isEqualTo(userAccount.getFullName());
     }
 
     @Test
@@ -139,32 +142,32 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void updateDepartment() throws Exception {
         Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
-        DepartmentDto departmentDto = Factory.departmentDto(userAccount.getUid().toString());
+        DepartmentWriteDto departmentDto = Factory.departmentDto(userAccount.getUid().toString());
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = put(
+        ResponseEntity<DepartmentWriteDto> response = put(
                 url,
                 departmentDto,
-                DepartmentDto.class,
+                DepartmentWriteDto.class,
                 userAccount.getEmail(),
                 userPassword
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        DepartmentDto body = response.getBody();
+        DepartmentWriteDto body = response.getBody();
         assertThat(body.getName()).isEqualTo(departmentDto.getName());
         assertThat(body.getDaysOff()).isEqualTo(departmentDto.getDaysOff());
 
         department = departmentRepository.findOne(department.getUid());
         assertThat(department.getName()).isEqualTo(departmentDto.getName());
-        assertThat(department.getDaysOff()).isEqualByComparingTo(BigDecimal.valueOf(departmentDto.getDaysOff()));
+        assertThat(department.getDaysOff()).isEqualByComparingTo(departmentDto.getDaysOff());
     }
 
     @Test
     public void updateNonExistingDepartmentReturns404() throws Exception {
-        DepartmentDto departmentDto = Factory.departmentDto(userAccount.getUid().toString());
+        DepartmentWriteDto departmentDto = Factory.departmentDto(userAccount.getUid().toString());
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), 0);
-        ResponseEntity<DepartmentDto> response = put(url, departmentDto, DepartmentDto.class, userAccount.getEmail(), userPassword);
+        ResponseEntity<DepartmentWriteDto> response = put(url, departmentDto, DepartmentWriteDto.class, userAccount.getEmail(), userPassword);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -175,17 +178,17 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         departmentRepository.save(department);
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = get(url, DepartmentDto.class);
+        ResponseEntity<DepartmentWriteDto> response = get(url, DepartmentWriteDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     public void createDepartmentAsGuestReturnUnauthorized() throws JsonProcessingException {
-        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder().name("department").daysOff(BigDecimal.TEN).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto> response = post(url, departmentDto, DepartmentDto.class);
+        ResponseEntity<DepartmentWriteDto> response = post(url, departmentDto, DepartmentWriteDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -194,10 +197,10 @@ public class DepartmentRestControllerTest extends IntegrationTests {
     public void updateDepartmentAsGuestReturnUnauthorized() throws Exception {
         Department department = Factory.department(company, userAccount);
         departmentRepository.save(department);
-        DepartmentDto departmentDto = DepartmentDto.builder().name("new name").daysOff(12).build();
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder().name("new name").daysOff(BigDecimal.valueOf(12)).build();
 
         String url = String.format("/v1/companies/%s/departments/%s", company.getUid(), department.getUid());
-        ResponseEntity<DepartmentDto> response = put(url, departmentDto, DepartmentDto.class);
+        ResponseEntity<DepartmentWriteDto> response = put(url, departmentDto, DepartmentWriteDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -218,13 +221,15 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().boss(userAccount.getUid().toString()).name("department").daysOff(10).build();
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .boss(userAccount.getUid().toString())
+                .name("department").daysOff(BigDecimal.TEN).build();
 
         String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
-        ResponseEntity<DepartmentDto> response = post(
+        ResponseEntity<DepartmentWriteDto> response = post(
                 url,
                 departmentDto,
-                DepartmentDto.class,
+                DepartmentWriteDto.class,
                 userAccount.getEmail(),
                 userPassword
         );
@@ -237,13 +242,13 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Company anotherCompany = Factory.company();
         companyRepository.save(anotherCompany);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().name("department").daysOff(10).build();
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder().name("department").daysOff(BigDecimal.TEN).build();
 
         String url = String.format("/v1/companies/%s/departments", anotherCompany.getUid());
-        ResponseEntity<DepartmentDto> response = post(
+        ResponseEntity<DepartmentWriteDto> response = post(
                 url,
                 departmentDto,
-                DepartmentDto.class,
+                DepartmentWriteDto.class,
                 userAccount.getEmail(),
                 userPassword
         );
@@ -258,14 +263,14 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(viewer);
         companyRepository.addEmployee(company, viewer, Role.Viewer);
 
-        DepartmentDto departmentDto = Factory.departmentDto(viewer.getUid().toString());
+        DepartmentWriteDto departmentDto = Factory.departmentDto(viewer.getUid().toString());
         int size = Lists.from(departmentRepository.findAll().iterator()).size();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto> response = post(
+        ResponseEntity<DepartmentWriteDto> response = post(
                 url,
                 departmentDto,
-                DepartmentDto.class,
+                DepartmentWriteDto.class,
                 viewer.getEmail(),
                 viewPassword
         );
@@ -284,13 +289,15 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(admin);
         companyRepository.addEmployee(company, admin, Role.Admin);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().boss(admin.getUid().toString()).name("department").daysOff(10).build();
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .boss(admin.getUid().toString())
+                .name("department").daysOff(BigDecimal.TEN).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto> response = post(
+        ResponseEntity<DepartmentReadDto> response = post(
                 url,
                 departmentDto,
-                DepartmentDto.class,
+                DepartmentReadDto.class,
                 admin.getEmail(),
                 adminPassword
         );
@@ -299,6 +306,8 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         Department department = departmentRepository.findOne(UUID.fromString(response.getBody().getUid()));
         assertThat(department.getCompany().getUid()).isEqualTo(company.getUid());
         assertThat(department.getBoss()).isEqualTo(admin);
+        assertThat(response.getBody().getBoss().getUid()).isEqualTo(admin.getUid().toString());
+        assertThat(response.getBody().getBoss().getLabel()).isEqualTo(admin.getFullName());
     }
 
     @Test
@@ -308,13 +317,15 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         userService.create(editor);
         companyRepository.addEmployee(company, editor, Role.Editor);
 
-        DepartmentDto departmentDto = DepartmentDto.builder().boss(editor.getUid().toString()).name("department").daysOff(10).build();
+        DepartmentWriteDto departmentDto = DepartmentWriteDto.builder()
+                .boss(userAccount.getUid().toString())
+                .name("department").daysOff(BigDecimal.TEN).build();
 
         String url = String.format("/v1/companies/%s/departments", company.getUid());
-        ResponseEntity<DepartmentDto> response = post(
+        ResponseEntity<DepartmentReadDto> response = post(
                 url,
                 departmentDto,
-                DepartmentDto.class,
+                DepartmentReadDto.class,
                 editor.getEmail(),
                 editorPassword
         );

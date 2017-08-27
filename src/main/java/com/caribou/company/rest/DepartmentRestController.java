@@ -7,7 +7,8 @@ import com.caribou.auth.service.UserService;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Department;
 import com.caribou.company.domain.Role;
-import com.caribou.company.rest.dto.DepartmentDto;
+import com.caribou.company.rest.dto.DepartmentReadDto;
+import com.caribou.company.rest.dto.DepartmentWriteDto;
 import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.DepartmentService;
@@ -60,7 +61,7 @@ public class DepartmentRestController {
     private UserService userService;
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-    public DepartmentDto get(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid) {
+    public DepartmentReadDto get(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!companyUid.equals(userDetails.getCompanyId().toString())) {
             throw new NotFound();
@@ -68,8 +69,8 @@ public class DepartmentRestController {
         return convert(departmentService.get(uid));
     }
 
-    private DepartmentDto convert(Department entity) {
-        DepartmentDto departmentDto = modelMapper.map(entity, DepartmentDto.class);
+    private DepartmentReadDto convert(Department entity) {
+        DepartmentReadDto departmentDto = mapperFacade.map(entity, DepartmentReadDto.class);
         departmentDto.add(linkTo(methodOn(DepartmentRestController.class).employee(entity.getCompany().getUid().toString(), entity.getUid().toString())).withRel("employees"));
         return departmentDto;
     }
@@ -101,7 +102,7 @@ public class DepartmentRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public Single<ResponseEntity<DepartmentDto>> create(@PathVariable("companyUid") String companyUid, @Valid @RequestBody DepartmentDto departmentDto) {
+    public Single<ResponseEntity<DepartmentReadDto>> create(@PathVariable("companyUid") String companyUid, @Valid @RequestBody DepartmentWriteDto departmentDto) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return companyService.getByEmployeeEmail(companyUid, userDetails.getUsername())
                 .map(company1 -> {
@@ -122,25 +123,35 @@ public class DepartmentRestController {
                 .toSingle();
     }
 
+    private Department convert(DepartmentWriteDto dto) {
+        Department department = modelMapper.map(dto, Department.class);
+        Optional<CompanyEmployee> boss = companyService.findEmployeeByUid(dto.getBoss());
+        if (!boss.isPresent()) {
+            throw new NotFound();
+        }
+        department.setBoss(boss.get().getMember());
+        return department;
+    }
+
     @RequestMapping(method = RequestMethod.GET)
-    public ListDto<DepartmentDto> getList(@PathVariable("companyUid") String companyUid) {
+    public ListDto<DepartmentReadDto> getList(@PathVariable("companyUid") String companyUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!companyUid.equals(userDetails.getCompanyId().toString())) {
             throw new NotFound();
         }
         List<Department> departments = departmentService.getDepartments(companyUid);
-        return ListDto.<DepartmentDto>builder()
+        return ListDto.<DepartmentReadDto>builder()
                 .total(departments.size())
                 .items(convert(departments))
                 .build();
     }
 
-    private List<DepartmentDto> convert(List<Department> dtos) {
+    private List<DepartmentReadDto> convert(List<Department> dtos) {
         return dtos.stream().map(this::convert).collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
-    public Single<DepartmentDto> update(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid, @Valid @RequestBody DepartmentDto departmentDto) {
+    public Single<DepartmentWriteDto> update(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid, @Valid @RequestBody DepartmentWriteDto departmentDto) {
         // TODO acl
         return companyService.getRx(companyUid)
                 .flatMap(company -> {
@@ -152,16 +163,6 @@ public class DepartmentRestController {
                     modelMapper.map(d, departmentDto);
                     return departmentDto;
                 }).toSingle();
-    }
-
-    private Department convert(DepartmentDto dto) {
-        Department department = modelMapper.map(dto, Department.class);
-        Optional<CompanyEmployee> boss = companyService.findEmployeeByUid(dto.getBoss());
-        if (!boss.isPresent()) {
-            throw new NotFound();
-        }
-        department.setBoss(boss.get().getMember());
-        return department;
     }
 
     private UserContext isUserAdminInCompany(String companyUid) {
