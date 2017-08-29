@@ -6,11 +6,16 @@ import com.caribou.auth.jwt.UserContext;
 import com.caribou.auth.service.UserService;
 import com.caribou.company.Pair;
 import com.caribou.company.domain.Company;
+import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.domain.Role;
 import com.caribou.company.rest.dto.CompanyDto;
+import com.caribou.company.rest.dto.EmployeeDto;
 import com.caribou.company.service.CompanyService;
 import com.caribou.company.service.EmployeeService;
+import com.caribou.company.service.NotFound;
 import com.caribou.company.service.parser.EmployeeCsvParser;
+import com.caribou.holiday.rest.dto.ListDto;
+import ma.glasnost.orika.MapperFacade;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -34,6 +39,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -48,13 +54,15 @@ public class CompanyRestController {
     private final EmployeeCsvParser employeeCsvParser;
     private final EmployeeService employeeService;
     private ModelMapper modelMapper = new ModelMapper();
+    private final MapperFacade mapperFacade;
 
     @Autowired
-    public CompanyRestController(CompanyService companyService, UserService userService, EmployeeCsvParser employeeCsvParser, EmployeeService employeeService) {
+    public CompanyRestController(CompanyService companyService, UserService userService, EmployeeCsvParser employeeCsvParser, EmployeeService employeeService, MapperFacade mapperFacade) {
         this.companyService = companyService;
         this.userService = userService;
         this.employeeCsvParser = employeeCsvParser;
         this.employeeService = employeeService;
+        this.mapperFacade = mapperFacade;
     }
 
     private static ResponseEntity errorHandler(Throwable throwable) {
@@ -106,6 +114,18 @@ public class CompanyRestController {
                 .toSingle();
     }
 
+    @RequestMapping(value = "/{uid}/employees", method = RequestMethod.GET)
+    public ListDto<EmployeeDto> getEmployees(@PathVariable("uid") String companyId) {
+        UserContext user = getUserForCompanyOr404(companyId);
+        List<EmployeeDto> employees = companyService.findEmployeesByCompanyUid(user.getCompanyId()).stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+        return ListDto.<EmployeeDto>builder()
+                .items(employees)
+                .total(employees.size())
+                .build();
+    }
+
     @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
     public Single<ResponseEntity<Object>> update(@PathVariable("uid") String uid, @RequestParam("file") MultipartFile file) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -140,6 +160,18 @@ public class CompanyRestController {
         header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=example.csv");
         header.setContentLength(documentBody.length);
         return new HttpEntity<>(documentBody, header);
+    }
+
+    private UserContext getUserForCompanyOr404(String companyId) {
+        UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userDetails.getCompanyId() != null && companyId.equals(userDetails.getCompanyId().toString())) {
+            return userDetails;
+        }
+        throw new NotFound();
+    }
+
+    private EmployeeDto map(CompanyEmployee companyEmployee) {
+        return mapperFacade.map(companyEmployee, EmployeeDto.class);
     }
 
 }

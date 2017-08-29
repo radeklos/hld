@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,6 +54,10 @@ public class CompanyService extends RxService.Imp<CompanyRepository, Company, UU
 
     public Optional<CompanyEmployee> findEmployeeByUid(String uid) {
         return companyRepository.findEmployeeByUid(UUID.fromString(uid));
+    }
+
+    public List<CompanyEmployee> findEmployeesByCompanyUid(UUID uid) {
+        return companyRepository.findEmployeesByCompanyUid(uid);
     }
 
 }

@@ -11,6 +11,7 @@ import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.rest.dto.CompanyDto;
 import com.caribou.company.service.parser.EmployeeCsvParser;
+import com.caribou.holiday.rest.dto.ListDto;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,6 +127,45 @@ public class CompanyRestControllerTest extends IntegrationTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
+
+    @Test
+    public void getEmployees() throws Exception {
+        Company company = Factory.company();
+        companyRepository.save(company);
+        companyRepository.addEmployee(company, userAccount, Role.Viewer);
+
+        ResponseEntity<ListDto> response = get(
+                String.format("/v1/companies/%s/employees", company.getUid()),
+                ListDto.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+
+        ListDto companyDto = response.getBody();
+        assertThat(companyDto.getTotal()).isEqualTo(1);
+
+        LinkedHashMap employeeDto = (LinkedHashMap) companyDto.getItems().get(0);
+        assertThat(employeeDto.get("email")).isEqualTo(userAccount.getEmail());
+        assertThat(employeeDto.get("firstName")).isEqualTo(userAccount.getFirstName());
+        assertThat(employeeDto.get("lastName")).isEqualTo(userAccount.getLastName());
+        assertThat(employeeDto.get("role")).isEqualTo(Role.Viewer.toString());
+    }
+
+    @Test
+    public void getEmployeesFromCompanyWhereHeDoesNotBelong() throws Exception {
+        Company company = Factory.company();
+        companyRepository.save(company);
+
+        ResponseEntity<ListDto> response = get(
+                String.format("/v1/companies/%s/employees", company.getUid()),
+                ListDto.class,
+                userAccount.getEmail(),
+                userPassword
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
 
     @Test
     public void updateCompany() throws Exception {
