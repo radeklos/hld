@@ -420,4 +420,28 @@ public class DepartmentRestControllerTest extends IntegrationTests {
         assertThat(createdUser.get().getDepartment().getUid()).isEqualTo(department.getUid());
     }
 
+    @Test
+    public void viewerCannotCreateNewUser() throws Exception {
+        UserAccount viewer = Factory.userAccount();
+        String viewerPassword = viewer.getPassword();
+        userService.create(viewer);
+        companyRepository.addEmployee(department, viewer, Role.Viewer, BigDecimal.TEN);
+
+        EmployeeDto employeeDto = EmployeeDto.builder()
+                .firstName(faker.name().firstName())
+                .lastName(faker.name().lastName())
+                .email(faker.internet().emailAddress())
+                .startedAt(LocalDate.now()).build();
+
+        String url = String.format("/v1/companies/%s/departments/%s/employees", company.getUid(), department.getUid());
+        ResponseEntity<EmployeeDto> response = post(
+                url,
+                employeeDto,
+                EmployeeDto.class,
+                viewer.getEmail(),
+                viewerPassword
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
 }

@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EmployeeDto {
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UUID uid;
 
     @JsonProperty
@@ -29,7 +29,7 @@ public class EmployeeDto {
     @JsonProperty
     private String email;
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Role role;
 
     @JsonProperty

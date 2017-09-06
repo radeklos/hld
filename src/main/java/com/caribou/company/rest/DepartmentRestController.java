@@ -96,7 +96,7 @@ public class DepartmentRestController {
 
     @RequestMapping(value = "/{uid}/employees", method = RequestMethod.POST)
     public ResponseEntity createEmployee(@PathVariable("companyUid") String companyUid, @PathVariable("uid") String uid, @Valid @RequestBody EmployeeDto employeeDto) {
-        isUserAdminInCompany(companyUid);
+        isNotUserViewerInCompany(companyUid);
         employeeService.createEmployee(convert(employeeDto), departmentService.get(uid), employeeDto.getStartedAt());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -165,13 +165,13 @@ public class DepartmentRestController {
                 }).toSingle();
     }
 
-    private UserContext isUserAdminInCompany(String companyUid) {
+    private UserContext isNotUserViewerInCompany(String companyUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!companyUid.equals(userDetails.getCompanyId().toString())) {
             throw new NotFound();
         }
-        if (!Role.Admin.equals(userDetails.getRoleInCompany())) {
-            throw new NotFound();
+        if (Role.Viewer.equals(userDetails.getRoleInCompany())) {
+            throw new AccessDeniedException("user={} doesn't have permission to pass though" + userDetails.getUid().toString());
         }
         return userDetails;
     }

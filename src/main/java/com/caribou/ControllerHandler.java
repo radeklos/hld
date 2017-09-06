@@ -7,6 +7,7 @@ import com.caribou.company.rest.ErrorHandler;
 import com.caribou.company.service.NotFound;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -58,6 +59,12 @@ public class ControllerHandler {
     @ResponseBody
     public Error notFound(Exception ex) {
         return new Error(HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public void forbidden() {
     }
 
     @ExceptionHandler(Exception.class)
