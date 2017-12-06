@@ -14,6 +14,7 @@ import com.caribou.holiday.domain.LeaveType;
 import com.caribou.holiday.repository.LeaveRepository;
 import com.caribou.holiday.repository.LeaveTypeRepository;
 import com.caribou.holiday.rest.dto.LeaveDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,5 +247,70 @@ public class LeaveControllerTest extends IntegrationTests {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void approverShouldBeAbleToApproveLeave() throws JsonProcessingException {
+        UserAccount approver = Factory.userAccount();
+        String approverPassword = approver.getPassword();
+        userService.create(approver);
+        companyRepository.save(company);
+        companyRepository.addEmployee(company, approver, Role.Viewer);
+
+        LocalDateTime now = LocalDateTime.of(2017, 1, 1, 0, 0, 0);
+        Leave leave = Leave.builder()
+                .userAccount(userAccount)
+                .approver(approver)
+                .reason("Holiday")
+                .starting(Timestamp.valueOf(now))
+                .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .numberOfDays(BigDecimal.ONE)
+                .status(Leave.Status.PENDING)
+                .leaveType(leaveType).build();
+        leaveRepository.save(leave);
+
+        String url = String.format("/v1/users/%s/leaves/%s/approve", userAccount.getUid(), leave.getUid());
+        ResponseEntity<HashMap> response = post(
+                url,
+                null,
+                HashMap.class,
+                approver.getEmail(),
+                approverPassword
+        );
+
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.ACCEPTED);
+        assertThat(leaveRepository.findOne(leave.getUid()).getStatus()).isEqualByComparingTo(Leave.Status.APPROVED);
+    }
+
+    @Test
+    public void approveShouldReturnNotFoundWhenTryToApproveBySomeoneElse() throws JsonProcessingException {
+        UserAccount approver = Factory.userAccount();
+        userService.create(approver);
+        companyRepository.save(company);
+        companyRepository.addEmployee(company, approver, Role.Viewer);
+
+        LocalDateTime now = LocalDateTime.of(2017, 1, 1, 0, 0, 0);
+        Leave leave = Leave.builder()
+                .userAccount(userAccount)
+                .approver(approver)
+                .reason("Holiday")
+                .starting(Timestamp.valueOf(now))
+                .ending(Timestamp.valueOf(now.plus(1, ChronoUnit.DAYS)))
+                .numberOfDays(BigDecimal.ONE)
+                .status(Leave.Status.PENDING)
+                .leaveType(leaveType).build();
+        leaveRepository.save(leave);
+
+        String url = String.format("/v1/users/%s/leaves/%s/approve", userAccount.getUid(), leave.getUid());
+        ResponseEntity<HashMap> response = post(
+                url,
+                null,
+                HashMap.class,
+                userAccount.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualByComparingTo(HttpStatus.NOT_FOUND);
+        assertThat(leaveRepository.findOne(leave.getUid()).getStatus()).isEqualByComparingTo(Leave.Status.PENDING);
     }
 }

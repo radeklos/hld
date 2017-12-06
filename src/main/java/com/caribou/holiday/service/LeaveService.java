@@ -1,6 +1,7 @@
 package com.caribou.holiday.service;
 
 import com.caribou.auth.domain.UserAccount;
+import com.caribou.auth.repository.UserRepository;
 import com.caribou.company.domain.CompanyEmployee;
 import com.caribou.company.repository.CompanyRepository;
 import com.caribou.company.service.NotFound;
@@ -47,6 +48,8 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
 
     private final CompanyRepository companyRepository;
 
+    private final UserRepository userRepository;
+
     private final BankHolidayRepository bankHolidayRepository;
 
     private final EmailSender emailSender;
@@ -54,9 +57,10 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public LeaveService(LeaveRepository leaveRepository, CompanyRepository companyRepository, BankHolidayRepository bankHolidayRepository, EmailSender emailSender, ApplicationEventPublisher applicationEventPublisher) {
+    public LeaveService(LeaveRepository leaveRepository, CompanyRepository companyRepository, UserRepository userRepository, BankHolidayRepository bankHolidayRepository, EmailSender emailSender, ApplicationEventPublisher applicationEventPublisher) {
         this.leaveRepository = leaveRepository;
         this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
         this.bankHolidayRepository = bankHolidayRepository;
         this.emailSender = emailSender;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -141,6 +145,15 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
             leaveRepository.save(leave);
             applicationEventPublisher.publishEvent(new LeaveApprovedEvent(leave));
         }
+    }
+
+    public void approve(UUID leaveUid, UUID approverUid) {
+        UserAccount approver = userRepository.findOne(approverUid);
+        Leave leave = leaveRepository.findOne(leaveUid);
+        if (leave == null || !leave.getApprover().getUid().equals(approver.getUid())) {
+            throw new NotFound();
+        }
+        approve(leave);
     }
 
     @TransactionalEventListener

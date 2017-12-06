@@ -24,6 +24,7 @@ import rx.Observable;
 import rx.Single;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 
 @RestController
@@ -82,9 +83,10 @@ public class LeaveController {
                 .toSingle();
     }
 
-    @RequestMapping(value = "/{leaveUid}", method = RequestMethod.POST)
-    public ResponseEntity confirmLeave(@PathVariable("userUid") String userUid, @PathVariable("leaveUid") String leaveUid) {
+    @RequestMapping(value = "/{leaveUid}/approve", method = RequestMethod.POST)
+    public ResponseEntity approve(@PathVariable("userUid") String userUid, @PathVariable("leaveUid") String leaveUid) {
         UserContext userDetails = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        leaveService.approve(UUID.fromString(leaveUid), userDetails.getUid());
         return ResponseEntity.accepted().build();
     }
 
