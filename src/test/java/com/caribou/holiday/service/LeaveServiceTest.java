@@ -13,6 +13,7 @@ import com.caribou.company.repository.DepartmentRepository;
 import com.caribou.company.service.CompanyService;
 import com.caribou.email.Email;
 import com.caribou.email.templates.LeaveApproved;
+import com.caribou.email.templates.LeaveRequest;
 import com.caribou.holiday.domain.BankHoliday;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.domain.LeaveType;
@@ -98,6 +99,13 @@ public class LeaveServiceTest extends IntegrationTests {
         assertThat(created.getStarting()).isEqualTo(leave.getStarting());
         assertThat(created.getLeaveType()).isEqualTo(leave.getLeaveType());
         assertThat(created.getUserAccount()).isEqualTo(userAccount);
+
+        ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
+        verify(emailSender).send(emailCaptor.capture(), any());
+
+        List<Email> args = emailCaptor.getAllValues();
+        assertThat(args).hasSize(1);
+        assertThat(args.get(0).getTemplate()).isInstanceOf(LeaveRequest.class);
     }
 
     @Test

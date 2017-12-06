@@ -40,17 +40,13 @@ public class Mailgun implements EmailSender {
     @Override
     public void send(Email email, Locale locale) {
         final ContentGenerator.Content emailContent = contentGenerator.generate(email.getTemplate(), locale);
-
         final MimeMessage mimeMessage = this.sender.createMimeMessage();
-
         try {
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, ENCODING);
-
             message.setFrom(toInternetAddress(email.getFrom() == null ? defaultFrom : email.getFrom()));
             message.setTo(toInternetAddress(email.getTo()));
             message.setSubject(emailContent.getSubject());
             message.setText(emailContent.getPlain(), emailContent.getHtml());
-
             sender.send(message.getMimeMessage());
         } catch (MessagingException e) {
             log.error("Can not sent email {} to {}: {}", email.getTemplate(), email.getTo(), e);

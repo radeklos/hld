@@ -4,7 +4,8 @@ public enum HtmlTemplates {
 
     Invite("employee_invitation"),
     Welcome("welcome"),
-    LeaveApproved("leave_approved");
+    LeaveApproved("leave_approved"),
+    LeaveRequest("leave_request");
 
     private String template;
 

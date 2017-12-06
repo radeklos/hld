@@ -1,0 +1,17 @@
+<html layout:decorator="layout">
+<body>
+<div layout:fragment="content">
+    <h1 th:text="#{email.leave.request}">Time off booked</h1>
+    <table>
+        <tr>
+            <td th:text="#{email.leave.from}">from</td>
+            <td th:text="${ctx.leave.starting}">from</td>
+        </tr>
+        <tr>
+            <td th:text="#{email.leave.to}">to</td>
+            <td th:text="${ctx.leave.ending}">from</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

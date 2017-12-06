@@ -8,14 +8,19 @@ import com.caribou.company.service.RxService;
 import com.caribou.email.Email;
 import com.caribou.email.providers.EmailSender;
 import com.caribou.email.templates.LeaveApproved;
+import com.caribou.email.templates.LeaveRequest;
 import com.caribou.holiday.domain.BankHoliday;
 import com.caribou.holiday.domain.Leave;
 import com.caribou.holiday.repository.BankHolidayRepository;
 import com.caribou.holiday.repository.LeaveRepository;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 import rx.Observable;
 
 import java.math.BigDecimal;
@@ -34,26 +39,35 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
 
-    @Autowired
-    private LeaveRepository leaveRepository;
+    private final LeaveRepository leaveRepository;
+
+    private final CompanyRepository companyRepository;
+
+    private final BankHolidayRepository bankHolidayRepository;
+
+    private final EmailSender emailSender;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    private BankHolidayRepository bankHolidayRepository;
-
-    @Autowired
-    private EmailSender emailSender;
+    public LeaveService(LeaveRepository leaveRepository, CompanyRepository companyRepository, BankHolidayRepository bankHolidayRepository, EmailSender emailSender, ApplicationEventPublisher applicationEventPublisher) {
+        this.leaveRepository = leaveRepository;
+        this.companyRepository = companyRepository;
+        this.bankHolidayRepository = bankHolidayRepository;
+        this.emailSender = emailSender;
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
 
     public Observable<Leave> findByUserAccount(UserAccount userAccount) {
         return Observable.from(leaveRepository.findByUserAccount(userAccount));
     }
 
     @Override
+    @Transactional
     public Observable<Leave> create(Leave entity) {
         return super.create(createLeave(entity));
     }
@@ -76,6 +90,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     private Leave createLeave(Leave entity) {
         entity.setNumberOfDays(numberOfBookedDays(entity, BankHoliday.Country.CZ));
         entity.setApprover(findUserApprover(entity.getUserAccount()));
+        applicationEventPublisher.publishEvent(new RequestLeaveEvent(entity));
         return entity;
     }
 
@@ -116,6 +131,7 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
         return employee.get().getDepartment().getBoss();
     }
 
+    @Transactional
     public void approve(Leave leave) {
         Optional<CompanyEmployee> employee0 = companyRepository.findEmployeeByUserAccount(leave.getUserAccount());
         if (employee0.isPresent()) {
@@ -123,16 +139,34 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
             companyRepository.updateRemainingAllowance(employee, employee.getRemainingAllowance().subtract(leave.getNumberOfDays()));
             leave.setStatus(Leave.Status.APPROVED);
             leaveRepository.save(leave);
-            sentEmail(leave);
+            applicationEventPublisher.publishEvent(new LeaveApprovedEvent(leave));
         }
     }
 
-    private void sentEmail(Leave leave) {
+    @TransactionalEventListener
+    public void sendLeaveRequestedEventListener(RequestLeaveEvent event) {
+        sendRequest(event.getLeave());
+    }
+
+    @TransactionalEventListener
+    public void sendLeaveApprovedEventListener(LeaveApprovedEvent event) {
+        sendApproved(event.getLeave());
+    }
+
+    private void sendApproved(Leave leave) {
         Email email = Email.builder()
                 .to(leave.getUserAccount())
                 .template(new LeaveApproved(leave))
                 .build();
         emailSender.send(email, leave.getUserAccount().getLocale());
+    }
+
+    private void sendRequest(Leave leave) {
+        Email email = Email.builder()
+                .to(leave.getApprover())
+                .template(new LeaveRequest(leave))
+                .build();
+        emailSender.send(email, leave.getApprover().getLocale());
     }
 
     private boolean isWeekend(LocalDate localDate) {
@@ -146,6 +180,16 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
         private final CompanyEmployee employee;
         private final List<Leave> leaves;
         private final double remaining;
+    }
+
+    @Data
+    private static class RequestLeaveEvent {
+        private final Leave leave;
+    }
+
+    @Data
+    private static class LeaveApprovedEvent {
+        private final Leave leave;
     }
 
 }

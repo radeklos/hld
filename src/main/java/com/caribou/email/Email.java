@@ -62,7 +62,7 @@ public class Email {
         }
 
         public Builder to(UserAccount user) {
-            to = new Email.Contact(user.getEmail(), String.format("%s %s", user.getFirstName(), user.getLastName()));
+            to = new Email.Contact(user.getEmail(), user.getFirstName() + user.getLastName());
             return this;
         }
 
