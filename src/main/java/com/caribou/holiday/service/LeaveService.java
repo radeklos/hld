@@ -196,12 +196,12 @@ public class LeaveService extends RxService.Imp<LeaveRepository, Leave, UUID> {
     }
 
     @Data
-    private static class RequestLeaveEvent {
+    static class RequestLeaveEvent {
         private final Leave leave;
     }
 
     @Data
-    private static class LeaveApprovedEvent {
+    static class LeaveApprovedEvent {
         private final Leave leave;
     }
 

@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -303,5 +304,34 @@ public class LeaveServiceTest extends IntegrationTests {
         assertThat(args).hasSize(1);
         assertThat(args.get(0).getTo().getEmail()).isEqualTo(userAccount.getEmail());
         assertThat(args.get(0).getTemplate()).isInstanceOf(LeaveApproved.class);
+    }
+
+    @Test
+    public void sendLeaveRequestedEventListenerSendsEmailApprove() {
+        Leave leave = Factory.leave(userAccount, boss, leaveType, LocalDate.now(), LocalDate.now());
+
+        leaveService.sendLeaveApprovedEventListener(new LeaveService.LeaveApprovedEvent(leave));
+
+        ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
+        verify(emailSender).send(emailCaptor.capture(), any(Locale.class));
+
+        List<Email> args = emailCaptor.getAllValues();
+        assertThat(args).hasSize(1);
+        assertThat(args.get(0).getTo().getEmail()).isEqualTo(leave.getUserAccount().getEmail());
+        assertThat(args.get(0).getTemplate()).isInstanceOf(LeaveApproved.class);
+    }
+
+    @Test
+    public void sendLeaveRequestedEventListenerSendsEmailRequest() {
+        Leave leave = Factory.leave(userAccount, boss, leaveType, LocalDate.now(), LocalDate.now());
+        leaveService.sendLeaveRequestedEventListener(new LeaveService.RequestLeaveEvent(leave));
+
+        ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
+        verify(emailSender).send(emailCaptor.capture(), any(Locale.class));
+
+        List<Email> args = emailCaptor.getAllValues();
+        assertThat(args).hasSize(1);
+        assertThat(args.get(0).getTo().getEmail()).isEqualTo(leave.getApprover().getEmail());
+        assertThat(args.get(0).getTemplate()).isInstanceOf(LeaveRequest.class);
     }
 }
