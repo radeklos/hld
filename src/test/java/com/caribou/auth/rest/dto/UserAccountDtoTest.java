@@ -29,7 +29,7 @@ public class UserAccountDtoTest {
                 .lastName("Doe")
                 .password("abcabc")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
@@ -56,7 +56,7 @@ public class UserAccountDtoTest {
                 .lastName("Doe")
                 .password("abcabc")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
@@ -87,7 +87,7 @@ public class UserAccountDtoTest {
                 .lastName("Doe")
                 .password("abcabc")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
@@ -103,7 +103,7 @@ public class UserAccountDtoTest {
                 .lastName("Doe")
                 .password("abcabc")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
@@ -118,7 +118,7 @@ public class UserAccountDtoTest {
                 .firstName("John")
                 .password("abcabc")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);
@@ -134,7 +134,7 @@ public class UserAccountDtoTest {
                 .lastName("")
                 .password("abcabc")
                 .build();
-        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount);
+        Set<ConstraintViolation<UserAccountDto>> constraintViolations = localValidatorFactory.validate(userAccount, UserAccountDto.CreateGroup.class);
         ConstraintViolation<UserAccountDto> constraintViolation = constraintViolations.iterator().next();
 
         assertThat(constraintViolations).hasSize(1);

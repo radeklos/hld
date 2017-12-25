@@ -80,7 +80,6 @@ public class UserRestController {
     private NestedSingleObject nested(Company company) {
         return NestedSingleObject.builder()
                 .href(linkTo(methodOn(CompanyRestController.class).get(company.getUid().toString())).toString())
-                .uri("chll:company:" + company.getUid())
                 .uid(company.getUid().toString())
                 .build();
     }

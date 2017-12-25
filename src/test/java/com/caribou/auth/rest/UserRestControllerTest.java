@@ -116,6 +116,27 @@ public class UserRestControllerTest extends IntegrationTests {
     }
 
     @Test
+    public void updateOnlyPassword() throws Exception {
+        UserAccount user = Factory.userAccount();
+        String password = user.getPassword();
+        userService.create(user);
+
+        UserAccountDto userDto = UserAccountDto.builder().password("new_password").build();
+        ResponseEntity<String> response = put(
+                "/v1/users/me",
+                userDto,
+                String.class,
+                user.getEmail(),
+                password
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK).as(response.getBody());
+
+        response = get("/v1/users/me", String.class, user.getEmail(), password);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
     public void updateUserDetailsForUnauthorisedUserReturns401() throws Exception {
         UserAccount user = Factory.userAccount();
         userService.create(user);

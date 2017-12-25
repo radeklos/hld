@@ -18,8 +18,8 @@ spring:
 services:
   mailgun:
     host: smtp.mailgun.org
-    username:
-    password:
+    username: postmaster@email.chll.cz
+    password: u+7Y;c?3+vn7tDq4
     defaulAlias: chllbot
     defaultFrom: chll@email.chll.cz
 

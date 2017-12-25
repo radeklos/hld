@@ -13,12 +13,12 @@ public class UserAccountDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String uid;
 
-    @NotEmpty
+    @NotEmpty(groups = {CreateGroup.class})
     @Size(max = 255)
     @JsonProperty
     private String firstName;
 
-    @NotEmpty
+    @NotEmpty(groups = {CreateGroup.class})
     @Size(max = 255)
     @JsonProperty
     private String lastName;
@@ -28,7 +28,7 @@ public class UserAccountDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotEmpty
+    @NotEmpty(groups = {CreateGroup.class})
     @Email
     @Size(max = 255)
     private String email;
